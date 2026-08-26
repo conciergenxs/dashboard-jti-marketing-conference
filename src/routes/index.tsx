@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { motion } from "motion/react";
-import { DashboardHeader, Ticker } from "@/components/dashboard/header";
+import { DashboardHeader } from "@/components/dashboard/header";
 import { ContourField } from "@/components/dashboard/contour-field";
 import { KpiStrip } from "@/components/dashboard/kpi-strip";
 import { PulseChart } from "@/components/dashboard/pulse-chart";
@@ -38,15 +38,6 @@ function Dashboard() {
   const [day, setDay] = useState<DayKey>("day2");
   const { data, feed, updatedAt } = useLiveDashboard(day);
 
-  const tickerItems = [
-    `${data.kpis.checkedIn} participants checked in`,
-    "Infinity Missions live",
-    `${data.gallery.photos} moments shared`,
-    EVENT.tagline,
-    "JTI Got Talent voting open",
-    "Bersama, Pasti Menang!",
-  ];
-
   return (
     <main className="relative min-h-screen overflow-x-clip">
       <ContourField />
@@ -60,9 +51,12 @@ function Dashboard() {
           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
           className="mt-8 min-w-0 space-y-5 sm:mt-10 sm:space-y-6"
         >
-          <KpiStrip kpis={data.kpis} />
+          <KpiStrip kpis={data.kpis} missions={data.missions} />
 
-          <Ticker items={tickerItems} />
+          <p className="text-label text-muted-foreground">
+            Data source: simulated live feed from the Infinity Hub — Infinity Pass scans, verified
+            mission proofs and in-app votes for {EVENT.target} registered participants.
+          </p>
 
           <Reveal>
             <PulseChart points={data.pulse} />
