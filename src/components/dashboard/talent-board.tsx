@@ -27,7 +27,7 @@ export function TalentBoard({ talents }: { talents: Talent[] }) {
               />
               <div className="relative flex items-center gap-3">
                 <span
-                  className={`display flex size-8 shrink-0 items-center justify-center rounded-lg text-sm font-bold tabular-nums ${
+                  className={`display flex size-8 shrink-0 items-center justify-center rounded-lg text-body font-bold tabular-nums ${
                     i === 0
                       ? "bg-gold/25 text-gold-foreground"
                       : "bg-primary/10 text-primary"
@@ -36,10 +36,10 @@ export function TalentBoard({ talents }: { talents: Talent[] }) {
                   {i + 1}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="display truncate text-sm font-bold uppercase">{t.name}</p>
+                  <p className="display truncate text-body font-bold uppercase">{t.name}</p>
                   <p className="truncate text-label text-muted-foreground">{t.act}</p>
                 </div>
-                <span className="shrink-0 text-sm font-bold text-foreground tabular-nums">
+                <span className="shrink-0 text-body font-bold text-foreground tabular-nums">
                   <Counter value={t.votes} />
                 </span>
               </div>

@@ -80,10 +80,10 @@ export function KpiStrip({ kpis }: { kpis: Kpis }) {
               <p className="text-label font-semibold tracking-[0.2em] text-muted-foreground uppercase sm:text-label">
                 {c.label}
               </p>
-              <p className="display mt-2 text-3xl leading-none font-bold tracking-tight text-foreground tabular-nums sm:text-4xl">
+              <p className="display mt-2 text-metric font-bold text-foreground tabular-nums">
                 <Counter value={c.value} suffix={c.suffix ?? ""} />
               </p>
-              <p className="mt-2 text-label leading-snug text-muted-foreground sm:text-xs">
+              <p className="mt-2 text-label text-muted-foreground">
                 {c.hint}
               </p>
             </div>

@@ -24,7 +24,7 @@ export function GalleryPulse({ gallery }: { gallery: DayData["gallery"] }) {
             className="rounded-xl border border-border/70 bg-surface/60 p-3 text-center"
           >
             <s.icon className="mx-auto size-4 text-primary" strokeWidth={1.8} />
-            <p className="display mt-2 text-xl font-bold tabular-nums">
+            <p className="display mt-2 text-title font-bold tabular-nums">
               <Counter value={s.value} />
             </p>
             <p className="mt-1 text-label leading-tight text-muted-foreground">{s.label}</p>
@@ -35,7 +35,7 @@ export function GalleryPulse({ gallery }: { gallery: DayData["gallery"] }) {
         <p className="text-label font-semibold tracking-[0.18em] text-primary uppercase">
           Most loved moment
         </p>
-        <p className="display mt-1.5 text-base font-bold uppercase">{gallery.topMoment}</p>
+        <p className="display mt-1.5 text-title font-bold uppercase">{gallery.topMoment}</p>
       </div>
     </Panel>
   );

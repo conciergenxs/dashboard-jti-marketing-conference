@@ -19,7 +19,7 @@ export function FunctionBars({ functions }: { functions: Slice[] }) {
       <ul className="space-y-3.5">
         {functions.map((f, i) => (
           <li key={f.label} className="group">
-            <div className="mb-1.5 flex items-center justify-between text-xs">
+            <div className="mb-1.5 flex items-center justify-between text-label">
               <span className="font-medium text-foreground/85">{f.label}</span>
               <span className="text-muted-foreground tabular-nums">
                 <Counter value={f.value} /> · {Math.round((f.value / total) * 100)}%

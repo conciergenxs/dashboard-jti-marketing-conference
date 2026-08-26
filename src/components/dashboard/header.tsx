@@ -32,12 +32,12 @@ export function DashboardHeader({
         </div>
 
         <div>
-          <h1 className="display text-4xl leading-[0.95] font-bold tracking-tight uppercase sm:text-6xl lg:text-7xl">
+          <h1 className="display text-display font-bold uppercase">
             <span className="text-gradient">Grow Beyond</span>
             <br />
             Limits
           </h1>
-          <p className="mt-3 max-w-xl text-sm text-muted-foreground sm:text-base">
+          <p className="mt-3 max-w-xl text-body text-muted-foreground">
             {EVENT.subtitle} — one hub, infinite journey. Every check-in, mission and moment from
             350+ JTI Indonesia employees, in real time.
           </p>
@@ -63,7 +63,7 @@ export function DashboardHeader({
                     transition={{ type: "spring", stiffness: 320, damping: 32 }}
                   />
                 )}
-                <span className="display block text-sm font-bold uppercase">{d.label}</span>
+                <span className="display block text-body font-bold uppercase">{d.label}</span>
                 <span
                   className={`block text-label tracking-wide uppercase ${active ? "text-primary-foreground/80" : "text-muted-foreground"}`}
                 >

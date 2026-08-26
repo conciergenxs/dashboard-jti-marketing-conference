@@ -46,7 +46,7 @@ export function PulseChart({ points }: { points: Point[] }) {
 
   return (
     <Panel eyebrow="Live activity pulse" title="Hub Activity & Check-ins" action={<LivePill />}>
-      <div className="mb-4 flex flex-wrap items-center gap-4 text-xs">
+      <div className="mb-4 flex flex-wrap items-center gap-4 text-label">
         <span className="inline-flex items-center gap-2 text-muted-foreground">
           <span className="size-2 rounded-full bg-accent" /> Hub activity
           <b className="text-foreground tabular-nums">

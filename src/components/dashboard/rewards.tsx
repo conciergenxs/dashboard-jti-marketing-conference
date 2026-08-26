@@ -25,7 +25,7 @@ export function Rewards({ rewards }: { rewards: DayData["rewards"] }) {
             whileHover={{ y: -4, rotate: i % 2 ? 0.8 : -0.8 }}
             className="rounded-xl border border-border/70 bg-gradient-to-br from-surface to-surface-2 p-3.5"
           >
-            <p className="display text-2xl font-bold text-primary tabular-nums">
+            <p className="display text-title font-bold text-primary tabular-nums">
               <Counter value={r.redeemed} />
             </p>
             <p className="mt-1 text-label leading-tight text-muted-foreground">{r.name}</p>

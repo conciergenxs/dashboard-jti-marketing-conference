@@ -82,7 +82,7 @@ export function Panel({
               </p>
             )}
             {title && (
-              <h2 className="display mt-1 text-xl font-bold tracking-tight uppercase sm:text-2xl">
+              <h2 className="display mt-1 text-title font-bold uppercase">
                 {title}
               </h2>
             )}
