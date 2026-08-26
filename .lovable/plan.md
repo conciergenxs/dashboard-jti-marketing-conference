@@ -21,6 +21,9 @@
 - Live activity pulse: remove the "Live" chip. JTI Got Talent: remove the "Voting open" chip.
 - Reward "+250 pts" style badges become a soft blue outline chip so they don't read as buttons.
 - Trim the data-source paragraph under the KPIs to one short sentence, full width.
+- Move "What is happening now" (activity feed) to the very bottom of the page, after Rewards.
+- Freeze the numbers: no auto-drifting values or auto-appending feed items. Everything is computed once per page load, so figures only change on reload. The "Last update" timestamp reflects that load time.
+
 
 ## Growing Together (Photo Wall)
 
