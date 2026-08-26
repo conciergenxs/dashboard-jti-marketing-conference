@@ -60,15 +60,15 @@ export function DashboardHeader({
                 {active && (
                   <motion.span
                     layoutId="day-pill"
-                    className="absolute inset-0 -z-10 rounded-xl bg-primary shadow-[0_6px_18px_-8px_var(--color-primary)]"
+                    className="absolute inset-0 rounded-xl bg-primary shadow-[0_6px_18px_-8px_var(--color-primary)]"
                     transition={{ type: "spring", stiffness: 320, damping: 32 }}
                   />
                 )}
-                <span className="display block truncate text-body font-semibold uppercase">
+                <span className="relative display block truncate text-body font-semibold uppercase">
                   {d.label}
                 </span>
                 <span
-                  className={`block truncate text-label ${active ? "text-primary-foreground/80" : "text-muted-foreground"}`}
+                  className={`relative block truncate text-label ${active ? "text-primary-foreground/80" : "text-muted-foreground"}`}
                 >
                   {d.caption}
                 </span>
