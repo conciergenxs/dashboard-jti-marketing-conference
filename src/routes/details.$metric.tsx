@@ -203,9 +203,8 @@ function MetricDetail() {
             {slice.map((r) => {
               const first = config.columns[0]!;
               const meta = config.columns
-                .slice(1)
-                .slice(-2)
-                .map((c) => `${c.label} ${r.cells[c.key]}`)
+                .slice(1, 3)
+                .map((c) => String(r.cells[c.key]))
                 .join(" · ");
               const isOpen = open === r.id;
               return (
