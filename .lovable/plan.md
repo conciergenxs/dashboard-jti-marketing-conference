@@ -21,6 +21,9 @@
 - Live activity pulse: remove the "Live" chip. JTI Got Talent: remove the "Voting open" chip.
 - Reward "+250 pts" style badges become a soft blue outline chip so they don't read as buttons.
 - Trim the data-source paragraph under the KPIs to one short sentence, full width.
+- Move "What is happening now" (activity feed) to the very bottom of the page, after Rewards.
+- Freeze the numbers: no auto-drifting values or auto-appending feed items. Everything is computed once per page load, so figures only change on reload. The "Last update" timestamp reflects that load time.
+
 
 ## Growing Together (Photo Wall)
 
@@ -37,5 +40,8 @@
 - `src/components/dashboard/primitives.tsx`: add a text-link variant to `SeeAll`.
 - `src/components/dashboard/header.tsx`: gradient active tab.
 - `src/components/dashboard/gallery-pulse.tsx`: stats rework, thumbnails, contributor leaderboard.
-- `pulse-chart.tsx`, `talent-board.tsx`, `rewards.tsx`: chip/badge changes.
+- `src/hooks/use-live-dashboard.ts`: drop the interval-based drift/feed simulation; return stable per-load data and a fixed `updatedAt`.
+- `src/routes/index.tsx`: reorder so the activity feed renders last.
+- `pulse-chart.tsx`, `talent-board.tsx`, `rewards.tsx`, `live-feed.tsx`: chip/badge changes.
+
 - All colors stay on the existing white/blue tokens; no new palette values.
