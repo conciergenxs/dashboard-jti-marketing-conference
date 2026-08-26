@@ -28,7 +28,7 @@ export function DashboardHeader({
               <br />
               Limits
             </h1>
-            <p className="mt-2.5 max-w-xl text-body text-muted-foreground">
+            <p className="mt-2.5 max-w-none text-body text-muted-foreground">
               {EVENT.subtitle}. See how our {EVENT.target} colleagues check in, finish missions and
               vote across the three event days.
             </p>
