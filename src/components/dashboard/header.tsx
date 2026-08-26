@@ -58,7 +58,7 @@ export function DashboardHeader({
                       transition={{ type: "spring", stiffness: 320, damping: 32 }}
                     />
                   )}
-                  <span className="relative display block truncate text-[10px] font-semibold uppercase">
+                  <span className="relative display block truncate text-[12px] font-bold uppercase">
                     {d.label}
                   </span>
                   <span
