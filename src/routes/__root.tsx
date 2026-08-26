@@ -81,7 +81,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "Live analytics for JTI Indonesia Market Conference 2026 in Yogyakarta.",
+          "Live analytics for JTI Indonesia Market Conference 2026.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

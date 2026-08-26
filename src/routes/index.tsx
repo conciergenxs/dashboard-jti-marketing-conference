@@ -93,7 +93,7 @@ function Dashboard() {
             <span className="text-gradient">{EVENT.tagline}</span>
           </p>
           <p className="mt-2 text-label tracking-[0.22em] text-muted-foreground uppercase">
-            Grow Beyond Limits · Market Conference 2026 · Yogyakarta
+            Grow Beyond Limits · Market Conference 2026
           </p>
         </footer>
       </div>
