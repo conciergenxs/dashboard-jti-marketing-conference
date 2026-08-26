@@ -1,8 +1,8 @@
 import { motion } from "motion/react";
-import { Users, ScanLine, Infinity as InfinityIcon, Activity } from "lucide-react";
+import { Users, ScanLine, Infinity as InfinityIcon, CheckCircle2 } from "lucide-react";
 import { Counter, SeeAll } from "./primitives";
 import type { MetricKey } from "@/lib/detail-data";
-import { EVENT, formatCompact, type Kpis } from "@/lib/dashboard-data";
+import { EVENT, formatCompact, type DayData, type Kpis } from "@/lib/dashboard-data";
 
 function Ring({ progress }: { progress: number }) {
   const r = 26;
@@ -27,7 +27,10 @@ function Ring({ progress }: { progress: number }) {
   );
 }
 
-export function KpiStrip({ kpis }: { kpis: Kpis }) {
+export function KpiStrip({ kpis, missions }: { kpis: Kpis; missions: DayData["missions"] }) {
+  const submissions = missions.reduce((s, m) => s + m.submissions, 0);
+  const submissionCap = Math.max(1, kpis.checkedIn * missions.length);
+  const avgPoints = Math.round(kpis.points / Math.max(1, kpis.checkedIn));
   const cards = [
     {
       key: "registered",
@@ -51,19 +54,19 @@ export function KpiStrip({ kpis }: { kpis: Kpis }) {
       key: "points",
       label: "Avg points",
       hint: `of 850 max · ${formatCompact(kpis.points)} pts total`,
-      value: Math.round(kpis.points / Math.max(1, kpis.checkedIn)),
+      value: avgPoints,
       icon: InfinityIcon,
-      ring: Math.round(kpis.points / Math.max(1, kpis.checkedIn)) / 850,
+      ring: avgPoints / 850,
       metric: "points" as MetricKey,
     },
     {
-      key: "engagement",
-      label: "Engagement",
-      hint: "hub active participants",
-      value: kpis.engagement,
-      suffix: "%",
-      icon: Activity,
-      ring: kpis.engagement / 100,
+      key: "missions",
+      label: "Missions verified",
+      hint: `of ${formatCompact(submissionCap)} possible proofs`,
+      value: submissions,
+      icon: CheckCircle2,
+      ring: submissions / submissionCap,
+      metric: "missions" as MetricKey,
     },
   ];
 
