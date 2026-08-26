@@ -51,7 +51,7 @@ export function Counter({
   }, [inView, value, mv]);
 
   return (
-    <span ref={ref} className={className}>
+    <span ref={ref} className={cn("tabular-nums", className)}>
       <motion.span>{text}</motion.span>
       {suffix}
     </span>
