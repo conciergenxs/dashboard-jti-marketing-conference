@@ -42,7 +42,7 @@ export function KpiStrip({ kpis, missions }: { kpis: Kpis; missions: DayData["mi
     {
       key: "registered",
       label: "Registered",
-      hint: `out of ${EVENT.target} invited colleagues`,
+      hint: `of ${EVENT.target} invited`,
       value: kpis.registered,
       icon: Users,
       ring: kpis.registered / EVENT.target,
@@ -51,7 +51,7 @@ export function KpiStrip({ kpis, missions }: { kpis: Kpis; missions: DayData["mi
     {
       key: "checked",
       label: "Checked in",
-      hint: "already scanned at the venue",
+      hint: "scanned at the door",
       value: kpis.checkedIn,
       icon: ScanLine,
       ring: kpis.checkedIn / kpis.registered,
@@ -60,7 +60,7 @@ export function KpiStrip({ kpis, missions }: { kpis: Kpis; missions: DayData["mi
     {
       key: "points",
       label: "Points / person",
-      hint: `average of 850 possible · ${formatCompact(kpis.points)} points earned so far`,
+      hint: `avg of 850 · ${formatCompact(kpis.points)} total`,
       value: avgPoints,
       icon: InfinityIcon,
       ring: avgPoints / 850,
@@ -69,7 +69,7 @@ export function KpiStrip({ kpis, missions }: { kpis: Kpis; missions: DayData["mi
     {
       key: "missions",
       label: "Missions done",
-      hint: `verified out of ${submissionCap.toLocaleString("en-US")} possible submissions`,
+      hint: `of ${submissionCap.toLocaleString("en-US")} possible`,
       value: submissions,
       icon: CheckCircle2,
       ring: submissions / submissionCap,
@@ -86,10 +86,10 @@ export function KpiStrip({ kpis, missions }: { kpis: Kpis; missions: DayData["mi
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
           whileHover={{ y: -5 }}
-          className="glass-card group relative overflow-hidden p-4 sm:p-5"
+          className="glass-card group relative flex flex-col overflow-hidden p-4 sm:p-5"
         >
           <div className="absolute -top-16 -right-12 size-32 rounded-full bg-accent/15 blur-2xl transition-opacity duration-500 group-hover:opacity-100 sm:opacity-60" />
-          <div className="relative flex items-start justify-between gap-2">
+          <div className="relative flex flex-1 items-start justify-between gap-2">
             <div className="min-w-0">
               <p className="text-label font-semibold tracking-[0.08em] text-muted-foreground uppercase sm:tracking-[0.14em] ">
                 {c.label}
@@ -100,17 +100,16 @@ export function KpiStrip({ kpis, missions }: { kpis: Kpis; missions: DayData["mi
               <p className="mt-2 text-label text-muted-foreground">
                 {c.hint}
               </p>
-              {c.metric && (
-                <div className="mt-3">
-                  <SeeAll metric={c.metric} label="Detail" />
-                </div>
-              )}
             </div>
             <div className="relative shrink-0">
-              <Ring progress={c.ring} />
+              <Ring progress={c.ring} id={`ring-${c.key}`} />
               <c.icon className="absolute inset-0 m-auto size-5 text-primary" strokeWidth={1.8} />
             </div>
           </div>
+          <div className="relative mt-4 border-t border-border/70 pt-2.5">
+            <SeeAll metric={c.metric} label="Detail" variant="text" />
+          </div>
+
         </motion.article>
       ))}
     </div>
