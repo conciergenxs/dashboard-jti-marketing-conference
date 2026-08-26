@@ -46,7 +46,7 @@ export function PulseChart({ points }: { points: Point[] }) {
 
   return (
     <Panel eyebrow="Live activity pulse" title="Hub Activity & Check-ins" action={<LivePill />}>
-      <div className="mb-4 flex flex-wrap items-center gap-4 text-xs">
+      <div className="mb-4 flex flex-wrap items-center gap-4 text-label">
         <span className="inline-flex items-center gap-2 text-muted-foreground">
           <span className="size-2 rounded-full bg-accent" /> Hub activity
           <b className="text-foreground tabular-nums">
@@ -142,7 +142,7 @@ export function PulseChart({ points }: { points: Point[] }) {
           />
         )}
       </svg>
-      <div className="mt-2 flex justify-between text-[0.62rem] text-muted-foreground tabular-nums">
+      <div className="mt-2 flex justify-between text-label text-muted-foreground tabular-nums">
         {points.map((p, i) => (
           <span key={p.label} className={i % 2 && points.length > 8 ? "hidden sm:inline" : ""}>
             {p.label}

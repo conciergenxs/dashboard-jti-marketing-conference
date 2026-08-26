@@ -50,8 +50,8 @@ export function HubDonut({ hub }: { hub: Slice[] }) {
             })}
           </svg>
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-            <span className="display text-2xl font-bold tabular-nums">{hub[active]!.value}%</span>
-            <span className="max-w-20 text-center text-[0.6rem] leading-tight text-muted-foreground">
+            <span className="display text-metric font-bold tabular-nums">{hub[active]!.value}%</span>
+            <span className="max-w-20 text-center text-label leading-tight text-muted-foreground">
               {hub[active]!.label}
             </span>
           </div>
@@ -61,7 +61,7 @@ export function HubDonut({ hub }: { hub: Slice[] }) {
             <li
               key={h.label}
               onMouseEnter={() => setActive(i)}
-              className={`flex cursor-pointer items-center gap-3 rounded-lg px-2.5 py-2 text-sm transition-colors duration-300 ${
+              className={`flex cursor-pointer items-center gap-3 rounded-lg px-2.5 py-2 text-body transition-colors duration-300 ${
                 active === i ? "bg-primary/8" : "hover:bg-surface-2"
               }`}
             >

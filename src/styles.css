@@ -27,7 +27,27 @@
 @theme {
   --font-display: "Open Sauce One", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Open Sauce One", ui-sans-serif, system-ui, sans-serif;
+
+  /* Fluid type scale — mobile → desktop */
+  --text-display: clamp(2.5rem, 1.35rem + 5.75vw, 4.75rem);
+  --text-display--line-height: 0.96;
+  --text-display--letter-spacing: -0.03em;
+
+  --text-metric: clamp(1.625rem, 1.32rem + 1.5vw, 2.25rem);
+  --text-metric--line-height: 1;
+  --text-metric--letter-spacing: -0.025em;
+
+  --text-title: clamp(1.25rem, 1.09rem + 0.78vw, 1.625rem);
+  --text-title--line-height: 1.15;
+  --text-title--letter-spacing: -0.02em;
+
+  --text-body: clamp(0.875rem, 0.845rem + 0.16vw, 0.9375rem);
+  --text-body--line-height: 1.55;
+
+  --text-label: clamp(0.6875rem, 0.665rem + 0.11vw, 0.75rem);
+  --text-label--line-height: 1.35;
 }
+
 
 @theme inline {
   --color-glow: var(--glow);

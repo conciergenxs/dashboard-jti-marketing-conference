@@ -22,22 +22,22 @@ export function DashboardHeader({
       >
         <div className="flex flex-wrap items-center gap-2.5">
           <LivePill />
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface/70 px-3 py-1 text-[0.68rem] text-muted-foreground">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface/70 px-3 py-1 text-label text-muted-foreground">
             <MapPin className="size-3" /> {EVENT.location}
           </span>
-          <span className="inline-flex items-center gap-1.5 text-[0.68rem] text-muted-foreground tabular-nums">
+          <span className="inline-flex items-center gap-1.5 text-label text-muted-foreground tabular-nums">
             <RefreshCw className="size-3 animate-spin [animation-duration:6s]" />
             {updatedAt ? `Updated ${updatedAt.toLocaleTimeString("en-GB")}` : "Syncing…"}
           </span>
         </div>
 
         <div>
-          <h1 className="display text-4xl leading-[0.95] font-bold tracking-tight uppercase sm:text-6xl lg:text-7xl">
+          <h1 className="display text-display font-bold uppercase">
             <span className="text-gradient">Grow Beyond</span>
             <br />
             Limits
           </h1>
-          <p className="mt-3 max-w-xl text-sm text-muted-foreground sm:text-base">
+          <p className="mt-3 max-w-xl text-body text-muted-foreground">
             {EVENT.subtitle} — one hub, infinite journey. Every check-in, mission and moment from
             350+ JTI Indonesia employees, in real time.
           </p>
@@ -63,9 +63,9 @@ export function DashboardHeader({
                     transition={{ type: "spring", stiffness: 320, damping: 32 }}
                   />
                 )}
-                <span className="display block text-sm font-bold uppercase">{d.label}</span>
+                <span className="display block text-body font-bold uppercase">{d.label}</span>
                 <span
-                  className={`block text-[0.62rem] tracking-wide uppercase ${active ? "text-primary-foreground/80" : "text-muted-foreground"}`}
+                  className={`block text-label tracking-wide uppercase ${active ? "text-primary-foreground/80" : "text-muted-foreground"}`}
                 >
                   {d.caption}
                 </span>
@@ -86,7 +86,7 @@ export function Ticker({ items }: { items: string[] }) {
         {row.map((t, i) => (
           <span
             key={i}
-            className="flex items-center gap-3 text-[0.7rem] tracking-[0.14em] text-muted-foreground uppercase"
+            className="flex items-center gap-3 text-label tracking-[0.14em] text-muted-foreground uppercase"
           >
             <span className="size-1.5 rounded-full bg-accent" />
             {t}

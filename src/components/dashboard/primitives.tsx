@@ -51,7 +51,7 @@ export function Counter({
   }, [inView, value, mv]);
 
   return (
-    <span ref={ref} className={className}>
+    <span ref={ref} className={cn("tabular-nums", className)}>
       <motion.span>{text}</motion.span>
       {suffix}
     </span>
@@ -77,12 +77,12 @@ export function Panel({
         <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
           <div>
             {eyebrow && (
-              <p className="text-[0.68rem] font-semibold tracking-[0.22em] text-primary uppercase">
+              <p className="text-label font-semibold tracking-[0.22em] text-primary uppercase">
                 {eyebrow}
               </p>
             )}
             {title && (
-              <h2 className="display mt-1 text-xl font-bold tracking-tight uppercase sm:text-2xl">
+              <h2 className="display mt-1 text-title font-bold uppercase">
                 {title}
               </h2>
             )}
@@ -97,7 +97,7 @@ export function Panel({
 
 export function LivePill({ label = "Live" }: { label?: string }) {
   return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/8 px-3 py-1 text-[0.7rem] font-semibold tracking-[0.16em] text-primary uppercase">
+    <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/8 px-3 py-1 text-label font-semibold tracking-[0.16em] text-primary uppercase">
       <span className="relative flex size-2">
         <span className="animate-glow-pulse absolute inline-flex size-2 rounded-full bg-primary" />
         <span className="relative inline-flex size-2 rounded-full bg-primary" />

@@ -77,13 +77,13 @@ export function KpiStrip({ kpis }: { kpis: Kpis }) {
           <div className="absolute -top-16 -right-12 size-32 rounded-full bg-accent/15 blur-2xl transition-opacity duration-500 group-hover:opacity-100 sm:opacity-60" />
           <div className="relative flex items-start justify-between gap-2">
             <div className="min-w-0">
-              <p className="text-[0.62rem] font-semibold tracking-[0.2em] text-muted-foreground uppercase sm:text-[0.68rem]">
+              <p className="text-label font-semibold tracking-[0.12em] text-muted-foreground uppercase sm:tracking-[0.18em] ">
                 {c.label}
               </p>
-              <p className="display mt-2 text-3xl leading-none font-bold tracking-tight text-foreground tabular-nums sm:text-4xl">
+              <p className="display mt-2 text-metric font-bold text-foreground tabular-nums">
                 <Counter value={c.value} suffix={c.suffix ?? ""} />
               </p>
-              <p className="mt-2 text-[0.68rem] leading-snug text-muted-foreground sm:text-xs">
+              <p className="mt-2 text-label text-muted-foreground">
                 {c.hint}
               </p>
             </div>

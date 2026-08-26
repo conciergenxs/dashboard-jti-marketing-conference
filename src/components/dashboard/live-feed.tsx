@@ -37,10 +37,10 @@ export function LiveFeed({ feed }: { feed: FeedItem[] }) {
                 <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                   <Icon className="size-4 text-primary" strokeWidth={1.9} />
                 </span>
-                <p className="min-w-0 flex-1 truncate text-xs text-muted-foreground">
+                <p className="min-w-0 flex-1 truncate text-label text-muted-foreground">
                   <b className="font-semibold text-foreground">{f.name}</b> {f.text}
                 </p>
-                <span className="shrink-0 text-[0.62rem] text-muted-foreground tabular-nums">
+                <span className="shrink-0 text-label text-muted-foreground tabular-nums">
                   {ago(f.at)}
                 </span>
               </motion.li>

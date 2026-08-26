@@ -11,10 +11,10 @@ export function Missions({ missions }: { missions: Mission[] }) {
       title="Take the Challenge"
       action={
         <div className="text-right">
-          <p className="text-[0.62rem] tracking-[0.16em] text-muted-foreground uppercase">
+          <p className="text-label tracking-[0.16em] text-muted-foreground uppercase">
             Points from missions
           </p>
-          <p className="display text-xl font-bold text-primary tabular-nums">
+          <p className="display text-title font-bold text-primary tabular-nums">
             <Counter value={total} />
           </p>
         </div>
@@ -33,14 +33,14 @@ export function Missions({ missions }: { missions: Mission[] }) {
               className="group rounded-xl border border-border/70 bg-surface/60 p-4 transition-colors duration-300 hover:border-primary/35"
             >
               <div className="flex items-baseline gap-3">
-                <span className="display text-2xl font-bold text-primary/35 transition-colors duration-300 group-hover:text-primary/70">
+                <span className="display text-title font-bold text-primary/35 transition-colors duration-300 group-hover:text-primary/70">
                   {m.index}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <h3 className="display truncate text-base font-bold uppercase">{m.name}</h3>
-                  <p className="truncate text-xs text-muted-foreground">{m.promise}</p>
+                  <h3 className="display text-title leading-tight font-bold uppercase">{m.name}</h3>
+                  <p className="mt-0.5 line-clamp-2 text-label text-muted-foreground">{m.promise}</p>
                 </div>
-                <span className="shrink-0 rounded-full bg-gold/15 px-2.5 py-1 text-[0.65rem] font-bold text-gold-foreground tabular-nums">
+                <span className="shrink-0 rounded-full bg-gold/15 px-2.5 py-1 text-label font-bold text-gold-foreground tabular-nums">
                   +{m.points} pts
                 </span>
               </div>
@@ -54,7 +54,7 @@ export function Missions({ missions }: { missions: Mission[] }) {
                     transition={{ duration: 1.2, delay: 0.2 + i * 0.1, ease: [0.22, 1, 0.36, 1] }}
                   />
                 </div>
-                <span className="w-24 shrink-0 text-right text-xs text-muted-foreground tabular-nums">
+                <span className="w-24 shrink-0 text-right text-label text-muted-foreground tabular-nums">
                   <b className="text-foreground">
                     <Counter value={m.submissions} />
                   </b>{" "}

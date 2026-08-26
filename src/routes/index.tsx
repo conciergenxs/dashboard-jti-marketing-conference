@@ -95,10 +95,10 @@ function Dashboard() {
         </motion.div>
 
         <footer className="mt-14 border-t border-border pt-8 text-center">
-          <p className="display text-2xl font-bold tracking-tight uppercase sm:text-3xl">
+          <p className="display text-title font-bold uppercase">
             <span className="text-gradient">{EVENT.tagline}</span>
           </p>
-          <p className="mt-2 text-xs tracking-[0.22em] text-muted-foreground uppercase">
+          <p className="mt-2 text-label tracking-[0.22em] text-muted-foreground uppercase">
             Grow Beyond Limits · Market Conference 2026 · Yogyakarta
           </p>
         </footer>
