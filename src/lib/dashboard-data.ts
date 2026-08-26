@@ -105,7 +105,7 @@ export const DATA: Record<DayKey, DayData> = {
   day1: {
     kpis: { registered: 361, checkedIn: 328, points: 74250, engagement: 87 },
     pulse: pulse(10, 96, 210, 9),
-    missions: missionBase.map((m, i) => ({ ...m, submissions: [287, 196, 118][i] })),
+    missions: missionBase.map((m, i) => ({ ...m, submissions: [287, 196, 118][i]! })),
     functions: [
       { label: "Sales & Distribution", value: 118 },
       { label: "Marketing", value: 64 },
@@ -114,7 +114,7 @@ export const DATA: Record<DayKey, DayData> = {
       { label: "People & Culture", value: 29 },
       { label: "Corporate Affairs", value: 22 },
     ],
-    talents: talentBase.map((t, i) => ({ ...t, votes: [412, 376, 298, 241, 187][i] })),
+    talents: talentBase.map((t, i) => ({ ...t, votes: [412, 376, 298, 241, 187][i]! })),
     gallery: {
       photos: 946,
       likes: 5124,
@@ -137,7 +137,7 @@ export const DATA: Record<DayKey, DayData> = {
   day2: {
     kpis: { registered: 368, checkedIn: 351, points: 148900, engagement: 93 },
     pulse: pulse(11, 128, 340, 8),
-    missions: missionBase.map((m, i) => ({ ...m, submissions: [341, 268, 214][i] })),
+    missions: missionBase.map((m, i) => ({ ...m, submissions: [341, 268, 214][i]! })),
     functions: [
       { label: "Sales & Distribution", value: 126 },
       { label: "Marketing", value: 69 },
@@ -146,7 +146,7 @@ export const DATA: Record<DayKey, DayData> = {
       { label: "People & Culture", value: 31 },
       { label: "Corporate Affairs", value: 23 },
     ],
-    talents: talentBase.map((t, i) => ({ ...t, votes: [688, 731, 522, 470, 388][i] })),
+    talents: talentBase.map((t, i) => ({ ...t, votes: [688, 731, 522, 470, 388][i]! })),
     gallery: {
       photos: 2184,
       likes: 13470,
@@ -169,7 +169,7 @@ export const DATA: Record<DayKey, DayData> = {
   day3: {
     kpis: { registered: 368, checkedIn: 344, points: 172400, engagement: 89 },
     pulse: pulse(8, 74, 180, 7),
-    missions: missionBase.map((m, i) => ({ ...m, submissions: [352, 291, 246][i] })),
+    missions: missionBase.map((m, i) => ({ ...m, submissions: [352, 291, 246][i]! })),
     functions: [
       { label: "Sales & Distribution", value: 124 },
       { label: "Marketing", value: 68 },
@@ -178,7 +178,7 @@ export const DATA: Record<DayKey, DayData> = {
       { label: "People & Culture", value: 30 },
       { label: "Corporate Affairs", value: 23 },
     ],
-    talents: talentBase.map((t, i) => ({ ...t, votes: [742, 809, 566, 498, 402][i] })),
+    talents: talentBase.map((t, i) => ({ ...t, votes: [742, 809, 566, 498, 402][i]! })),
     gallery: {
       photos: 2461,
       likes: 15980,
