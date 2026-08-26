@@ -49,13 +49,13 @@ export function PulseChart({ points }: { points: Point[] }) {
       <div className="mb-4 flex flex-wrap items-center gap-4 text-label">
         <span className="inline-flex items-center gap-2 text-muted-foreground">
           <span className="size-2 rounded-full bg-accent" /> Hub activity
-          <b className="text-foreground tabular-nums">
+          <b className="font-semibold text-foreground tabular-nums">
             {formatNumber(points[active]!.activity)}
           </b>
         </span>
         <span className="inline-flex items-center gap-2 text-muted-foreground">
           <span className="size-2 rounded-full bg-primary" /> Check-ins
-          <b className="text-foreground tabular-nums">{formatNumber(points[active]!.checkins)}</b>
+          <b className="font-semibold text-foreground tabular-nums">{formatNumber(points[active]!.checkins)}</b>
         </span>
         <span className="ml-auto text-muted-foreground tabular-nums">{points[active]!.label}</span>
       </div>

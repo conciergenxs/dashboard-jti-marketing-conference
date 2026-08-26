@@ -55,7 +55,7 @@ export function Missions({ missions }: { missions: Mission[] }) {
                   />
                 </div>
                 <span className="w-24 shrink-0 text-right text-label text-muted-foreground tabular-nums">
-                  <b className="text-foreground">
+                  <b className="font-semibold text-foreground">
                     <Counter value={m.submissions} />
                   </b>{" "}
                   proofs
