@@ -25,8 +25,8 @@
  */
 
 @theme inline {
-  --font-display: "Saira Condensed", "Arial Narrow", sans-serif;
-  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Open Sauce One", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Open Sauce One", ui-sans-serif, system-ui, sans-serif;
   --color-glow: var(--glow);
   --color-glow-foreground: var(--glow-foreground);
   --color-gold: var(--gold);
