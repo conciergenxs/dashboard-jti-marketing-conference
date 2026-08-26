@@ -1,7 +1,15 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowLeft, ChevronLeft, ChevronRight, Search, SlidersHorizontal, X } from "lucide-react";
+import {
+  ArrowLeft,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Search,
+  SlidersHorizontal,
+  X,
+} from "lucide-react";
 import { ContourField } from "@/components/dashboard/contour-field";
 import { METRICS, METRIC_KEYS, type MetricKey } from "@/lib/detail-data";
 
@@ -38,6 +46,7 @@ function MetricDetail() {
   const [query, setQuery] = useState("");
   const [group, setGroup] = useState("all");
   const [page, setPage] = useState(1);
+  const [open, setOpen] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -53,6 +62,7 @@ function MetricDetail() {
   const reset = (fn: () => void) => {
     fn();
     setPage(1);
+    setOpen(null);
   };
 
   return (
@@ -81,7 +91,24 @@ function MetricDetail() {
           <p className="mt-3 max-w-2xl text-body text-muted-foreground">{config.description}</p>
         </motion.header>
 
-        <div className="mt-6 grid grid-cols-3 gap-3">
+        <nav className="mt-5 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {METRIC_KEYS.map((k) => (
+            <Link
+              key={k}
+              to="/details/$metric"
+              params={{ metric: k }}
+              className={`shrink-0 rounded-full border px-3.5 py-2 text-label font-semibold tracking-[0.1em] uppercase transition-colors ${
+                k === metric
+                  ? "border-primary/40 bg-primary/10 text-primary"
+                  : "border-border bg-surface/70 text-muted-foreground hover:border-primary/30 hover:text-foreground"
+              }`}
+            >
+              {METRICS[k].title}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="mt-5 grid grid-cols-3 gap-2.5 sm:gap-3">
           {config.summary.map((s, i) => (
             <motion.div
               key={s.label}
@@ -138,7 +165,10 @@ function MetricDetail() {
           </label>
         </div>
 
-        <p className="mt-3 text-label tracking-[0.14em] text-muted-foreground uppercase">
+        <p className="mt-3 text-label text-muted-foreground">
+          Data source: simulated Infinity Hub records · {config.rows.length} rows
+        </p>
+        <p className="mt-1.5 text-label tracking-[0.14em] text-muted-foreground uppercase">
           {filtered.length} result{filtered.length === 1 ? "" : "s"}
           {group !== "all" || query ? " · filtered" : ""}
         </p>
@@ -188,37 +218,63 @@ function MetricDetail() {
           )}
         </div>
 
-        {/* cards (mobile) */}
-        <div className="mt-3 space-y-2.5 sm:hidden">
+        {/* accordion (mobile) */}
+        <div className="mt-3 space-y-2 sm:hidden">
           <AnimatePresence initial={false} mode="popLayout">
-            {slice.map((r) => (
-              <motion.div
-                key={r.id}
-                layout
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.25 }}
-                className="glass-card p-4"
-              >
-                {config.columns.map((c, i) =>
-                  i === 0 ? (
-                    <p key={c.key} className="display text-body font-semibold">
-                      {r.cells[c.key]}
-                    </p>
-                  ) : (
-                    <div key={c.key} className="mt-1.5 flex items-baseline justify-between gap-3">
-                      <span className="text-label tracking-[0.12em] text-muted-foreground uppercase">
-                        {c.label}
+            {slice.map((r) => {
+              const first = config.columns[0]!;
+              const second = config.columns[config.columns.length - 1]!;
+              const isOpen = open === r.id;
+              return (
+                <motion.div key={r.id} layout className="glass-card overflow-hidden p-0">
+                  <button
+                    type="button"
+                    aria-expanded={isOpen}
+                    onClick={() => setOpen(isOpen ? null : r.id)}
+                    className="flex w-full items-center gap-3 px-4 py-3 text-left"
+                  >
+                    <span className="min-w-0 flex-1">
+                      <span className="display block truncate text-body font-semibold">
+                        {r.cells[first.key]}
                       </span>
-                      <span className="min-w-0 truncate text-body font-medium tabular-nums">
-                        {r.cells[c.key]}
+                      <span className="block truncate text-label text-muted-foreground">
+                        {second.label}: {r.cells[second.key]}
                       </span>
-                    </div>
-                  ),
-                )}
-              </motion.div>
-            ))}
+                    </span>
+                    <ChevronDown
+                      className={`size-4 shrink-0 text-primary transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
+                    />
+                  </button>
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                        className="overflow-hidden"
+                      >
+                        <div className="border-t border-border/60 px-4 py-3">
+                          {config.columns.slice(1).map((c) => (
+                            <div
+                              key={c.key}
+                              className="flex items-baseline justify-between gap-3 py-1"
+                            >
+                              <span className="text-label tracking-[0.12em] text-muted-foreground uppercase">
+                                {c.label}
+                              </span>
+                              <span className="min-w-0 truncate text-body font-medium tabular-nums">
+                                {r.cells[c.key]}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              );
+            })}
           </AnimatePresence>
           {slice.length === 0 && (
             <p className="glass-card p-8 text-center text-body text-muted-foreground">
@@ -248,18 +304,6 @@ function MetricDetail() {
           </button>
         </div>
 
-        <nav className="mt-8 flex flex-wrap gap-2">
-          {METRIC_KEYS.filter((k) => k !== metric).map((k) => (
-            <Link
-              key={k}
-              to="/details/$metric"
-              params={{ metric: k }}
-              className="rounded-full border border-border bg-surface/70 px-3.5 py-2 text-label font-semibold tracking-[0.12em] uppercase transition-colors hover:border-primary/40 hover:text-primary"
-            >
-              {METRICS[k].title}
-            </Link>
-          ))}
-        </nav>
       </div>
     </main>
   );
