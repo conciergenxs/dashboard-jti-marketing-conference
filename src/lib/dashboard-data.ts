@@ -201,13 +201,13 @@ export const DATA: Record<DayKey, DayData> = {
 };
 
 export const FEED_TEMPLATES = [
-  { kind: "checkin", text: "scanned their Infinity Pass at the main hall" },
-  { kind: "mission", text: "completed Mission 01 · Connect to Win" },
-  { kind: "mission", text: "submitted Mission 02 · Make More Possible" },
-  { kind: "mission", text: "unlocked Mission 03 · Win Together" },
-  { kind: "photo", text: "uploaded a moment to Growing Together" },
-  { kind: "vote", text: "voted in JTI Got Talent" },
-  { kind: "reward", text: "redeemed a reward from the Infinity Wheel" },
+  { kind: "checkin", text: "just checked in at the main hall" },
+  { kind: "mission", text: "finished Mission 01 · Connect to Win" },
+  { kind: "mission", text: "sent proof for Mission 02 · Make More Possible" },
+  { kind: "mission", text: "cleared Mission 03 · Win Together" },
+  { kind: "photo", text: "posted a photo to the Growing Together wall" },
+  { kind: "vote", text: "cast a vote for JTI Got Talent" },
+  { kind: "reward", text: "spun the Infinity Wheel and claimed a reward" },
 ] as const;
 
 export const FEED_NAMES = [

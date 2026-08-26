@@ -5,13 +5,13 @@ import type { DayData } from "@/lib/dashboard-data";
 
 export function GalleryPulse({ gallery }: { gallery: DayData["gallery"] }) {
   const stats = [
-    { label: "Moments uploaded", value: gallery.photos, icon: ImageIcon },
-    { label: "Likes given", value: gallery.likes, icon: Heart },
-    { label: "Contributors", value: gallery.contributors, icon: Users },
+    { label: "Photos shared", value: gallery.photos, icon: ImageIcon },
+    { label: "Likes", value: gallery.likes, icon: Heart },
+    { label: "People posting", value: gallery.contributors, icon: Users },
   ];
 
   return (
-    <Panel eyebrow="Growing Together" title="Shared Memories">
+    <Panel eyebrow="Growing Together" title="Photo Wall">
       <div className="grid grid-cols-3 gap-2.5">
         {stats.map((s, i) => (
           <motion.div
@@ -33,7 +33,7 @@ export function GalleryPulse({ gallery }: { gallery: DayData["gallery"] }) {
       </div>
       <div className="mt-4 overflow-hidden rounded-xl border border-primary/15 bg-gradient-to-br from-primary/10 to-accent/10 p-4">
         <p className="text-label font-semibold tracking-[0.18em] text-primary uppercase">
-          Most loved moment
+          Most liked moment
         </p>
         <p className="display mt-1.5 text-title font-semibold uppercase">{gallery.topMoment}</p>
       </div>

@@ -18,7 +18,7 @@ export function HubDonut({ hub }: { hub: Slice[] }) {
   let offset = 0;
 
   return (
-    <Panel eyebrow="Infinity Hub" title="Where Attention Goes">
+    <Panel eyebrow="Infinity Hub" title="Where People Spend Time">
       <div className="flex flex-col items-center gap-6 sm:flex-row">
         <div className="relative shrink-0">
           <svg viewBox="0 0 140 140" className="size-36 -rotate-90">

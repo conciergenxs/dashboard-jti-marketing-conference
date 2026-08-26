@@ -8,11 +8,11 @@ export function FunctionBars({ functions }: { functions: Slice[] }) {
 
   return (
     <Panel
-      eyebrow="Cross-functional mix"
-      title="Participation by Function"
+      eyebrow="Departments"
+      title="Who Is In The Room"
       action={
         <span className="rounded-full border border-border bg-surface-2 px-3 py-1 text-label text-muted-foreground tabular-nums">
-          {total} present
+          {total} checked in
         </span>
       }
     >

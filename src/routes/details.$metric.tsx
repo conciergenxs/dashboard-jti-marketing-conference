@@ -166,7 +166,7 @@ function MetricDetail() {
         </div>
 
         <p className="mt-3 text-label text-muted-foreground">
-          Data source: simulated Infinity Hub records · {config.rows.length} rows
+          From Infinity Hub app records ({config.rows.length} entries) · demo data
         </p>
         <p className="mt-1.5 text-label tracking-[0.14em] text-muted-foreground uppercase">
           {filtered.length} result{filtered.length === 1 ? "" : "s"}

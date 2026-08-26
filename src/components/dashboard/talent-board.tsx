@@ -7,9 +7,9 @@ export function TalentBoard({ talents }: { talents: Talent[] }) {
   const max = ranked[0]?.votes ?? 1;
 
   return (
-    <Panel eyebrow="JTI Got Talent" title="Employee Voting" action={
+    <Panel eyebrow="JTI Got Talent" title="Vote Leaderboard" action={
         <div className="flex items-center gap-2.5">
-          <LivePill label="Voting" />
+          <LivePill label="Voting open" />
           <SeeAll metric="talent" />
         </div>
       }>
@@ -34,7 +34,7 @@ export function TalentBoard({ talents }: { talents: Talent[] }) {
                 <span
                   className={`display flex size-8 shrink-0 items-center justify-center rounded-lg text-body font-semibold tabular-nums ${
                     i === 0
-                      ? "bg-gold/25 text-gold-foreground"
+                      ? "bg-primary text-primary-foreground"
                       : "bg-primary/10 text-primary"
                   }`}
                 >

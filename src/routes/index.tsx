@@ -54,8 +54,9 @@ function Dashboard() {
           <KpiStrip kpis={data.kpis} missions={data.missions} />
 
           <p className="text-label text-muted-foreground">
-            Data source: simulated live feed from the Infinity Hub — Infinity Pass scans, verified
-            mission proofs and in-app votes for {EVENT.target} registered participants.
+            Numbers come from the Infinity Hub app: badge scans at the door, mission proofs approved
+            by the crew, and in-app votes from our {EVENT.target} colleagues. This demo runs on
+            simulated data.
           </p>
 
           <Reveal>
