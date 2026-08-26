@@ -93,7 +93,7 @@ function MetricDetail() {
               <p className="text-label font-semibold tracking-[0.12em] text-muted-foreground uppercase">
                 {s.label}
               </p>
-              <p className="display mt-1.5 text-metric font-bold tabular-nums">{s.value}</p>
+              <p className="display mt-1.5 text-title font-bold tabular-nums sm:text-metric">{s.value}</p>
             </motion.div>
           ))}
         </div>
