@@ -11,21 +11,23 @@ const PAD = 16;
 
 function path(values: number[], max: number, close: boolean) {
   const step = (W - PAD * 2) / (values.length - 1);
-  const pts = values.map((v, i) => {
-    const x = PAD + i * step;
-    const y = H - PAD - (v / max) * (H - PAD * 2);
-    return [x, y] as const;
-  });
-  let d = `M ${pts[0][0]} ${pts[0][1]}`;
+  const pts: [number, number][] = values.map((v, i) => [
+    PAD + i * step,
+    H - PAD - (v / max) * (H - PAD * 2),
+  ]);
+  const first = pts[0]!;
+  const last = pts[pts.length - 1]!;
+  let d = `M ${first[0]} ${first[1]}`;
   for (let i = 1; i < pts.length; i++) {
-    const [px, py] = pts[i - 1];
-    const [x, y] = pts[i];
+    const [px, py] = pts[i - 1]!;
+    const [x, y] = pts[i]!;
     const cx = (px + x) / 2;
     d += ` C ${cx} ${py}, ${cx} ${y}, ${x} ${y}`;
   }
-  if (close) d += ` L ${pts[pts.length - 1][0]} ${H - PAD} L ${pts[0][0]} ${H - PAD} Z`;
+  if (close) d += ` L ${last[0]} ${H - PAD} L ${first[0]} ${H - PAD} Z`;
   return { d, pts };
 }
+
 
 export function PulseChart({ points }: { points: Point[] }) {
   const [hover, setHover] = useState<number | null>(null);
