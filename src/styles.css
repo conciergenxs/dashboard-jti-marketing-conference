@@ -24,9 +24,12 @@
  * 2. Register it in @theme inline as --color-<name>: var(--<name>)
  */
 
-@theme inline {
+@theme {
   --font-display: "Open Sauce One", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Open Sauce One", ui-sans-serif, system-ui, sans-serif;
+}
+
+@theme inline {
   --color-glow: var(--glow);
   --color-glow-foreground: var(--glow-foreground);
   --color-gold: var(--gold);
