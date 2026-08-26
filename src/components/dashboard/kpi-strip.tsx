@@ -97,7 +97,7 @@ export function KpiStrip({ kpis, missions }: { kpis: Kpis; missions: DayData["mi
               <p className="display mt-2 text-metric font-bold text-foreground tabular-nums">
                 <Counter value={c.value} />
               </p>
-              <p className="mt-2 text-label text-muted-foreground">
+              <p className="mt-2 min-h-8 text-label text-muted-foreground">
                 {c.hint}
               </p>
             </div>
