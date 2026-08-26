@@ -37,8 +37,8 @@ export function Missions({ missions }: { missions: Mission[] }) {
                   {m.index}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <h3 className="display truncate text-title font-bold uppercase">{m.name}</h3>
-                  <p className="truncate text-label text-muted-foreground">{m.promise}</p>
+                  <h3 className="display text-title leading-tight font-bold uppercase">{m.name}</h3>
+                  <p className="mt-0.5 line-clamp-2 text-label text-muted-foreground">{m.promise}</p>
                 </div>
                 <span className="shrink-0 rounded-full bg-gold/15 px-2.5 py-1 text-label font-bold text-gold-foreground tabular-nums">
                   +{m.points} pts
