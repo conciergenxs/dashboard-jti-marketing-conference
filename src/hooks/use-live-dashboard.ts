@@ -30,8 +30,15 @@ function nextFeedItem(): FeedItem {
   };
 }
 
+/** Points are earned only from verified missions: 100 + 250 + 500 = 850 max. */
+function pointsFromMissions(missions: DayData["missions"]) {
+  return missions.reduce((sum, m) => sum + m.points * m.submissions, 0);
+}
+
 function drift(data: DayData, tick: number): DayData {
-  if (tick === 0) return data;
+  if (tick === 0) {
+    return { ...data, kpis: { ...data.kpis, points: pointsFromMissions(data.missions) } };
+  }
   const j = (n: number, amp: number) =>
     Math.max(0, Math.round(n + Math.sin(tick * 0.7 + n) * amp + Math.random() * amp));
 
@@ -48,12 +55,17 @@ function drift(data: DayData, tick: number): DayData {
     return { ...t, votes: t.votes + inc };
   });
 
+  const missions = data.missions.map((m, i) => ({
+    ...m,
+    submissions: Math.min(checkedIn, m.submissions + Math.floor(tick / (2 + i))),
+  }));
+
   return {
     ...data,
     kpis: {
       registered,
       checkedIn,
-      points: data.kpis.points + tick * 110,
+      points: pointsFromMissions(missions),
       engagement: Math.min(99, data.kpis.engagement + (tick % 4 === 0 ? 1 : 0)),
     },
     pulse: data.pulse.map((p, i) => ({
@@ -61,10 +73,7 @@ function drift(data: DayData, tick: number): DayData {
       checkins: i === data.pulse.length - 1 ? j(p.checkins, 6) : p.checkins,
       activity: i >= data.pulse.length - 2 ? j(p.activity, 10) : p.activity,
     })),
-    missions: data.missions.map((m, i) => ({
-      ...m,
-      submissions: Math.min(checkedIn, m.submissions + Math.floor(tick / (2 + i))),
-    })),
+    missions,
     talents,
     gallery: {
       ...data.gallery,
