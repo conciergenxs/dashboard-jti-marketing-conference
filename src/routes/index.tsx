@@ -36,13 +36,13 @@ export const Route = createFileRoute("/")({
 
 function Dashboard() {
   const [day, setDay] = useState<DayKey>("day2");
-  const { data, feed, updatedAt } = useLiveDashboard(day);
+  const { data, feed } = useLiveDashboard(day);
 
   return (
     <main className="relative min-h-screen overflow-x-clip">
       <ContourField />
       <div className="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6">
-        <DashboardHeader day={day} onDayChange={setDay} updatedAt={updatedAt} />
+        <DashboardHeader day={day} onDayChange={setDay} />
 
         <motion.div
           key={day}
@@ -52,11 +52,6 @@ function Dashboard() {
           className="mt-8 min-w-0 space-y-5 sm:mt-10 sm:space-y-6"
         >
           <KpiStrip kpis={data.kpis} missions={data.missions} />
-
-          <p className="text-label text-muted-foreground">
-            Source: Infinity Hub app — door scans, approved mission proofs and in-app votes from
-            {" "}{EVENT.target} colleagues. Demo data, refreshed on reload.
-          </p>
 
           <Reveal>
             <PulseChart points={data.pulse} />
