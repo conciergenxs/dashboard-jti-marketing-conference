@@ -35,7 +35,7 @@ export function KpiStrip({ kpis, missions }: { kpis: Kpis; missions: DayData["mi
     {
       key: "registered",
       label: "Registered",
-      hint: `of ${EVENT.target} participants`,
+      hint: `out of ${EVENT.target} invited colleagues`,
       value: kpis.registered,
       icon: Users,
       ring: kpis.registered / EVENT.target,
@@ -44,7 +44,7 @@ export function KpiStrip({ kpis, missions }: { kpis: Kpis; missions: DayData["mi
     {
       key: "checked",
       label: "Checked in",
-      hint: "Infinity Pass scans",
+      hint: "already scanned at the venue",
       value: kpis.checkedIn,
       icon: ScanLine,
       ring: kpis.checkedIn / kpis.registered,
@@ -52,8 +52,8 @@ export function KpiStrip({ kpis, missions }: { kpis: Kpis; missions: DayData["mi
     },
     {
       key: "points",
-      label: "Avg points",
-      hint: `of 850 max · ${formatCompact(kpis.points)} pts total`,
+      label: "Points / person",
+      hint: `average of 850 possible · ${formatCompact(kpis.points)} points earned so far`,
       value: avgPoints,
       icon: InfinityIcon,
       ring: avgPoints / 850,
@@ -61,8 +61,8 @@ export function KpiStrip({ kpis, missions }: { kpis: Kpis; missions: DayData["mi
     },
     {
       key: "missions",
-      label: "Missions verified",
-      hint: `of ${submissionCap.toLocaleString("en-US")} possible proofs`,
+      label: "Missions done",
+      hint: `verified out of ${submissionCap.toLocaleString("en-US")} possible submissions`,
       value: submissions,
       icon: CheckCircle2,
       ring: submissions / submissionCap,

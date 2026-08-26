@@ -24,7 +24,7 @@ export function DashboardHeader({
           <span className="min-w-0"><LivePill /></span>
           <span className="inline-flex shrink-0 items-center gap-1.5 text-label text-muted-foreground tabular-nums">
             <RefreshCw className="size-3 animate-spin [animation-duration:6s]" />
-            {updatedAt ? `Updated ${updatedAt.toLocaleTimeString("en-GB")}` : "Syncing…"}
+            {updatedAt ? `Last update ${updatedAt.toLocaleTimeString("en-GB")}` : "Connecting…"}
           </span>
         </div>
 
@@ -35,14 +35,14 @@ export function DashboardHeader({
             Limits
           </h1>
           <p className="mt-3 max-w-xl text-body text-muted-foreground">
-            {EVENT.subtitle} — live participation analytics for {EVENT.target} JTI Indonesia
-            employees across the Infinity Hub.
+            {EVENT.subtitle}. Follow how our {EVENT.target} colleagues join, complete missions and
+            vote — updated every few seconds while the event runs.
           </p>
         </div>
 
         <div
           role="tablist"
-          aria-label="Event day"
+          aria-label="Choose event day"
           className="grid grid-cols-3 gap-1.5 rounded-2xl border border-border bg-surface/70 p-1.5"
         >
           {DAYS.map((d) => {
@@ -54,7 +54,7 @@ export function DashboardHeader({
                 aria-selected={active}
                 onClick={() => onDayChange(d.key)}
                 className={`relative min-w-0 rounded-xl px-2 py-2 text-center transition-colors duration-300 sm:px-4 sm:py-2.5 ${
-                  active ? "text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                  active ? "text-primary-foreground" : "text-foreground/70 hover:text-foreground"
                 }`}
               >
                 {active && (
@@ -68,7 +68,7 @@ export function DashboardHeader({
                   {d.label}
                 </span>
                 <span
-                  className={`relative block truncate text-label ${active ? "text-primary-foreground/80" : "text-muted-foreground"}`}
+                  className={`relative block truncate text-label ${active ? "text-primary-foreground" : "text-muted-foreground"}`}
                 >
                   {d.caption}
                 </span>

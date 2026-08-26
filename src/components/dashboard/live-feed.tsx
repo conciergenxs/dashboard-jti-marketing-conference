@@ -19,7 +19,7 @@ function ago(at: number) {
 
 export function LiveFeed({ feed }: { feed: FeedItem[] }) {
   return (
-    <Panel eyebrow="Real time" title="Activity Feed" action={<LivePill label="Streaming" />}>
+    <Panel eyebrow="Real time" title="What Is Happening Now" action={<LivePill label="Live" />}>
       <ul className="space-y-2">
         <AnimatePresence initial={false}>
           {feed.map((f) => {

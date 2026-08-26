@@ -149,8 +149,8 @@ function checkinsConfig(): MetricConfig {
   return {
     key: "checkins",
     eyebrow: "Infinity Pass",
-    title: "Check-in Detail",
-    description: "Every registered participant and their Infinity Pass scan.",
+    title: "Check-ins",
+    description: "Everyone who registered, and whether they have scanned in at the venue.",
     filterLabel: "Function",
     filterOptions: [...FUNCTIONS],
     columns: [
@@ -193,7 +193,7 @@ function missionsConfig(): MetricConfig {
     key: "missions",
     eyebrow: "Infinity Missions",
     title: "Mission Submissions",
-    description: "Every verified mission proof submitted through the Infinity Hub.",
+    description: "Mission proofs sent through the app and approved by the crew.",
     filterLabel: "Mission",
     filterOptions: MISSIONS_META.map((m) => `${m.code} · ${m.name}`),
     columns: [
@@ -228,8 +228,8 @@ function talentConfig(): MetricConfig {
   return {
     key: "talent",
     eyebrow: "JTI Got Talent",
-    title: "Voting Detail",
-    description: "One vote per checked-in participant across the three talent categories.",
+    title: "Talent Votes",
+    description: "Each colleague who checked in can cast one vote for a talent act.",
     filterLabel: "Act",
     filterOptions: [...TALENT_ACTS],
     columns: [
@@ -261,7 +261,7 @@ function rewardsConfig(): MetricConfig {
     key: "rewards",
     eyebrow: "Infinity Wheel",
     title: "Reward Redemptions",
-    description: "Unlocked after all three Infinity Missions are verified.",
+    description: "Rewards claimed on the Infinity Wheel after all three missions are approved.",
     filterLabel: "Reward",
     filterOptions: [...REWARDS_META],
     columns: [
@@ -299,8 +299,8 @@ function pointsConfig(): MetricConfig {
   return {
     key: "points",
     eyebrow: "Infinity Points",
-    title: "Points per Participant",
-    description: "Points come only from verified missions — 100 + 250 + 500 = 850 maximum.",
+    title: "Points per Person",
+    description: "Points come only from approved missions: 100 + 250 + 500, so 850 is the maximum.",
     filterLabel: "Function",
     filterOptions: [...FUNCTIONS],
     columns: [

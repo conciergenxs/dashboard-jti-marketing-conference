@@ -7,11 +7,11 @@ export function Rewards({ rewards }: { rewards: DayData["rewards"] }) {
   return (
     <Panel
       eyebrow="Infinity Wheel"
-      title="Rewards Redeemed"
+      title="Rewards Claimed"
       action={
         <div className="flex items-center gap-2.5">
-          <span className="rounded-full bg-gold/15 px-3 py-1 text-label font-semibold text-gold-foreground tabular-nums">
-            {total} total
+          <span className="rounded-full bg-primary/10 px-3 py-1 text-label font-semibold text-primary tabular-nums">
+            {total} claimed
           </span>
           <SeeAll metric="rewards" />
         </div>

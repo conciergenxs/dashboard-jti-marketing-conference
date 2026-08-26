@@ -8,13 +8,13 @@ export function Missions({ missions }: { missions: Mission[] }) {
   return (
     <Panel
       eyebrow="Infinity Missions"
-      title="Take the Challenge"
+      title="Mission Progress"
       action={
         <div className="flex items-center gap-3">
           <SeeAll metric="missions" />
           <div className="text-right">
           <p className="text-label tracking-[0.16em] text-muted-foreground uppercase">
-            Proofs submitted
+            Verified so far
           </p>
           <p className="display text-title font-semibold text-primary tabular-nums">
             <Counter value={proofs} />
@@ -44,7 +44,7 @@ export function Missions({ missions }: { missions: Mission[] }) {
                   <h3 className="display text-title leading-tight font-semibold uppercase">{m.name}</h3>
                   <p className="mt-0.5 line-clamp-2 text-label text-muted-foreground">{m.promise}</p>
                 </div>
-                <span className="shrink-0 rounded-full bg-gold/15 px-2.5 py-1 text-label font-semibold text-gold-foreground tabular-nums">
+                <span className="shrink-0 rounded-full bg-primary/10 px-2.5 py-1 text-label font-semibold text-primary tabular-nums">
                   +{m.points} pts
                 </span>
               </div>
@@ -62,7 +62,7 @@ export function Missions({ missions }: { missions: Mission[] }) {
                   <b className="font-semibold text-foreground">
                     <Counter value={m.submissions} />
                   </b>{" "}
-                  proofs
+                  done
                 </span>
               </div>
             </motion.div>
