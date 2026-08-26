@@ -4,7 +4,7 @@ A public, mobile-first live analytics dashboard for JTI Market Conference 2026 (
 
 ## Visual direction
 
-- Light "luminous blue" base: near-white background with soft blue radial glows, frosted/translucent cards, subtle reflective gradients and curved infinity linework in the background.
+- Luminous cards, subtle reflective gradients and curved infinity linework in the background.Light "luminous blue" base: near-white background with soft blue radial glows, frosted/tran
 - Palette: deep navy text, electric/cyan blue primary, soft sky blue supports, warm gold accent for rewards/awards, JTI green used sparingly for positive deltas.
 - Type: bold condensed-feel display headings (uppercase, tight tracking) for KPI numbers and section titles + clean geometric sans for body — matching the deck's headline style.
 - Motion everywhere but tasteful: count-up KPI numbers, staggered card reveals on scroll, animated gradient/progress rings, live "pulse" dot, marquee ticker, hover lift + glow, animated chart draw-in, number flip on live updates, spring page transitions, reduced-motion respected.
@@ -14,10 +14,10 @@ A public, mobile-first live analytics dashboard for JTI Market Conference 2026 (
 Header: event title, Yogyakarta · 3 days, live status pill, last-updated timestamp, day switcher (Day 1 / Day 2 / Day 3).
 
 1. Hero KPI row (4 cards, count-up + live ticks)
-   - Registered participants (of 350+ target) with progress ring
-   - Checked-in now (Infinity Pass scans)
-   - Infinity Points earned (collective)
-   - Engagement rate %
+  - Registered participants (of 350+ target) with progress ring
+  - Checked-in now (Infinity Pass scans)
+  - Infinity Points earned (collective)
+  - Engagement rate %
 2. Live activity pulse — area/line chart of check-ins and hub activity across the day, animated draw-in.
 3. Infinity Missions progress — three mission cards (Connect to Win 100 pts, Make More Possible 250 pts, Win Together 500 pts) with animated completion bars and submission counts.
 4. Participation by function/department — animated horizontal bar chart (cross-functional mix).
