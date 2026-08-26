@@ -48,7 +48,7 @@ function Dashboard() {
   ];
 
   return (
-    <main className="relative min-h-screen">
+    <main className="relative min-h-screen overflow-x-clip">
       <InfinityBackground />
       <div className="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6">
         <DashboardHeader day={day} onDayChange={setDay} updatedAt={updatedAt} />

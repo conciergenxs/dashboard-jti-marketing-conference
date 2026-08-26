@@ -74,7 +74,7 @@ export function Panel({
   return (
     <div className={cn("glass-card card-lift p-5 sm:p-6", className)}>
       {(title || eyebrow) && (
-        <div className="mb-5 flex items-start justify-between gap-3">
+        <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
           <div>
             {eyebrow && (
               <p className="text-[0.68rem] font-semibold tracking-[0.22em] text-primary uppercase">
