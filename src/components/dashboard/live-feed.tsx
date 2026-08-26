@@ -11,11 +11,7 @@ const ICONS: Record<string, typeof ScanLine> = {
   reward: Gift,
 };
 
-function ago(at: number) {
-  const s = Math.max(1, Math.round((Date.now() - at) / 1000));
-  if (s < 60) return `${s}s ago`;
-  return `${Math.round(s / 60)}m ago`;
-}
+
 
 export function LiveFeed({ feed }: { feed: FeedItem[] }) {
   return (
@@ -41,7 +37,7 @@ export function LiveFeed({ feed }: { feed: FeedItem[] }) {
                   <b className="font-semibold text-foreground">{f.name}</b> {f.text}
                 </p>
                 <span className="shrink-0 text-label text-muted-foreground tabular-nums">
-                  {ago(f.at)}
+                  {f.minutesAgo}m ago
                 </span>
               </motion.li>
             );

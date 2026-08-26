@@ -54,9 +54,8 @@ function Dashboard() {
           <KpiStrip kpis={data.kpis} missions={data.missions} />
 
           <p className="text-label text-muted-foreground">
-            Numbers come from the Infinity Hub app: badge scans at the door, mission proofs approved
-            by the crew, and in-app votes from our {EVENT.target} colleagues. This demo runs on
-            simulated data.
+            Source: Infinity Hub app — door scans, approved mission proofs and in-app votes from
+            {" "}{EVENT.target} colleagues. Demo data, refreshed on reload.
           </p>
 
           <Reveal>
@@ -80,12 +79,12 @@ function Dashboard() {
               <GalleryPulse gallery={data.gallery} />
             </Reveal>
             <Reveal delay={0.08}>
-              <LiveFeed feed={feed} />
+              <Rewards rewards={data.rewards} />
             </Reveal>
           </div>
 
           <Reveal>
-            <Rewards rewards={data.rewards} />
+            <LiveFeed feed={feed} />
           </Reveal>
         </motion.div>
 
