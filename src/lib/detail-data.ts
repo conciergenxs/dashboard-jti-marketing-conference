@@ -208,7 +208,7 @@ function missionsConfig(): MetricConfig {
       { label: "Submissions", value: fmt(rows.length) },
       {
         label: "Points awarded",
-        value: fmt(rows.reduce((s, r) => s + Number(r.cells.points), 0)),
+        value: fmt(rows.reduce((s, r) => s + Number(r.cells['points']), 0)),
       },
       {
         label: "All 3 complete",
@@ -295,7 +295,7 @@ function pointsConfig(): MetricConfig {
       points: p.points,
     },
   }));
-  const total = rows.reduce((s, r) => s + Number(r.cells.points), 0);
+  const total = rows.reduce((s, r) => s + Number(r.cells['points']), 0);
   return {
     key: "points",
     eyebrow: "Infinity Points",
@@ -314,7 +314,7 @@ function pointsConfig(): MetricConfig {
     summary: [
       { label: "Total points", value: fmt(total) },
       { label: "Average", value: `${fmt(Math.round(total / Math.max(1, rows.length)))} / 850` },
-      { label: "Perfect 850", value: fmt(rows.filter((r) => r.cells.points === 850).length) },
+      { label: "Perfect 850", value: fmt(rows.filter((r) => r.cells['points'] === 850).length) },
     ],
   };
 }
