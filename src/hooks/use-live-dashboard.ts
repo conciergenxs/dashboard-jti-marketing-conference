@@ -29,6 +29,7 @@ function nextFeedItem(): FeedItem {
 }
 
 function drift(data: DayData, tick: number): DayData {
+  if (tick === 0) return data;
   const j = (n: number, amp: number) =>
     Math.max(0, Math.round(n + Math.sin(tick * 0.7 + n) * amp + Math.random() * amp));
   return {

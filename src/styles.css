@@ -1,6 +1,12 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
+@import "@fontsource/open-sauce-one/400.css";
+@import "@fontsource/open-sauce-one/500.css";
+@import "@fontsource/open-sauce-one/600.css";
+@import "@fontsource/open-sauce-one/700.css";
+@import "@fontsource/open-sauce-one/800.css";
+@import "@fontsource/open-sauce-one/900.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -18,9 +24,12 @@
  * 2. Register it in @theme inline as --color-<name>: var(--<name>)
  */
 
+@theme {
+  --font-display: "Open Sauce One", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Open Sauce One", ui-sans-serif, system-ui, sans-serif;
+}
+
 @theme inline {
-  --font-display: "Saira Condensed", "Arial Narrow", sans-serif;
-  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
   --color-glow: var(--glow);
   --color-glow-foreground: var(--glow-foreground);
   --color-gold: var(--gold);
@@ -170,7 +179,7 @@
   h3,
   .display {
     font-family: var(--font-display);
-    letter-spacing: -0.01em;
+    letter-spacing: -0.022em;
   }
 }
 
