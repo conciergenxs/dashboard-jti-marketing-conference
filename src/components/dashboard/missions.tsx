@@ -11,7 +11,7 @@ export function Missions({ missions }: { missions: Mission[] }) {
       title="Take the Challenge"
       action={
         <div className="text-right">
-          <p className="text-[0.62rem] tracking-[0.16em] text-muted-foreground uppercase">
+          <p className="text-label tracking-[0.16em] text-muted-foreground uppercase">
             Points from missions
           </p>
           <p className="display text-xl font-bold text-primary tabular-nums">
@@ -40,7 +40,7 @@ export function Missions({ missions }: { missions: Mission[] }) {
                   <h3 className="display truncate text-base font-bold uppercase">{m.name}</h3>
                   <p className="truncate text-xs text-muted-foreground">{m.promise}</p>
                 </div>
-                <span className="shrink-0 rounded-full bg-gold/15 px-2.5 py-1 text-[0.65rem] font-bold text-gold-foreground tabular-nums">
+                <span className="shrink-0 rounded-full bg-gold/15 px-2.5 py-1 text-label font-bold text-gold-foreground tabular-nums">
                   +{m.points} pts
                 </span>
               </div>

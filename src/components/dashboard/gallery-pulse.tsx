@@ -27,12 +27,12 @@ export function GalleryPulse({ gallery }: { gallery: DayData["gallery"] }) {
             <p className="display mt-2 text-xl font-bold tabular-nums">
               <Counter value={s.value} />
             </p>
-            <p className="mt-1 text-[0.6rem] leading-tight text-muted-foreground">{s.label}</p>
+            <p className="mt-1 text-label leading-tight text-muted-foreground">{s.label}</p>
           </motion.div>
         ))}
       </div>
       <div className="mt-4 overflow-hidden rounded-xl border border-primary/15 bg-gradient-to-br from-primary/10 to-accent/10 p-4">
-        <p className="text-[0.62rem] font-semibold tracking-[0.18em] text-primary uppercase">
+        <p className="text-label font-semibold tracking-[0.18em] text-primary uppercase">
           Most loved moment
         </p>
         <p className="display mt-1.5 text-base font-bold uppercase">{gallery.topMoment}</p>

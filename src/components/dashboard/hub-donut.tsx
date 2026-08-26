@@ -51,7 +51,7 @@ export function HubDonut({ hub }: { hub: Slice[] }) {
           </svg>
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
             <span className="display text-2xl font-bold tabular-nums">{hub[active]!.value}%</span>
-            <span className="max-w-20 text-center text-[0.6rem] leading-tight text-muted-foreground">
+            <span className="max-w-20 text-center text-label leading-tight text-muted-foreground">
               {hub[active]!.label}
             </span>
           </div>

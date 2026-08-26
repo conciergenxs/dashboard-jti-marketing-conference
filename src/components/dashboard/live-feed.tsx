@@ -40,7 +40,7 @@ export function LiveFeed({ feed }: { feed: FeedItem[] }) {
                 <p className="min-w-0 flex-1 truncate text-xs text-muted-foreground">
                   <b className="font-semibold text-foreground">{f.name}</b> {f.text}
                 </p>
-                <span className="shrink-0 text-[0.62rem] text-muted-foreground tabular-nums">
+                <span className="shrink-0 text-label text-muted-foreground tabular-nums">
                   {ago(f.at)}
                 </span>
               </motion.li>

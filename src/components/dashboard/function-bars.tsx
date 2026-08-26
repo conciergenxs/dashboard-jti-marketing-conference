@@ -11,7 +11,7 @@ export function FunctionBars({ functions }: { functions: Slice[] }) {
       eyebrow="Cross-functional mix"
       title="Participation by Function"
       action={
-        <span className="rounded-full border border-border bg-surface-2 px-3 py-1 text-[0.68rem] text-muted-foreground tabular-nums">
+        <span className="rounded-full border border-border bg-surface-2 px-3 py-1 text-label text-muted-foreground tabular-nums">
           {total} present
         </span>
       }

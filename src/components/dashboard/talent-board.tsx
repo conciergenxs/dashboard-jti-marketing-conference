@@ -37,7 +37,7 @@ export function TalentBoard({ talents }: { talents: Talent[] }) {
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="display truncate text-sm font-bold uppercase">{t.name}</p>
-                  <p className="truncate text-[0.7rem] text-muted-foreground">{t.act}</p>
+                  <p className="truncate text-label text-muted-foreground">{t.act}</p>
                 </div>
                 <span className="shrink-0 text-sm font-bold text-foreground tabular-nums">
                   <Counter value={t.votes} />
