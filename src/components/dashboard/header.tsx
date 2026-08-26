@@ -21,7 +21,7 @@ export function DashboardHeader({
         className="flex flex-col gap-4 sm:gap-5"
       >
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
-          <LivePill />
+          <span className="min-w-0"><LivePill /></span>
           <span className="inline-flex shrink-0 items-center gap-1.5 text-label text-muted-foreground tabular-nums">
             <RefreshCw className="size-3 animate-spin [animation-duration:6s]" />
             {updatedAt ? `Updated ${updatedAt.toLocaleTimeString("en-GB")}` : "Syncing…"}
@@ -60,7 +60,7 @@ export function DashboardHeader({
                 {active && (
                   <motion.span
                     layoutId="day-pill"
-                    className="absolute inset-0 -z-10 rounded-xl bg-gradient-to-r from-primary to-accent"
+                    className="absolute inset-0 -z-10 rounded-xl bg-primary shadow-[0_6px_18px_-8px_var(--color-primary)]"
                     transition={{ type: "spring", stiffness: 320, damping: 32 }}
                   />
                 )}
