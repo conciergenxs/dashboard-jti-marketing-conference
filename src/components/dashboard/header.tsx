@@ -17,8 +17,13 @@ export function DashboardHeader({
         transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         className="flex flex-col gap-4 sm:gap-5"
       >
-        <div className="flex items-center">
+        <div className="flex items-center justify-between gap-4">
           <LivePill />
+          <img
+            src="/jti-logo.svg"
+            alt="JTI"
+            className="h-6 w-auto shrink-0 sm:h-8"
+          />
         </div>
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
