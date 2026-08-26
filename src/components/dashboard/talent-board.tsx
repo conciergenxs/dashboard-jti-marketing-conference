@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "motion/react";
-import { Panel, Counter, LivePill } from "./primitives";
+import { Panel, Counter, LivePill, SeeAll } from "./primitives";
 import type { Talent } from "@/lib/dashboard-data";
 
 export function TalentBoard({ talents }: { talents: Talent[] }) {
@@ -7,7 +7,12 @@ export function TalentBoard({ talents }: { talents: Talent[] }) {
   const max = ranked[0]?.votes ?? 1;
 
   return (
-    <Panel eyebrow="JTI Got Talent" title="Employee Voting" action={<LivePill label="Voting" />}>
+    <Panel eyebrow="JTI Got Talent" title="Employee Voting" action={
+        <div className="flex items-center gap-2.5">
+          <LivePill label="Voting" />
+          <SeeAll metric="talent" />
+        </div>
+      }>
       <ul className="space-y-2.5">
         <AnimatePresence initial={false}>
           {ranked.map((t, i) => (

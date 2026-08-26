@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { Panel, Counter } from "./primitives";
+import { Panel, Counter, SeeAll } from "./primitives";
 import { EVENT, type Mission } from "@/lib/dashboard-data";
 
 export function Missions({ missions }: { missions: Mission[] }) {
@@ -10,13 +10,16 @@ export function Missions({ missions }: { missions: Mission[] }) {
       eyebrow="Infinity Missions"
       title="Take the Challenge"
       action={
-        <div className="text-right">
+        <div className="flex items-center gap-3">
+          <SeeAll metric="missions" />
+          <div className="text-right">
           <p className="text-label tracking-[0.16em] text-muted-foreground uppercase">
             Proofs submitted
           </p>
           <p className="display text-title font-semibold text-primary tabular-nums">
             <Counter value={proofs} />
           </p>
+          </div>
         </div>
       }
     >

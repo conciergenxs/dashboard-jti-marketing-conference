@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { Counter, Panel } from "./primitives";
+import { Counter, Panel, SeeAll } from "./primitives";
 import type { DayData } from "@/lib/dashboard-data";
 
 export function Rewards({ rewards }: { rewards: DayData["rewards"] }) {
@@ -9,9 +9,12 @@ export function Rewards({ rewards }: { rewards: DayData["rewards"] }) {
       eyebrow="Infinity Wheel"
       title="Rewards Redeemed"
       action={
-        <span className="rounded-full bg-gold/15 px-3 py-1 text-label font-semibold text-gold-foreground tabular-nums">
-          {total} total
-        </span>
+        <div className="flex items-center gap-2.5">
+          <span className="rounded-full bg-gold/15 px-3 py-1 text-label font-semibold text-gold-foreground tabular-nums">
+            {total} total
+          </span>
+          <SeeAll metric="rewards" />
+        </div>
       }
     >
       <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">

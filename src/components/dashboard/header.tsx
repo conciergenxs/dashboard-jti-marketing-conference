@@ -20,12 +20,12 @@ export function DashboardHeader({
         transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         className="flex flex-col gap-4"
       >
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-nowrap items-center gap-2.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <LivePill />
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface/70 px-3 py-1 text-label text-muted-foreground">
+          <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-surface/70 px-3 py-1 text-label text-muted-foreground">
             <MapPin className="size-3" /> {EVENT.location}
           </span>
-          <span className="inline-flex items-center gap-1.5 text-label text-muted-foreground tabular-nums">
+          <span className="ml-auto inline-flex items-center gap-1.5 text-label text-muted-foreground tabular-nums">
             <RefreshCw className="size-3 animate-spin [animation-duration:6s]" />
             {updatedAt ? `Updated ${updatedAt.toLocaleTimeString("en-GB")}` : "Syncing…"}
           </span>
