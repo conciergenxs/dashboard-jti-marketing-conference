@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
   ArrowLeft,
@@ -44,20 +44,28 @@ function MetricDetail() {
   const { metric } = Route.useParams();
   const config = METRICS[metric as MetricKey]!;
   const [query, setQuery] = useState("");
-  const [group, setGroup] = useState("all");
+  const [facets, setFacets] = useState<Record<string, string>>({});
   const [page, setPage] = useState(1);
   const [open, setOpen] = useState<string | null>(null);
+  const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
+
+  useEffect(() => setUpdatedAt(new Date()), []);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return config.rows.filter(
-      (r) => (group === "all" || r.group === group) && (!q || r.search.includes(q)),
+      (r) =>
+        config.filters.every((f) => {
+          const v = facets[f.key];
+          return !v || v === "all" || r.facets[f.key] === v;
+        }) && (!q || r.search.includes(q)),
     );
-  }, [config.rows, query, group]);
+  }, [config, query, facets]);
 
   const pages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const current = Math.min(page, pages);
   const slice = filtered.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE);
+  const isFiltered = !!query.trim() || config.filters.some((f) => facets[f.key] && facets[f.key] !== "all");
 
   const reset = (fn: () => void) => {
     fn();
@@ -65,13 +73,17 @@ function MetricDetail() {
     setOpen(null);
   };
 
+  const stamp = updatedAt
+    ? `${updatedAt.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}, ${updatedAt.toLocaleDateString("en-GB")}`
+    : "—";
+
   return (
     <main className="relative min-h-screen overflow-x-clip">
       <ContourField />
-      <div className="mx-auto w-full max-w-6xl px-4 pt-8 pb-16 sm:px-6 sm:pt-12">
+      <div className="mx-auto w-full max-w-6xl px-4 pt-6 pb-16 sm:px-6 sm:pt-10">
         <Link
           to="/"
-          className="inline-flex items-center gap-2 text-label font-semibold tracking-[0.14em] text-primary uppercase transition-colors hover:text-accent"
+          className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/80 px-3.5 py-2 text-label font-semibold text-foreground/80 transition-colors hover:border-primary/40 hover:text-primary"
         >
           <ArrowLeft className="size-3.5" /> Back to dashboard
         </Link>
@@ -80,59 +92,22 @@ function MetricDetail() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-5"
+          className="mt-6"
         >
-          <p className="text-label font-semibold tracking-[0.22em] text-primary uppercase">
-            {config.eyebrow}
-          </p>
-          <h1 className="display mt-1.5 text-display font-extrabold uppercase">
+          <h1 className="display text-display font-extrabold uppercase">
             <span className="text-gradient">{config.title}</span>
           </h1>
-          <p className="mt-3 max-w-2xl text-body text-muted-foreground">{config.description}</p>
+          <p className="mt-2.5 max-w-2xl text-body text-muted-foreground">{config.description}</p>
         </motion.header>
 
-        <nav className="mt-5 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {METRIC_KEYS.map((k) => (
-            <Link
-              key={k}
-              to="/details/$metric"
-              params={{ metric: k }}
-              className={`shrink-0 rounded-full border px-3.5 py-2 text-label font-semibold tracking-[0.1em] uppercase transition-colors ${
-                k === metric
-                  ? "border-primary/40 bg-primary/10 text-primary"
-                  : "border-border bg-surface/70 text-muted-foreground hover:border-primary/30 hover:text-foreground"
-              }`}
-            >
-              {METRICS[k].title}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="mt-5 grid grid-cols-3 gap-2.5 sm:gap-3">
-          {config.summary.map((s, i) => (
-            <motion.div
-              key={s.label}
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.06 * i, ease: [0.22, 1, 0.36, 1] }}
-              className="glass-card p-3.5 sm:p-4"
-            >
-              <p className="text-label font-semibold tracking-[0.12em] text-muted-foreground uppercase">
-                {s.label}
-              </p>
-              <p className="display mt-1.5 text-title font-bold tabular-nums sm:text-metric">{s.value}</p>
-            </motion.div>
-          ))}
-        </div>
-
         {/* controls */}
-        <div className="glass-card sticky top-3 z-20 mt-5 flex flex-col gap-3 p-3 sm:flex-row sm:items-center">
+        <div className="glass-card sticky top-3 z-20 mt-5 flex flex-col gap-2.5 p-3 sm:flex-row sm:items-center">
           <label className="relative flex min-w-0 flex-1 items-center">
             <Search className="absolute left-3 size-4 text-muted-foreground" />
             <input
               value={query}
               onChange={(e) => reset(() => setQuery(e.target.value))}
-              placeholder="Search name, function, ID…"
+              placeholder="Search name or function…"
               className="h-11 w-full rounded-xl border border-border bg-surface/70 pr-9 pl-9 text-body outline-none transition-colors focus:border-primary/50"
             />
             {query && (
@@ -147,31 +122,35 @@ function MetricDetail() {
             )}
           </label>
 
-          <label className="relative flex items-center">
-            <SlidersHorizontal className="pointer-events-none absolute left-3 size-4 text-muted-foreground" />
-            <select
-              value={group}
-              onChange={(e) => reset(() => setGroup(e.target.value))}
-              aria-label={config.filterLabel}
-              className="h-11 w-full appearance-none rounded-xl border border-border bg-surface/70 pr-8 pl-9 text-body outline-none transition-colors focus:border-primary/50 sm:w-64"
-            >
-              <option value="all">All {config.filterLabel.toLowerCase()}s</option>
-              {config.filterOptions.map((o) => (
-                <option key={o} value={o}>
-                  {o}
-                </option>
-              ))}
-            </select>
-          </label>
+          <div className="grid grid-cols-2 gap-2.5 sm:flex sm:shrink-0">
+            {config.filters.map((f) => (
+              <label key={f.key} className="relative flex min-w-0 items-center">
+                <SlidersHorizontal className="pointer-events-none absolute left-3 size-4 text-muted-foreground" />
+                <select
+                  value={facets[f.key] ?? "all"}
+                  onChange={(e) => reset(() => setFacets((s) => ({ ...s, [f.key]: e.target.value })))}
+                  aria-label={f.label}
+                  className="h-11 w-full min-w-0 appearance-none truncate rounded-xl border border-border bg-surface/70 pr-8 pl-9 text-body outline-none transition-colors focus:border-primary/50 sm:w-48"
+                >
+                  <option value="all">All · {f.label}</option>
+                  {f.options.map((o) => (
+                    <option key={o} value={o}>
+                      {o}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ))}
+          </div>
         </div>
 
-        <p className="mt-3 text-label text-muted-foreground">
-          From Infinity Hub app records ({config.rows.length} entries) · demo data
-        </p>
-        <p className="mt-1.5 text-label tracking-[0.14em] text-muted-foreground uppercase">
-          {filtered.length} result{filtered.length === 1 ? "" : "s"}
-          {group !== "all" || query ? " · filtered" : ""}
-        </p>
+        <div className="mt-3 flex items-center justify-between gap-3 text-label text-muted-foreground">
+          <span className="tabular-nums">Last update {stamp}</span>
+          <span className="shrink-0 font-semibold text-foreground tabular-nums">
+            {filtered.length} result{filtered.length === 1 ? "" : "s"}
+            {isFiltered ? " · filtered" : ""}
+          </span>
+        </div>
 
         {/* table (desktop) */}
         <div className="glass-card mt-3 hidden overflow-hidden p-0 sm:block">
@@ -267,7 +246,7 @@ function MetricDetail() {
                               <span className="text-label tracking-[0.12em] text-muted-foreground uppercase">
                                 {c.label}
                               </span>
-                              <span className="min-w-0 truncate text-body font-medium tabular-nums">
+                              <span className="min-w-0 truncate text-label font-semibold text-foreground tabular-nums">
                                 {r.cells[c.key]}
                               </span>
                             </div>
