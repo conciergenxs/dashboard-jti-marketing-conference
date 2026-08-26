@@ -43,6 +43,8 @@ export function PulseChart({ points }: { points: Point[] }) {
     false,
   );
   const active = hover ?? points.length - 1;
+  const totalActivity = points.reduce((sum, p) => sum + p.activity, 0) || 1;
+  const share = hover === null ? 0 : Math.round((points[hover]!.activity / totalActivity) * 100);
 
   return (
     <Panel eyebrow="Live activity pulse" title="Hub Activity & Check-ins" action={<LivePill />}>
@@ -60,6 +62,7 @@ export function PulseChart({ points }: { points: Point[] }) {
         <span className="ml-auto text-muted-foreground tabular-nums">{points[active]!.label}</span>
       </div>
 
+      <div className="relative">
       <svg
         viewBox={`0 0 ${W} ${H}`}
         className="h-48 w-full touch-none sm:h-60"
@@ -142,6 +145,46 @@ export function PulseChart({ points }: { points: Point[] }) {
           />
         )}
       </svg>
+        {hover !== null && (
+          <motion.div
+            initial={{ opacity: 0, y: 6, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+            className="pointer-events-none absolute z-20 w-40 -translate-x-1/2 rounded-xl border border-border bg-background/95 p-3 shadow-lg backdrop-blur-md"
+            style={{
+              left: `${Math.min(85, Math.max(15, (checkins.pts[hover]![0] / W) * 100))}%`,
+              top: `${Math.max(0, (Math.min(checkins.pts[hover]![1], activity.pts[hover]![1]) / H) * 100 - 4)}%`,
+              transform: "translate(-50%, -100%)",
+            }}
+          >
+            <p className="text-label font-semibold tracking-[0.14em] text-muted-foreground uppercase tabular-nums">
+              {points[hover]!.label}
+            </p>
+            <div className="mt-2 space-y-1.5">
+              <div className="flex items-center justify-between gap-3 text-label">
+                <span className="inline-flex items-center gap-1.5 text-muted-foreground">
+                  <span className="size-1.5 rounded-full bg-primary" /> Check-ins
+                </span>
+                <b className="font-semibold text-foreground tabular-nums">
+                  {formatNumber(points[hover]!.checkins)}
+                </b>
+              </div>
+              <div className="flex items-center justify-between gap-3 text-label">
+                <span className="inline-flex items-center gap-1.5 text-muted-foreground">
+                  <span className="size-1.5 rounded-full bg-accent" /> Hub actions
+                </span>
+                <b className="font-semibold text-foreground tabular-nums">
+                  {formatNumber(points[hover]!.activity)}
+                </b>
+              </div>
+              <div className="flex items-center justify-between gap-3 border-t border-border pt-1.5 text-label">
+                <span className="text-muted-foreground">Share of day</span>
+                <b className="font-semibold text-primary tabular-nums">{share}%</b>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </div>
       <div className="mt-2 flex justify-between text-label text-muted-foreground tabular-nums">
         {points.map((p, i) => (
           <span key={p.label} className={i % 2 && points.length > 8 ? "hidden sm:inline" : ""}>
