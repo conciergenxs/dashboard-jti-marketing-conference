@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "motion/react";
 import { Gift, Heart, ScanLine, Sparkles, Vote } from "lucide-react";
-import { LivePill, Panel } from "./primitives";
+import { Panel } from "./primitives";
 import type { FeedItem } from "@/hooks/use-live-dashboard";
 
 const ICONS: Record<string, typeof ScanLine> = {
@@ -19,7 +19,7 @@ function ago(at: number) {
 
 export function LiveFeed({ feed }: { feed: FeedItem[] }) {
   return (
-    <Panel eyebrow="Real time" title="What Is Happening Now" action={<LivePill label="Live" />}>
+    <Panel eyebrow="Activity log" title="What Is Happening Now">
       <ul className="space-y-2">
         <AnimatePresence initial={false}>
           {feed.map((f) => {

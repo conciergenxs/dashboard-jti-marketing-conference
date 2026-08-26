@@ -60,7 +60,7 @@ export function DashboardHeader({
                 {active && (
                   <motion.span
                     layoutId="day-pill"
-                    className="absolute inset-0 rounded-xl bg-primary shadow-[0_6px_18px_-8px_var(--color-primary)]"
+                    className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary to-accent shadow-[0_6px_18px_-8px_var(--color-primary)]"
                     transition={{ type: "spring", stiffness: 320, damping: 32 }}
                   />
                 )}

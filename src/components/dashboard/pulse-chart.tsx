@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { useState } from "react";
-import { Panel, LivePill } from "./primitives";
+import { Panel } from "./primitives";
 import { formatNumber } from "@/lib/dashboard-data";
 
 type Point = { label: string; checkins: number; activity: number };
@@ -47,7 +47,7 @@ export function PulseChart({ points }: { points: Point[] }) {
   const share = hover === null ? 0 : Math.round((points[hover]!.activity / totalActivity) * 100);
 
   return (
-    <Panel eyebrow="Live activity pulse" title="Hub Activity & Check-ins" action={<LivePill />}>
+    <Panel eyebrow="Activity pulse" title="Hub Activity & Check-ins">
       <div className="mb-4 flex flex-wrap items-center gap-4 text-label">
         <span className="inline-flex items-center gap-2 text-muted-foreground">
           <span className="size-2 rounded-full bg-accent" /> Hub activity

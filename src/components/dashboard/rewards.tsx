@@ -10,7 +10,7 @@ export function Rewards({ rewards }: { rewards: DayData["rewards"] }) {
       title="Rewards Claimed"
       action={
         <div className="flex items-center gap-2.5">
-          <span className="rounded-full bg-primary/10 px-3 py-1 text-label font-semibold text-primary tabular-nums">
+          <span className="rounded-full border border-primary/25 px-3 py-1 text-label font-medium text-primary/90 tabular-nums">
             {total} claimed
           </span>
           <SeeAll metric="rewards" />

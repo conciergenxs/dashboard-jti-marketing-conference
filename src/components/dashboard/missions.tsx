@@ -44,7 +44,7 @@ export function Missions({ missions }: { missions: Mission[] }) {
                   <h3 className="display text-title leading-tight font-semibold uppercase">{m.name}</h3>
                   <p className="mt-0.5 line-clamp-2 text-label text-muted-foreground">{m.promise}</p>
                 </div>
-                <span className="shrink-0 rounded-full bg-primary/10 px-2.5 py-1 text-label font-semibold text-primary tabular-nums">
+                <span className="shrink-0 rounded-full border border-primary/25 px-2.5 py-1 text-label font-medium text-primary/90 tabular-nums">
                   +{m.points} pts
                 </span>
               </div>
