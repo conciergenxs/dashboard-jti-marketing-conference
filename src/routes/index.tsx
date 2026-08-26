@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { motion } from "motion/react";
 import { DashboardHeader, Ticker } from "@/components/dashboard/header";
-import { InfinityBackground } from "@/components/dashboard/infinity-background";
+import { ContourField } from "@/components/dashboard/contour-field";
 import { KpiStrip } from "@/components/dashboard/kpi-strip";
 import { PulseChart } from "@/components/dashboard/pulse-chart";
 import { Missions } from "@/components/dashboard/missions";
@@ -49,7 +49,7 @@ function Dashboard() {
 
   return (
     <main className="relative min-h-screen overflow-x-clip">
-      <InfinityBackground />
+      <ContourField />
       <div className="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6">
         <DashboardHeader day={day} onDayChange={setDay} updatedAt={updatedAt} />
 
