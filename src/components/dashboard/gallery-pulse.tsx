@@ -1,18 +1,24 @@
-import { Heart, Image as ImageIcon, Users } from "lucide-react";
+import { Image as ImageIcon, Users } from "lucide-react";
 import { motion } from "motion/react";
-import { Counter, Panel } from "./primitives";
+import { Counter, Panel, SeeAll } from "./primitives";
+import { STORYTELLERS, STORY_MOMENTS } from "@/lib/detail-data";
 import type { DayData } from "@/lib/dashboard-data";
+
+const TOP = [...STORYTELLERS].sort((a, b) => b.stories - a.stories).slice(0, 4);
 
 export function GalleryPulse({ gallery }: { gallery: DayData["gallery"] }) {
   const stats = [
-    { label: "Photos shared", value: gallery.photos, icon: ImageIcon },
-    { label: "Likes", value: gallery.likes, icon: Heart },
+    { label: "Stories shared", value: gallery.photos, icon: ImageIcon },
     { label: "People posting", value: gallery.contributors, icon: Users },
   ];
 
   return (
-    <Panel eyebrow="Growing Together" title="Photo Wall">
-      <div className="grid grid-cols-3 gap-2.5">
+    <Panel
+      eyebrow="Growing Together"
+      title="Story Wall"
+      action={<SeeAll metric="stories" />}
+    >
+      <div className="grid grid-cols-2 gap-2.5">
         {stats.map((s, i) => (
           <motion.div
             key={s.label}
@@ -21,9 +27,9 @@ export function GalleryPulse({ gallery }: { gallery: DayData["gallery"] }) {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: i * 0.08 }}
             whileHover={{ y: -3 }}
-            className="rounded-xl border border-border/70 bg-surface/60 p-3 text-center"
+            className="rounded-xl border border-border/70 bg-surface/60 p-3"
           >
-            <s.icon className="mx-auto size-4 text-primary" strokeWidth={1.8} />
+            <s.icon className="size-4 text-primary" strokeWidth={1.8} />
             <p className="display mt-2 text-title font-semibold tabular-nums">
               <Counter value={s.value} />
             </p>
@@ -31,11 +37,54 @@ export function GalleryPulse({ gallery }: { gallery: DayData["gallery"] }) {
           </motion.div>
         ))}
       </div>
-      <div className="mt-4 overflow-hidden rounded-xl border border-primary/15 bg-gradient-to-br from-primary/10 to-accent/10 p-4">
-        <p className="text-label font-semibold tracking-[0.18em] text-primary uppercase">
-          Most liked moment
+
+      {/* moment thumbnails */}
+      <div className="mt-4 grid grid-cols-5 gap-2">
+        {STORY_MOMENTS.map((m, i) => (
+          <motion.div
+            key={m}
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.45, delay: i * 0.06 }}
+            whileHover={{ y: -4 }}
+            title={m}
+            className="group relative aspect-square overflow-hidden rounded-lg border border-primary/15 bg-gradient-to-br from-primary/25 via-accent/15 to-surface"
+          >
+            <span className="absolute inset-0 bg-gradient-to-t from-primary/45 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+            <span className="absolute inset-x-1 bottom-1 truncate text-[0.6rem] leading-tight font-semibold text-primary/80 uppercase">
+              {m.split(" · ")[0]}
+            </span>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* contributor leaderboard */}
+      <div className="mt-4 space-y-1.5">
+        <p className="text-label font-semibold tracking-[0.16em] text-muted-foreground uppercase">
+          Top storytellers
         </p>
-        <p className="display mt-1.5 text-title font-semibold uppercase">{gallery.topMoment}</p>
+        {TOP.map((p, i) => (
+          <motion.div
+            key={p.name + i}
+            initial={{ opacity: 0, x: -12 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.45, delay: i * 0.06 }}
+            className="flex items-center gap-3 rounded-xl border border-border/70 bg-surface/60 px-3 py-2 transition-colors hover:border-primary/35"
+          >
+            <span className="display w-4 shrink-0 text-label font-bold text-primary/50 tabular-nums">
+              {i + 1}
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-body font-semibold">{p.name}</span>
+              <span className="block truncate text-label text-muted-foreground">{p.fn}</span>
+            </span>
+            <span className="shrink-0 rounded-full border border-primary/25 px-2.5 py-1 text-label font-medium text-primary/90 tabular-nums">
+              {p.stories} stories
+            </span>
+          </motion.div>
+        ))}
       </div>
     </Panel>
   );
