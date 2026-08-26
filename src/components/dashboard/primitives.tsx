@@ -5,18 +5,32 @@ import { ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { MetricKey } from "@/lib/detail-data";
 
-export function SeeAll({ metric, label = "See all" }: { metric: MetricKey; label?: string }) {
+export function SeeAll({
+  metric,
+  label = "See all",
+  variant = "pill",
+}: {
+  metric: MetricKey;
+  label?: string;
+  variant?: "pill" | "text";
+}) {
   return (
     <Link
       to="/details/$metric"
       params={{ metric }}
-      className="group inline-flex shrink-0 items-center gap-1 rounded-full border border-primary/20 bg-primary/5 px-3 py-1.5 text-label font-semibold tracking-[0.12em] text-primary uppercase transition-colors hover:border-primary/50 hover:bg-primary/10"
+      className={cn(
+        "group inline-flex shrink-0 items-center gap-1 text-label font-semibold tracking-[0.12em] text-primary uppercase transition-colors",
+        variant === "pill"
+          ? "rounded-full border border-primary/20 bg-primary/5 px-3 py-1.5 hover:border-primary/50 hover:bg-primary/10"
+          : "hover:text-accent",
+      )}
     >
       {label}
       <ArrowUpRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
     </Link>
   );
 }
+
 
 export function Reveal({
   children,
