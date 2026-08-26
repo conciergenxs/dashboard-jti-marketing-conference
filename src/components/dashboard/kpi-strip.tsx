@@ -4,17 +4,23 @@ import { Counter, SeeAll } from "./primitives";
 import type { MetricKey } from "@/lib/detail-data";
 import { EVENT, formatCompact, type DayData, type Kpis } from "@/lib/dashboard-data";
 
-function Ring({ progress }: { progress: number }) {
+function Ring({ progress, id }: { progress: number; id: string }) {
   const r = 26;
   const c = 2 * Math.PI * r;
   return (
     <svg viewBox="0 0 64 64" className="size-14 -rotate-90">
+      <defs>
+        <linearGradient id={id} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="var(--color-primary)" />
+          <stop offset="100%" stopColor="var(--color-accent)" />
+        </linearGradient>
+      </defs>
       <circle cx="32" cy="32" r={r} className="stroke-primary/12" strokeWidth="6" fill="none" />
       <motion.circle
         cx="32"
         cy="32"
         r={r}
-        stroke="var(--color-primary)"
+        stroke={`url(#${id})`}
         strokeWidth="6"
         strokeLinecap="round"
         fill="none"
@@ -26,6 +32,7 @@ function Ring({ progress }: { progress: number }) {
     </svg>
   );
 }
+
 
 export function KpiStrip({ kpis, missions }: { kpis: Kpis; missions: DayData["missions"] }) {
   const submissions = missions.reduce((s, m) => s + m.submissions, 0);
