@@ -4,7 +4,14 @@ import { Counter, Panel, SeeAll } from "./primitives";
 import { STORYTELLERS, STORY_MOMENTS } from "@/lib/detail-data";
 import type { DayData } from "@/lib/dashboard-data";
 
-const TOP = [...STORYTELLERS].sort((a, b) => b.stories - a.stories).slice(0, 4);
+const TOP = (() => {
+  const sorted = [...STORYTELLERS].sort(
+    (a, b) => b.stories - a.stories || a.name.localeCompare(b.name),
+  );
+  const seen = new Set<string>();
+  const picks = sorted.filter((p) => !seen.has(p.fn) && seen.add(p.fn));
+  return [...picks, ...sorted].slice(0, 4);
+})();
 
 export function GalleryPulse({ gallery }: { gallery: DayData["gallery"] }) {
   const stats = [
@@ -39,7 +46,7 @@ export function GalleryPulse({ gallery }: { gallery: DayData["gallery"] }) {
       </div>
 
       {/* moment thumbnails */}
-      <div className="mt-4 grid grid-cols-5 gap-2">
+      <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-5">
         {STORY_MOMENTS.map((m, i) => (
           <motion.div
             key={m}
@@ -49,11 +56,11 @@ export function GalleryPulse({ gallery }: { gallery: DayData["gallery"] }) {
             transition={{ duration: 0.45, delay: i * 0.06 }}
             whileHover={{ y: -4 }}
             title={m}
-            className="group relative aspect-square overflow-hidden rounded-lg border border-primary/15 bg-gradient-to-br from-primary/25 via-accent/15 to-surface"
+            className="group relative aspect-[4/3] overflow-hidden rounded-lg border border-primary/15 bg-gradient-to-br from-primary/25 via-accent/15 to-surface"
           >
             <span className="absolute inset-0 bg-gradient-to-t from-primary/45 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-            <span className="absolute inset-x-1 bottom-1 truncate text-[0.6rem] leading-tight font-semibold text-primary/80 uppercase">
-              {m.split(" · ")[0]}
+            <span className="absolute inset-x-1.5 bottom-1.5 line-clamp-2 text-[0.62rem] leading-[1.15] font-semibold text-primary/85 uppercase">
+              {m.split(" · ").at(-1)}
             </span>
           </motion.div>
         ))}
