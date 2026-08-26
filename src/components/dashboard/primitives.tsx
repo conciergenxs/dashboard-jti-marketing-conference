@@ -19,14 +19,14 @@ export function SeeAll({
       to="/details/$metric"
       params={{ metric }}
       className={cn(
-        "group inline-flex shrink-0 items-center gap-1 text-label font-semibold tracking-[0.12em] text-primary uppercase transition-colors",
+        "group inline-flex shrink-0 items-center gap-1 text-[11px] font-semibold tracking-[0.1em] text-primary uppercase transition-colors",
         variant === "pill"
-          ? "rounded-full border border-primary/20 bg-primary/5 px-3 py-1.5 hover:border-primary/50 hover:bg-primary/10"
+          ? "rounded-full border border-primary/20 bg-primary/5 px-2 py-1 hover:border-primary/50 hover:bg-primary/10"
           : "hover:text-accent",
       )}
     >
       {label}
-      <ArrowUpRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+      <ArrowUpRight className="size-3 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
     </Link>
   );
 }
@@ -107,7 +107,7 @@ export function Panel({
         <div className="mb-5 flex items-center justify-between gap-3">
           <div className="min-w-0">
             {eyebrow && (
-              <p className="text-label font-semibold tracking-[0.22em] text-primary uppercase">
+              <p className="text-[10px] font-semibold tracking-[0.22em] text-primary uppercase">
                 {eyebrow}
               </p>
             )}

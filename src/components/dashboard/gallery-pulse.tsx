@@ -68,7 +68,7 @@ export function GalleryPulse({ gallery }: { gallery: DayData["gallery"] }) {
 
       {/* contributor leaderboard */}
       <div className="mt-4 space-y-1.5">
-        <p className="text-label font-semibold tracking-[0.16em] text-muted-foreground uppercase">
+        <p className="text-[10px] font-semibold tracking-[0.16em] text-muted-foreground uppercase">
           Top storytellers
         </p>
         {TOP.map((p, i) => (
