@@ -104,8 +104,8 @@ export function Panel({
   return (
     <div className={cn("glass-card card-lift min-w-0 p-5 sm:p-6", className)}>
       {(title || eyebrow) && (
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-          <div>
+        <div className="mb-5 flex items-center justify-between gap-3">
+          <div className="min-w-0">
             {eyebrow && (
               <p className="text-label font-semibold tracking-[0.22em] text-primary uppercase">
                 {eyebrow}
@@ -117,7 +117,7 @@ export function Panel({
               </h2>
             )}
           </div>
-          {action}
+          {action && <div className="shrink-0">{action}</div>}
         </div>
       )}
       {children}

@@ -35,8 +35,8 @@ export function DashboardHeader({
             Limits
           </h1>
           <p className="mt-3 max-w-xl text-body text-muted-foreground">
-            {EVENT.subtitle}. Follow how our {EVENT.target} colleagues join, complete missions and
-            vote — updated every few seconds while the event runs.
+            {EVENT.subtitle}. See how our {EVENT.target} colleagues check in, finish missions and
+            vote across the three event days.
           </p>
         </div>
 
