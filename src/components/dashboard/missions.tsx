@@ -9,20 +9,15 @@ export function Missions({ missions }: { missions: Mission[] }) {
     <Panel
       eyebrow="Infinity Missions"
       title="Mission Progress"
-      action={
-        <div className="flex items-center gap-3">
-          <SeeAll metric="missions" />
-          <div className="text-right">
-          <p className="text-label tracking-[0.16em] text-muted-foreground uppercase">
-            Verified so far
-          </p>
-          <p className="display text-title font-semibold text-primary tabular-nums">
-            <Counter value={proofs} />
-          </p>
-          </div>
-        </div>
-      }
+      action={<SeeAll metric="missions" />}
     >
+
+      <p className="-mt-3 mb-4 text-label text-muted-foreground">
+        <b className="font-semibold text-foreground tabular-nums">
+          <Counter value={proofs} />
+        </b>{" "}
+        proofs verified so far
+      </p>
 
       <div className="space-y-4">
         {missions.map((m, i) => {
@@ -44,7 +39,7 @@ export function Missions({ missions }: { missions: Mission[] }) {
                   <h3 className="display text-title leading-tight font-semibold uppercase">{m.name}</h3>
                   <p className="mt-0.5 line-clamp-2 text-label text-muted-foreground">{m.promise}</p>
                 </div>
-                <span className="shrink-0 rounded-full bg-primary/10 px-2.5 py-1 text-label font-semibold text-primary tabular-nums">
+                <span className="shrink-0 rounded-full border border-primary/25 px-2.5 py-1 text-label font-medium text-primary/90 tabular-nums">
                   +{m.points} pts
                 </span>
               </div>

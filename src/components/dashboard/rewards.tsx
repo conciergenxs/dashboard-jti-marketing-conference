@@ -8,15 +8,12 @@ export function Rewards({ rewards }: { rewards: DayData["rewards"] }) {
     <Panel
       eyebrow="Infinity Wheel"
       title="Rewards Claimed"
-      action={
-        <div className="flex items-center gap-2.5">
-          <span className="rounded-full bg-primary/10 px-3 py-1 text-label font-semibold text-primary tabular-nums">
-            {total} claimed
-          </span>
-          <SeeAll metric="rewards" />
-        </div>
-      }
+      action={<SeeAll metric="rewards" />}
     >
+      <p className="-mt-3 mb-4 text-label text-muted-foreground">
+        <b className="font-semibold text-foreground tabular-nums">{total}</b> rewards claimed today
+      </p>
+
       <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
         {rewards.map((r, i) => (
           <motion.div
