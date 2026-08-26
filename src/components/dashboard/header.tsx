@@ -1,13 +1,16 @@
 import { motion } from "motion/react";
-import { DAYS, EVENT, type DayKey } from "@/lib/dashboard-data";
-import { LivePill } from "./primitives";
+import { Users } from "lucide-react";
+import { DAYS, EVENT, type DayKey, type Kpis } from "@/lib/dashboard-data";
+import { Counter, LivePill } from "./primitives";
 
 export function DashboardHeader({
   day,
   onDayChange,
+  kpis,
 }: {
   day: DayKey;
   onDayChange: (d: DayKey) => void;
+  kpis: Kpis;
 }) {
   return (
     <header className="pt-5 sm:pt-10">
@@ -19,62 +22,75 @@ export function DashboardHeader({
       >
         <div className="flex items-center justify-between gap-4">
           <LivePill />
-          <img
-            src="/jti-logo.svg"
-            alt="JTI"
-            className="h-6 w-auto shrink-0 sm:h-8"
-          />
+          <img src="/jti-logo.svg" alt="JTI" className="h-6 w-auto shrink-0 sm:h-8" />
         </div>
 
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
-          <div className="min-w-0">
-            <h1 className="display text-display font-extrabold uppercase">
-              <span className="text-gradient">Grow Beyond</span>
-              <br />
-              Limits
-            </h1>
-            <p className="mt-2.5 max-w-none text-body text-muted-foreground">
-              {EVENT.subtitle}. See how our {EVENT.target} colleagues check in, finish missions and
-              vote across the three event days.
+        <div className="min-w-0">
+          <h1 className="display text-display font-extrabold uppercase">
+            <span className="text-gradient">Grow Beyond</span>
+            <br />
+            Limits
+          </h1>
+          <p className="mt-2.5 max-w-none text-body text-muted-foreground">
+            {EVENT.subtitle}. See how our {EVENT.target} colleagues check in, finish missions and
+            vote across the three event days.
+          </p>
+        </div>
+
+        <div className="glass-card flex w-full items-center gap-4 px-4 py-3.5 sm:px-5">
+          <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary/10">
+            <Users className="size-5 text-primary" strokeWidth={1.8} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
+              Registered
+            </p>
+            <p className="display text-metric font-bold text-foreground tabular-nums">
+              <Counter value={kpis.registered} />
+              <span className="ml-2 text-label font-normal tracking-normal text-muted-foreground normal-case">
+                of {EVENT.target} invited
+              </span>
             </p>
           </div>
+        </div>
 
-          <div
-            role="tablist"
-            aria-label="Choose event day"
-            className="grid w-full shrink-0 grid-cols-3 gap-1 rounded-xl border border-border bg-surface/70 p-1 sm:w-auto"
-          >
-            {DAYS.map((d) => {
-              const active = d.key === day;
-              return (
-                <button
-                  key={d.key}
-                  role="tab"
-                  aria-selected={active}
-                  onClick={() => onDayChange(d.key)}
-                  className={`relative min-w-0 rounded-lg px-2 py-1.5 text-center transition-colors duration-300 sm:px-3 sm:py-2 ${
-                    active ? "text-primary-foreground" : "text-foreground/70 hover:text-foreground"
-                  }`}
+        <div className="border-t border-border/70" />
+
+        <div
+          role="tablist"
+          aria-label="Choose event day"
+          className="grid w-full grid-cols-3 gap-1 rounded-xl border border-border bg-surface/70 p-1"
+        >
+          {DAYS.map((d) => {
+            const active = d.key === day;
+            return (
+              <button
+                key={d.key}
+                role="tab"
+                aria-selected={active}
+                onClick={() => onDayChange(d.key)}
+                className={`relative min-w-0 rounded-lg px-2 py-1.5 text-center transition-colors duration-300 sm:px-3 sm:py-2 ${
+                  active ? "text-primary-foreground" : "text-foreground/70 hover:text-foreground"
+                }`}
+              >
+                {active && (
+                  <motion.span
+                    layoutId="day-pill"
+                    className="absolute inset-0 rounded-lg bg-gradient-to-br from-primary to-accent shadow-[0_6px_18px_-8px_var(--color-primary)]"
+                    transition={{ type: "spring", stiffness: 320, damping: 32 }}
+                  />
+                )}
+                <span className="relative display block truncate text-[12px] font-bold uppercase">
+                  {d.label}
+                </span>
+                <span
+                  className={`relative block truncate text-[10px] ${active ? "text-primary-foreground" : "text-muted-foreground"}`}
                 >
-                  {active && (
-                    <motion.span
-                      layoutId="day-pill"
-                      className="absolute inset-0 rounded-lg bg-gradient-to-br from-primary to-accent shadow-[0_6px_18px_-8px_var(--color-primary)]"
-                      transition={{ type: "spring", stiffness: 320, damping: 32 }}
-                    />
-                  )}
-                  <span className="relative display block truncate text-[12px] font-bold uppercase">
-                    {d.label}
-                  </span>
-                  <span
-                    className={`relative block truncate text-[10px] ${active ? "text-primary-foreground" : "text-muted-foreground"}`}
-                  >
-                    {d.caption}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+                  {d.caption}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </motion.div>
     </header>

@@ -42,7 +42,7 @@ function Dashboard() {
     <main className="relative min-h-screen overflow-x-clip">
       <ContourField />
       <div className="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6">
-        <DashboardHeader day={day} onDayChange={setDay} />
+        <DashboardHeader day={day} onDayChange={setDay} kpis={data.kpis} />
 
         <motion.div
           key={day}
