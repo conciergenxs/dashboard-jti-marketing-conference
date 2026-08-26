@@ -65,8 +65,7 @@ export function ContourField() {
       />
 
       {/* diagonal violet→blue accent edge bleeding off the left margin */}
-      <div className="absolute -top-32 -left-10 h-[150%] w-10 origin-top-left -rotate-12 bg-gradient-to-b from-chart-3/25 via-primary/15 to-transparent blur-md" />
-      <div className="absolute -top-32 -left-6 h-[150%] w-px origin-top-left -rotate-12 bg-gradient-to-b from-chart-3/80 via-accent/70 to-transparent" />
+      <div className="absolute -top-32 -left-10 h-[150%] w-10 origin-top-left -rotate-12 bg-gradient-to-b from-chart-3/18 via-primary/10 to-transparent blur-md" />
 
       <svg
         className="absolute inset-0 h-full w-full"

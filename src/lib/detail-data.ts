@@ -150,7 +150,7 @@ function checkinsConfig(): MetricConfig {
     key: "checkins",
     eyebrow: "Infinity Pass",
     title: "Check-in Detail",
-    description: "Every registered participant and their Infinity Pass scan at Hotel Tentrem.",
+    description: "Every registered participant and their Infinity Pass scan.",
     filterLabel: "Function",
     filterOptions: [...FUNCTIONS],
     columns: [
@@ -313,7 +313,7 @@ function pointsConfig(): MetricConfig {
     rows,
     summary: [
       { label: "Total points", value: fmt(total) },
-      { label: "Average", value: `${fmt(Math.round(total / Math.max(1, rows.length)))} / 850` },
+      { label: "Avg / 850", value: fmt(Math.round(total / Math.max(1, rows.length))) },
       { label: "Perfect 850", value: fmt(rows.filter((r) => r.cells['points'] === 850).length) },
     ],
   };
