@@ -1,31 +1,24 @@
 import { motion } from "motion/react";
-import { RefreshCw } from "lucide-react";
 import { DAYS, EVENT, type DayKey } from "@/lib/dashboard-data";
 import { LivePill } from "./primitives";
 
 export function DashboardHeader({
   day,
   onDayChange,
-  updatedAt,
 }: {
   day: DayKey;
   onDayChange: (d: DayKey) => void;
-  updatedAt: Date | null;
 }) {
   return (
-    <header className="pt-7 sm:pt-12">
+    <header className="pt-5 sm:pt-10">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         className="flex flex-col gap-4 sm:gap-5"
       >
-        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
-          <span className="min-w-0"><LivePill /></span>
-          <span className="inline-flex shrink-0 items-center gap-1.5 text-label text-muted-foreground tabular-nums">
-            <RefreshCw className="size-3 animate-spin [animation-duration:6s]" />
-            {updatedAt ? `Last update ${updatedAt.toLocaleTimeString("en-GB")}` : "Connecting…"}
-          </span>
+        <div className="flex items-center">
+          <LivePill />
         </div>
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
