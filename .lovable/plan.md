@@ -40,5 +40,8 @@
 - `src/components/dashboard/primitives.tsx`: add a text-link variant to `SeeAll`.
 - `src/components/dashboard/header.tsx`: gradient active tab.
 - `src/components/dashboard/gallery-pulse.tsx`: stats rework, thumbnails, contributor leaderboard.
-- `pulse-chart.tsx`, `talent-board.tsx`, `rewards.tsx`: chip/badge changes.
+- `src/hooks/use-live-dashboard.ts`: drop the interval-based drift/feed simulation; return stable per-load data and a fixed `updatedAt`.
+- `src/routes/index.tsx`: reorder so the activity feed renders last.
+- `pulse-chart.tsx`, `talent-board.tsx`, `rewards.tsx`, `live-feed.tsx`: chip/badge changes.
+
 - All colors stay on the existing white/blue tokens; no new palette values.
