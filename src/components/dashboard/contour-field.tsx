@@ -65,8 +65,8 @@ export function ContourField() {
       />
 
       {/* diagonal violet→blue accent edge bleeding off the left margin */}
-      <div className="absolute -top-24 -left-24 h-[130%] w-40 origin-top-left -rotate-12 bg-gradient-to-b from-chart-3/45 via-primary/30 to-transparent blur-[2px] sm:w-24" />
-      <div className="absolute -top-24 -left-16 h-[130%] w-[2px] origin-top-left -rotate-12 bg-gradient-to-b from-chart-3 via-accent to-transparent opacity-60" />
+      <div className="absolute -top-32 -left-10 h-[150%] w-10 origin-top-left -rotate-12 bg-gradient-to-b from-chart-3/25 via-primary/15 to-transparent blur-md" />
+      <div className="absolute -top-32 -left-6 h-[150%] w-px origin-top-left -rotate-12 bg-gradient-to-b from-chart-3/80 via-accent/70 to-transparent" />
 
       <svg
         className="absolute inset-0 h-full w-full"
@@ -95,8 +95,8 @@ export function ContourField() {
           amp={58}
           baseY={230}
           phase={0.4}
-          opacity={0.5}
-          width={0.6}
+          opacity={0.75}
+          width={0.7}
           duration={46}
         />
         <Ribbon
@@ -106,8 +106,8 @@ export function ContourField() {
           amp={44}
           baseY={690}
           phase={2.1}
-          opacity={0.38}
-          width={0.55}
+          opacity={0.6}
+          width={0.65}
           duration={62}
           delay={-14}
         />
