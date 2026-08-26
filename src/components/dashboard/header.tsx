@@ -32,7 +32,7 @@ export function DashboardHeader({
         </div>
 
         <div>
-          <h1 className="display text-display font-bold uppercase">
+          <h1 className="display text-display font-extrabold uppercase">
             <span className="text-gradient">Grow Beyond</span>
             <br />
             Limits
@@ -63,7 +63,7 @@ export function DashboardHeader({
                     transition={{ type: "spring", stiffness: 320, damping: 32 }}
                   />
                 )}
-                <span className="display block text-body font-bold uppercase">{d.label}</span>
+                <span className="display block text-body font-semibold uppercase">{d.label}</span>
                 <span
                   className={`block text-label tracking-wide uppercase ${active ? "text-primary-foreground/80" : "text-muted-foreground"}`}
                 >
