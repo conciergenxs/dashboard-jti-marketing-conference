@@ -18,7 +18,7 @@ import { EVENT, type DayKey } from "@/lib/dashboard-data";
 
 const TITLE = "Grow Beyond Limits — Market Conference 2026 Live Analytics";
 const DESCRIPTION =
-  "Live analytics for JTI Indonesia Market Conference 2026 in Yogyakarta: check-ins, Infinity Missions, JTI Got Talent voting and Infinity Hub engagement in real time.";
+  "Live analytics for JTI Indonesia Market Conference 2026: check-ins, Infinity Missions, JTI Got Talent voting and Infinity Hub engagement in real time.";
 
 export const Route = createFileRoute("/")({
   head: () => ({
