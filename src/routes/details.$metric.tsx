@@ -223,7 +223,11 @@ function MetricDetail() {
           <AnimatePresence initial={false} mode="popLayout">
             {slice.map((r) => {
               const first = config.columns[0]!;
-              const second = config.columns[config.columns.length - 1]!;
+              const meta = config.columns
+                .slice(1)
+                .slice(-2)
+                .map((c) => String(r.cells[c.key]))
+                .join(" · ");
               const isOpen = open === r.id;
               return (
                 <motion.div key={r.id} layout className="glass-card overflow-hidden p-0">
@@ -238,7 +242,7 @@ function MetricDetail() {
                         {r.cells[first.key]}
                       </span>
                       <span className="block truncate text-label text-muted-foreground">
-                        {second.label}: {r.cells[second.key]}
+                        {meta}
                       </span>
                     </span>
                     <ChevronDown
