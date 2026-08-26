@@ -1,7 +1,7 @@
 import { motion } from "motion/react";
 import { Users, ScanLine, Infinity as InfinityIcon, Activity } from "lucide-react";
 import { Counter } from "./primitives";
-import { EVENT, type Kpis } from "@/lib/dashboard-data";
+import { EVENT, formatCompact, type Kpis } from "@/lib/dashboard-data";
 
 function Ring({ progress }: { progress: number }) {
   const r = 26;
@@ -31,7 +31,7 @@ export function KpiStrip({ kpis }: { kpis: Kpis }) {
     {
       key: "registered",
       label: "Registered",
-      hint: `of ${EVENT.target}+ target`,
+      hint: `of ${EVENT.target} participants`,
       value: kpis.registered,
       icon: Users,
       ring: kpis.registered / EVENT.target,
@@ -46,11 +46,12 @@ export function KpiStrip({ kpis }: { kpis: Kpis }) {
     },
     {
       key: "points",
-      label: "Infinity Points",
-      hint: "collected together",
-      value: kpis.points,
+      label: "Points / person",
+      hint: `${formatCompact(kpis.points)} pts collected`,
+      value: Math.round(kpis.points / Math.max(1, kpis.checkedIn)),
+      suffix: " pts",
       icon: InfinityIcon,
-      ring: 0.82,
+      ring: Math.round(kpis.points / Math.max(1, kpis.checkedIn)) / 850,
     },
     {
       key: "engagement",

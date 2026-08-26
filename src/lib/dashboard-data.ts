@@ -103,22 +103,22 @@ function pulse(
 
 export const DATA: Record<DayKey, DayData> = {
   day1: {
-    kpis: { registered: 361, checkedIn: 328, points: 74250, engagement: 87 },
+    kpis: { registered: 342, checkedIn: 318, points: 98600, engagement: 84 },
     pulse: pulse(10, 96, 210, 9),
-    missions: missionBase.map((m, i) => ({ ...m, submissions: [287, 196, 118][i]! })),
+    missions: missionBase.map((m, i) => ({ ...m, submissions: [268, 179, 104][i]! })),
     functions: [
-      { label: "Sales & Distribution", value: 118 },
-      { label: "Marketing", value: 64 },
-      { label: "Operations", value: 57 },
+      { label: "Sales & Distribution", value: 108 },
+      { label: "Marketing", value: 58 },
+      { label: "Operations", value: 52 },
       { label: "Finance", value: 38 },
-      { label: "People & Culture", value: 29 },
-      { label: "Corporate Affairs", value: 22 },
+      { label: "People & Culture", value: 34 },
+      { label: "Corporate Affairs", value: 28 },
     ],
-    talents: talentBase.map((t, i) => ({ ...t, votes: [412, 376, 298, 241, 187][i]! })),
+    talents: talentBase.map((t, i) => ({ ...t, votes: [96, 84, 58, 44, 30][i]! })),
     gallery: {
-      photos: 946,
-      likes: 5124,
-      contributors: 274,
+      photos: 612,
+      likes: 1840,
+      contributors: 246,
       topMoment: "Welcome Dinner · Infinite Night gate",
     },
     hub: [
@@ -128,29 +128,29 @@ export const DATA: Record<DayKey, DayData> = {
       { label: "Content & Memories", value: 17 },
     ],
     rewards: [
-      { name: "GBL Enamel Pin", redeemed: 164 },
-      { name: "Coffee Tumbler", redeemed: 122 },
-      { name: "Reflective Sticker", redeemed: 208 },
-      { name: "GBL Desk Lamp", redeemed: 61 },
+      { name: "GBL Enamel Pin", redeemed: 84 },
+      { name: "Coffee Tumbler", redeemed: 66 },
+      { name: "Reflective Sticker", redeemed: 102 },
+      { name: "GBL Desk Lamp", redeemed: 41 },
     ],
   },
   day2: {
-    kpis: { registered: 368, checkedIn: 351, points: 148900, engagement: 93 },
+    kpis: { registered: 350, checkedIn: 341, points: 144900, engagement: 93 },
     pulse: pulse(11, 128, 340, 8),
-    missions: missionBase.map((m, i) => ({ ...m, submissions: [341, 268, 214][i]! })),
+    missions: missionBase.map((m, i) => ({ ...m, submissions: [322, 259, 198][i]! })),
     functions: [
-      { label: "Sales & Distribution", value: 126 },
-      { label: "Marketing", value: 69 },
-      { label: "Operations", value: 61 },
+      { label: "Sales & Distribution", value: 116 },
+      { label: "Marketing", value: 63 },
+      { label: "Operations", value: 56 },
       { label: "Finance", value: 41 },
-      { label: "People & Culture", value: 31 },
-      { label: "Corporate Affairs", value: 23 },
+      { label: "People & Culture", value: 36 },
+      { label: "Corporate Affairs", value: 29 },
     ],
-    talents: talentBase.map((t, i) => ({ ...t, votes: [688, 731, 522, 470, 388][i]! })),
+    talents: talentBase.map((t, i) => ({ ...t, votes: [112, 96, 64, 42, 25][i]! })),
     gallery: {
-      photos: 2184,
-      likes: 13470,
-      contributors: 331,
+      photos: 1284,
+      likes: 4720,
+      contributors: 318,
       topMoment: "Gala Dinner · Jingle grand finale",
     },
     hub: [
@@ -160,29 +160,29 @@ export const DATA: Record<DayKey, DayData> = {
       { label: "Content & Memories", value: 17 },
     ],
     rewards: [
-      { name: "GBL Enamel Pin", redeemed: 248 },
-      { name: "Coffee Tumbler", redeemed: 219 },
-      { name: "Reflective Sticker", redeemed: 302 },
-      { name: "GBL Desk Lamp", redeemed: 137 },
+      { name: "GBL Enamel Pin", redeemed: 128 },
+      { name: "Coffee Tumbler", redeemed: 104 },
+      { name: "Reflective Sticker", redeemed: 146 },
+      { name: "GBL Desk Lamp", redeemed: 63 },
     ],
   },
   day3: {
-    kpis: { registered: 368, checkedIn: 344, points: 172400, engagement: 89 },
+    kpis: { registered: 350, checkedIn: 336, points: 172000, engagement: 89 },
     pulse: pulse(8, 74, 180, 7),
-    missions: missionBase.map((m, i) => ({ ...m, submissions: [352, 291, 246][i]! })),
+    missions: missionBase.map((m, i) => ({ ...m, submissions: [331, 288, 241][i]! })),
     functions: [
-      { label: "Sales & Distribution", value: 124 },
-      { label: "Marketing", value: 68 },
-      { label: "Operations", value: 59 },
+      { label: "Sales & Distribution", value: 114 },
+      { label: "Marketing", value: 62 },
+      { label: "Operations", value: 55 },
       { label: "Finance", value: 40 },
-      { label: "People & Culture", value: 30 },
-      { label: "Corporate Affairs", value: 23 },
+      { label: "People & Culture", value: 35 },
+      { label: "Corporate Affairs", value: 30 },
     ],
-    talents: talentBase.map((t, i) => ({ ...t, votes: [742, 809, 566, 498, 402][i]! })),
+    talents: talentBase.map((t, i) => ({ ...t, votes: [118, 101, 66, 32, 18][i]! })),
     gallery: {
-      photos: 2461,
-      likes: 15980,
-      contributors: 344,
+      photos: 1502,
+      likes: 6180,
+      contributors: 329,
       topMoment: "Collective Time Capsule reveal",
     },
     hub: [
@@ -192,10 +192,10 @@ export const DATA: Record<DayKey, DayData> = {
       { label: "Content & Memories", value: 36 },
     ],
     rewards: [
-      { name: "GBL Enamel Pin", redeemed: 271 },
-      { name: "Coffee Tumbler", redeemed: 244 },
-      { name: "Reflective Sticker", redeemed: 318 },
-      { name: "GBL Desk Lamp", redeemed: 158 },
+      { name: "GBL Enamel Pin", redeemed: 149 },
+      { name: "Coffee Tumbler", redeemed: 121 },
+      { name: "Reflective Sticker", redeemed: 168 },
+      { name: "GBL Desk Lamp", redeemed: 77 },
     ],
   },
 };
@@ -227,4 +227,8 @@ export const FEED_NAMES = [
 
 export function formatNumber(n: number) {
   return new Intl.NumberFormat("en-US").format(Math.round(n));
+}
+
+export function formatCompact(n: number) {
+  return new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 }).format(n);
 }

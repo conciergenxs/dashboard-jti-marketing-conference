@@ -3,7 +3,7 @@ import { Panel, Counter } from "./primitives";
 import { EVENT, type Mission } from "@/lib/dashboard-data";
 
 export function Missions({ missions }: { missions: Mission[] }) {
-  const total = missions.reduce((s, m) => s + m.submissions * m.points, 0);
+  const proofs = missions.reduce((s, m) => s + m.submissions, 0);
 
   return (
     <Panel
@@ -12,14 +12,15 @@ export function Missions({ missions }: { missions: Mission[] }) {
       action={
         <div className="text-right">
           <p className="text-label tracking-[0.16em] text-muted-foreground uppercase">
-            Points from missions
+            Proofs submitted
           </p>
           <p className="display text-title font-semibold text-primary tabular-nums">
-            <Counter value={total} />
+            <Counter value={proofs} />
           </p>
         </div>
       }
     >
+
       <div className="space-y-4">
         {missions.map((m, i) => {
           const pct = Math.min(100, (m.submissions / EVENT.target) * 100);
