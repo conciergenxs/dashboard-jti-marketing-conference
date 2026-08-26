@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { Users, ScanLine, Infinity as InfinityIcon, Activity } from "lucide-react";
-import { Counter } from "./primitives";
+import { Counter, SeeAll } from "./primitives";
+import type { MetricKey } from "@/lib/detail-data";
 import { EVENT, formatCompact, type Kpis } from "@/lib/dashboard-data";
 
 function Ring({ progress }: { progress: number }) {
@@ -35,6 +36,7 @@ export function KpiStrip({ kpis }: { kpis: Kpis }) {
       value: kpis.registered,
       icon: Users,
       ring: kpis.registered / EVENT.target,
+      metric: "checkins" as MetricKey,
     },
     {
       key: "checked",
@@ -43,15 +45,16 @@ export function KpiStrip({ kpis }: { kpis: Kpis }) {
       value: kpis.checkedIn,
       icon: ScanLine,
       ring: kpis.checkedIn / kpis.registered,
+      metric: "checkins" as MetricKey,
     },
     {
       key: "points",
-      label: "Points / person",
-      hint: `${formatCompact(kpis.points)} pts collected`,
+      label: "Avg points",
+      hint: `of 850 max · ${formatCompact(kpis.points)} pts total`,
       value: Math.round(kpis.points / Math.max(1, kpis.checkedIn)),
-      suffix: " pts",
       icon: InfinityIcon,
       ring: Math.round(kpis.points / Math.max(1, kpis.checkedIn)) / 850,
+      metric: "points" as MetricKey,
     },
     {
       key: "engagement",
@@ -87,6 +90,11 @@ export function KpiStrip({ kpis }: { kpis: Kpis }) {
               <p className="mt-2 text-label text-muted-foreground">
                 {c.hint}
               </p>
+              {c.metric && (
+                <div className="mt-3">
+                  <SeeAll metric={c.metric} label="Detail" />
+                </div>
+              )}
             </div>
             <div className="relative shrink-0">
               <Ring progress={c.ring} />
