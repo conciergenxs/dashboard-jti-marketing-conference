@@ -83,7 +83,7 @@ export function KpiStrip({ kpis }: { kpis: Kpis }) {
               <p className="display mt-2 text-3xl leading-none font-bold tracking-tight text-foreground tabular-nums sm:text-4xl">
                 <Counter value={c.value} suffix={c.suffix ?? ""} />
               </p>
-              <p className="mt-2 truncate text-[0.68rem] text-muted-foreground sm:text-xs">
+              <p className="mt-2 text-[0.68rem] leading-snug text-muted-foreground sm:text-xs">
                 {c.hint}
               </p>
             </div>
