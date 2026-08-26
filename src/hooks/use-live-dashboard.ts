@@ -7,6 +7,8 @@ import {
   type DayKey,
 } from "@/lib/dashboard-data";
 
+const CAPACITY = 350;
+
 export type FeedItem = {
   id: number;
   name: string;
@@ -32,12 +34,26 @@ function drift(data: DayData, tick: number): DayData {
   if (tick === 0) return data;
   const j = (n: number, amp: number) =>
     Math.max(0, Math.round(n + Math.sin(tick * 0.7 + n) * amp + Math.random() * amp));
+
+  const registered = Math.min(CAPACITY, data.kpis.registered + Math.floor(tick / 6));
+  const checkedIn = Math.min(registered, data.kpis.checkedIn + Math.floor(tick / 3));
+
+  // one vote per checked-in participant is the hard ceiling
+  const voteBudget = Math.max(0, checkedIn - data.talents.reduce((s, t) => s + t.votes, 0));
+  let voteUsed = 0;
+  const talents = data.talents.map((t, i) => {
+    const want = Math.max(0, Math.floor(tick * (0.5 - i * 0.09)));
+    const inc = Math.min(want, voteBudget - voteUsed);
+    voteUsed += inc;
+    return { ...t, votes: t.votes + inc };
+  });
+
   return {
     ...data,
     kpis: {
-      registered: data.kpis.registered + Math.floor(tick / 6),
-      checkedIn: Math.min(data.kpis.registered, data.kpis.checkedIn + Math.floor(tick / 3)),
-      points: data.kpis.points + tick * 135,
+      registered,
+      checkedIn,
+      points: data.kpis.points + tick * 110,
       engagement: Math.min(99, data.kpis.engagement + (tick % 4 === 0 ? 1 : 0)),
     },
     pulse: data.pulse.map((p, i) => ({
@@ -47,16 +63,14 @@ function drift(data: DayData, tick: number): DayData {
     })),
     missions: data.missions.map((m, i) => ({
       ...m,
-      submissions: m.submissions + Math.floor(tick / (2 + i)),
+      submissions: Math.min(checkedIn, m.submissions + Math.floor(tick / (2 + i))),
     })),
-    talents: data.talents.map((t, i) => ({
-      ...t,
-      votes: t.votes + Math.floor(tick * (0.6 + ((i * 7) % 5) / 6)),
-    })),
+    talents,
     gallery: {
       ...data.gallery,
       photos: data.gallery.photos + tick * 2,
       likes: data.gallery.likes + tick * 9,
+      contributors: Math.min(checkedIn, data.gallery.contributors + Math.floor(tick / 8)),
     },
   };
 }
