@@ -50,14 +50,14 @@ export function PulseChart({ points }: { points: Point[] }) {
         <span className="inline-flex items-center gap-2 text-muted-foreground">
           <span className="size-2 rounded-full bg-accent" /> Hub activity
           <b className="text-foreground tabular-nums">
-            {formatNumber(points[active].activity)}
+            {formatNumber(points[active]!.activity)}
           </b>
         </span>
         <span className="inline-flex items-center gap-2 text-muted-foreground">
           <span className="size-2 rounded-full bg-primary" /> Check-ins
-          <b className="text-foreground tabular-nums">{formatNumber(points[active].checkins)}</b>
+          <b className="text-foreground tabular-nums">{formatNumber(points[active]!.checkins)}</b>
         </span>
-        <span className="ml-auto text-muted-foreground tabular-nums">{points[active].label}</span>
+        <span className="ml-auto text-muted-foreground tabular-nums">{points[active]!.label}</span>
       </div>
 
       <svg
@@ -125,8 +125,8 @@ export function PulseChart({ points }: { points: Point[] }) {
               strokeWidth={2.5}
             />
             <circle
-              cx={activity.pts[i][0]}
-              cy={activity.pts[i][1]}
+              cx={activity.pts[i]![0]}
+              cy={activity.pts[i]![1]}
               r={active === i ? 5 : 0}
               className="fill-accent transition-all duration-300"
             />
@@ -134,8 +134,8 @@ export function PulseChart({ points }: { points: Point[] }) {
         ))}
         {active !== null && (
           <line
-            x1={checkins.pts[active][0]}
-            x2={checkins.pts[active][0]}
+            x1={checkins.pts[active]![0]}
+            x2={checkins.pts[active]![0]}
             y1={PAD}
             y2={H - PAD}
             className="stroke-primary/30"

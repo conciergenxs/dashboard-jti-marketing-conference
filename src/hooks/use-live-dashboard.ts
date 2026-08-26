@@ -18,10 +18,10 @@ export type FeedItem = {
 let feedId = 0;
 
 function nextFeedItem(): FeedItem {
-  const t = FEED_TEMPLATES[Math.floor(Math.random() * FEED_TEMPLATES.length)];
+  const t = FEED_TEMPLATES[Math.floor(Math.random() * FEED_TEMPLATES.length)]!;
   return {
     id: feedId++,
-    name: FEED_NAMES[Math.floor(Math.random() * FEED_NAMES.length)],
+    name: FEED_NAMES[Math.floor(Math.random() * FEED_NAMES.length)]!,
     kind: t.kind,
     text: t.text,
     at: Date.now(),
