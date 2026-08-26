@@ -58,7 +58,7 @@ function Dashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-8 space-y-5 sm:mt-10 sm:space-y-6"
+          className="mt-8 min-w-0 space-y-5 sm:mt-10 sm:space-y-6"
         >
           <KpiStrip kpis={data.kpis} />
 
@@ -68,7 +68,7 @@ function Dashboard() {
             <PulseChart points={data.pulse} />
           </Reveal>
 
-          <div className="grid gap-5 sm:gap-6 lg:grid-cols-2">
+          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-5 sm:gap-6 lg:grid-cols-2">
             <Reveal>
               <Missions missions={data.missions} />
             </Reveal>
