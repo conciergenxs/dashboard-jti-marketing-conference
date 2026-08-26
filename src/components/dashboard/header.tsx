@@ -28,7 +28,7 @@ export function DashboardHeader({
           </span>
         </div>
 
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
           <div className="min-w-0">
             <h1 className="display text-display font-extrabold uppercase">
               <span className="text-gradient">Grow Beyond</span>
