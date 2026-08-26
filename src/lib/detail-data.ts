@@ -150,7 +150,7 @@ function checkinsConfig(): MetricConfig {
     key: "checkins",
     eyebrow: "Infinity Pass",
     title: "Check-in Detail",
-    description: "Every registered participant and their Infinity Pass scan at Hotel Tentrem.",
+    description: "Every registered participant and their Infinity Pass scan.",
     filterLabel: "Function",
     filterOptions: [...FUNCTIONS],
     columns: [
