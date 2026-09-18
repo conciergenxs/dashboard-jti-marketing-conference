@@ -41,23 +41,35 @@ function Dashboard() {
   return (
     <main className="relative min-h-screen overflow-x-clip">
       <ContourField />
-      <div className="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6">
+      {/* 1152px is a reading measure, not a dashboard measure — widen it only
+          on screens that actually have the room. */}
+      <div className="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6 xl:max-w-7xl xl:px-10 2xl:max-w-[88rem]">
         <DashboardHeader day={day} onDayChange={setDay} kpis={data.kpis} />
 
+        {/* At >=1280px the page stops being one column of full-width bands: the
+            chart takes two thirds and the live feed becomes a rail beside it,
+            instead of sitting ~2,400px below the fold on the one surface that
+            is actually live. */}
         <motion.div
           key={day}
+          id="day-panel"
+          role="tabpanel"
+          aria-labelledby={`day-tab-${day}`}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-8 min-w-0 space-y-5 sm:mt-10 sm:space-y-6"
+          className="mt-8 min-w-0 space-y-5 sm:mt-10 sm:space-y-6 xl:grid xl:grid-cols-12 xl:gap-6 xl:space-y-0"
         >
           <KpiStrip kpis={data.kpis} missions={data.missions} />
 
-          <Reveal>
+          <Reveal className="xl:col-span-8 xl:row-start-2">
             <PulseChart points={data.pulse} />
           </Reveal>
 
-          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-5 sm:gap-6 lg:grid-cols-2">
+          {/* Panel carries h-full, so cards in a row bottom out together rather
+              than leaving ragged gaps. No `order` utilities: they would desync
+              the visual order from the DOM/tab order. */}
+          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-5 sm:gap-6 lg:grid-cols-2 xl:col-span-12 xl:row-start-3 xl:grid-cols-3">
             <Reveal>
               <Missions missions={data.missions} />
             </Reveal>
@@ -78,7 +90,10 @@ function Dashboard() {
             </Reveal>
           </div>
 
-          <Reveal>
+          {/* Stays last in the DOM — mobile order is unchanged. At >=1280px the
+              explicit grid coordinates lift it into the rail beside the chart,
+              which CSS grid placement does independently of source order. */}
+          <Reveal className="xl:col-span-4 xl:col-start-9 xl:row-start-2">
             <LiveFeed feed={feed} />
           </Reveal>
         </motion.div>

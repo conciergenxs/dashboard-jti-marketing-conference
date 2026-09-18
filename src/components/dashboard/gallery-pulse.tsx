@@ -1,6 +1,6 @@
 import { Image as ImageIcon, Users } from "lucide-react";
-import { motion } from "motion/react";
-import { Counter, Panel, SeeAll } from "./primitives";
+import { motion, useReducedMotion } from "motion/react";
+import { Counter, Panel, SeeAll, useEntrance } from "./primitives";
 import { STORYTELLERS, STORY_MOMENTS } from "@/lib/detail-data";
 import type { DayData } from "@/lib/dashboard-data";
 
@@ -14,26 +14,22 @@ const TOP = (() => {
 })();
 
 export function GalleryPulse({ gallery }: { gallery: DayData["gallery"] }) {
+  const reduce = useReducedMotion();
+  const entrance = useEntrance();
   const stats = [
     { label: "Stories shared", value: gallery.photos, icon: ImageIcon },
     { label: "People posting", value: gallery.contributors, icon: Users },
   ];
 
   return (
-    <Panel
-      eyebrow="Growing Together"
-      title="Story Wall"
-      action={<SeeAll metric="stories" />}
-    >
+    <Panel eyebrow="Growing Together" title="Story Wall" action={<SeeAll metric="stories" />}>
       <div className="grid grid-cols-2 gap-2.5">
         {stats.map((s, i) => (
           <motion.div
             key={s.label}
             initial={{ opacity: 0, scale: 0.94 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: i * 0.08 }}
-            whileHover={{ y: -3 }}
+            {...entrance({ opacity: 1, scale: 1 })}
+            transition={{ duration: reduce ? 0 : 0.5, delay: reduce ? 0 : i * 0.08 }}
             className="rounded-xl border border-border/70 bg-surface/60 p-3"
           >
             <s.icon className="size-4 text-primary" strokeWidth={1.8} />
@@ -51,14 +47,11 @@ export function GalleryPulse({ gallery }: { gallery: DayData["gallery"] }) {
           <motion.div
             key={m}
             initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.45, delay: i * 0.06 }}
-            whileHover={{ y: -4 }}
+            {...entrance({ opacity: 1, y: 0 })}
+            transition={{ duration: reduce ? 0 : 0.45, delay: reduce ? 0 : i * 0.06 }}
             title={m}
-            className="group relative aspect-[4/3] overflow-hidden rounded-lg border border-primary/15 bg-gradient-to-br from-primary/25 via-accent/15 to-surface"
+            className="relative aspect-[4/3] overflow-hidden rounded-lg border border-primary/15 bg-gradient-to-br from-primary/25 via-accent/15 to-surface"
           >
-            <span className="absolute inset-0 bg-gradient-to-t from-primary/45 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
             <span className="absolute inset-x-1.5 bottom-1.5 line-clamp-2 text-[0.62rem] leading-[1.15] font-semibold text-primary/85 uppercase">
               {m.split(" · ").at(-1)}
             </span>
@@ -75,10 +68,9 @@ export function GalleryPulse({ gallery }: { gallery: DayData["gallery"] }) {
           <motion.div
             key={p.name + i}
             initial={{ opacity: 0, x: -12 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.45, delay: i * 0.06 }}
-            className="flex items-center gap-3 rounded-xl border border-border/70 bg-surface/60 px-3 py-2 transition-colors hover:border-primary/35"
+            {...entrance({ opacity: 1, x: 0 })}
+            transition={{ duration: reduce ? 0 : 0.45, delay: reduce ? 0 : i * 0.06 }}
+            className="hover-warm flex items-center gap-3 rounded-xl border border-border/70 bg-surface/60 px-3 py-2"
           >
             <span className="display w-4 shrink-0 text-label font-bold text-primary/50 tabular-nums">
               {i + 1}

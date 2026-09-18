@@ -58,14 +58,16 @@ function MetricDetail() {
         config.filters.every((f) => {
           const v = facets[f.key];
           return !v || v === "all" || r.facets[f.key] === v;
-        }) && (!q || r.search.includes(q)),
+        }) &&
+        (!q || r.search.includes(q)),
     );
   }, [config, query, facets]);
 
   const pages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const current = Math.min(page, pages);
   const slice = filtered.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE);
-  const isFiltered = !!query.trim() || config.filters.some((f) => facets[f.key] && facets[f.key] !== "all");
+  const isFiltered =
+    !!query.trim() || config.filters.some((f) => facets[f.key] && facets[f.key] !== "all");
 
   const reset = (fn: () => void) => {
     fn();
@@ -80,7 +82,7 @@ function MetricDetail() {
   return (
     <main className="relative min-h-screen overflow-x-clip">
       <ContourField />
-      <div className="mx-auto w-full max-w-6xl px-4 pt-6 pb-16 sm:px-6 sm:pt-10">
+      <div className="mx-auto w-full max-w-6xl px-4 pt-6 pb-16 sm:px-6 sm:pt-10 xl:max-w-7xl xl:px-10 2xl:max-w-[88rem]">
         <Link
           to="/"
           className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/80 px-3.5 py-2 text-label font-semibold text-foreground/80 transition-colors hover:border-primary/40 hover:text-primary"
@@ -128,7 +130,9 @@ function MetricDetail() {
                 <SlidersHorizontal className="pointer-events-none absolute left-3 size-4 text-muted-foreground" />
                 <select
                   value={facets[f.key] ?? "all"}
-                  onChange={(e) => reset(() => setFacets((s) => ({ ...s, [f.key]: e.target.value })))}
+                  onChange={(e) =>
+                    reset(() => setFacets((s) => ({ ...s, [f.key]: e.target.value })))
+                  }
                   aria-label={f.label}
                   className="h-11 w-full min-w-0 appearance-none truncate rounded-xl border border-border bg-surface/70 pr-8 pl-9 text-body outline-none transition-colors focus:border-primary/50 sm:w-48"
                 >
@@ -285,7 +289,6 @@ function MetricDetail() {
             Next <ChevronRight className="size-4" />
           </button>
         </div>
-
       </div>
     </main>
   );

@@ -1,8 +1,9 @@
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Panel, Counter, SeeAll } from "./primitives";
 import type { Talent } from "@/lib/dashboard-data";
 
 export function TalentBoard({ talents }: { talents: Talent[] }) {
+  const reduce = useReducedMotion();
   const ranked = [...talents].sort((a, b) => b.votes - a.votes);
   const max = ranked[0]?.votes ?? 1;
 
@@ -16,21 +17,21 @@ export function TalentBoard({ talents }: { talents: Talent[] }) {
               layout
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ type: "spring", stiffness: 260, damping: 28 }}
-              className="relative overflow-hidden rounded-xl border border-border/70 bg-surface/60 p-3 transition-colors duration-300 hover:border-accent/45"
+              transition={
+                reduce ? { duration: 0 } : { type: "spring", stiffness: 260, damping: 28 }
+              }
+              className="hover-warm relative overflow-hidden rounded-xl border border-border/70 bg-surface/60 p-3"
             >
               <motion.div
                 className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary/12 to-accent/10"
                 initial={{ width: 0 }}
                 animate={{ width: `${(t.votes / max) * 100}%` }}
-                transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: reduce ? 0 : 1, ease: [0.22, 1, 0.36, 1] }}
               />
               <div className="relative flex items-center gap-3">
                 <span
                   className={`display flex size-8 shrink-0 items-center justify-center rounded-lg text-body font-semibold tabular-nums ${
-                    i === 0
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-primary/10 text-primary"
+                    i === 0 ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary"
                   }`}
                 >
                   {i + 1}

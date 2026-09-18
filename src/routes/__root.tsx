@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MotionConfig } from "motion/react";
 import {
   Outlet,
   Link,
@@ -80,8 +81,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "Grow Beyond Limits — Market Conference 2026" },
       {
         name: "description",
-        content:
-          "Live analytics for JTI Indonesia Market Conference 2026.",
+        content: "Live analytics for JTI Indonesia Market Conference 2026.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -94,8 +94,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
   }),
-
-
 
   shellComponent: RootShell,
   component: RootComponent,
@@ -122,8 +120,13 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      {/* Motion writes inline transforms from rAF, so the @media
+          (prefers-reduced-motion) rule in styles.css cannot reach any of it.
+          This is the only switch that does. */}
+      <MotionConfig reducedMotion="user">
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        <Outlet />
+      </MotionConfig>
     </QueryClientProvider>
   );
 }

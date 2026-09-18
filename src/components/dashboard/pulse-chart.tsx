@@ -1,4 +1,4 @@
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { useState } from "react";
 import { Panel } from "./primitives";
 import { formatNumber } from "@/lib/dashboard-data";
@@ -28,9 +28,9 @@ function path(values: number[], max: number, close: boolean) {
   return { d, pts };
 }
 
-
 export function PulseChart({ points }: { points: Point[] }) {
   const [hover, setHover] = useState<number | null>(null);
+  const reduce = useReducedMotion();
   const max = Math.max(...points.map((p) => Math.max(p.checkins, p.activity))) * 1.15;
   const activity = path(
     points.map((p) => p.activity),
@@ -57,94 +57,113 @@ export function PulseChart({ points }: { points: Point[] }) {
         </span>
         <span className="inline-flex items-center gap-2 text-muted-foreground">
           <span className="size-2 rounded-full bg-primary" /> Check-ins
-          <b className="font-semibold text-foreground tabular-nums">{formatNumber(points[active]!.checkins)}</b>
+          <b className="font-semibold text-foreground tabular-nums">
+            {formatNumber(points[active]!.checkins)}
+          </b>
         </span>
         <span className="ml-auto text-muted-foreground tabular-nums">{points[active]!.label}</span>
       </div>
 
       <div className="relative">
-      <svg
-        viewBox={`0 0 ${W} ${H}`}
-        className="h-48 w-full touch-none sm:h-60"
-        onMouseLeave={() => setHover(null)}
-      >
-        <defs>
-          <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="var(--color-accent)" stopOpacity="0.42" />
-            <stop offset="100%" stopColor="var(--color-accent)" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        {[0.25, 0.5, 0.75, 1].map((g) => (
-          <line
-            key={g}
-            x1={PAD}
-            x2={W - PAD}
-            y1={H - PAD - g * (H - PAD * 2)}
-            y2={H - PAD - g * (H - PAD * 2)}
-            className="stroke-border"
-            strokeDasharray="3 6"
-          />
-        ))}
-        <motion.path
-          d={activity.d}
-          fill="url(#areaFill)"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 0.5 }}
-        />
-        <motion.path
-          d={path(
-            points.map((p) => p.activity),
-            max,
-            false,
-          ).d}
-          fill="none"
-          stroke="var(--color-accent)"
-          strokeWidth={2.5}
-          strokeLinecap="round"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1] }}
-        />
-        <motion.path
-          d={checkins.d}
-          fill="none"
-          stroke="var(--color-primary)"
-          strokeWidth={2.5}
-          strokeLinecap="round"
-          strokeDasharray="0"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 1.6, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
-        />
-        {checkins.pts.map(([x, y], i) => (
-          <g key={i} onMouseEnter={() => setHover(i)} onTouchStart={() => setHover(i)}>
-            <rect x={x - 18} y={0} width={36} height={H} fill="transparent" />
-            <circle
-              cx={x}
-              cy={y}
-              r={active === i ? 6 : 3}
-              className="fill-background stroke-primary transition-all duration-300"
-              strokeWidth={2.5}
+        {/*
+        The viewBox is 3:1. With a fixed height at desktop width,
+        preserveAspectRatio="meet" capped the scale at 1.0, so the chart drew at
+        its native 720px centred inside a ~1050px panel — dead gutters either
+        side, and both the full-width axis row and the tooltip (positioned as a
+        % of the container) drifted off the data. Locking the box to the
+        viewBox's own 3:1 ratio at >=1024px makes the plot fill the panel and
+        those percentages map 1:1 again.
+      */}
+        <svg
+          role="img"
+          aria-label="Hub activity and check-ins across the day"
+          viewBox={`0 0 ${W} ${H}`}
+          className="h-48 w-full touch-none sm:h-60 lg:aspect-[3/1] lg:h-auto"
+          onMouseLeave={() => setHover(null)}
+        >
+          <defs>
+            <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="var(--color-accent)" stopOpacity="0.42" />
+              <stop offset="100%" stopColor="var(--color-accent)" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          {[0.25, 0.5, 0.75, 1].map((g) => (
+            <line
+              key={g}
+              x1={PAD}
+              x2={W - PAD}
+              y1={H - PAD - g * (H - PAD * 2)}
+              y2={H - PAD - g * (H - PAD * 2)}
+              className="stroke-border"
+              strokeDasharray="3 6"
             />
-            <circle
-              cx={activity.pts[i]![0]}
-              cy={activity.pts[i]![1]}
-              r={active === i ? 5 : 0}
-              className="fill-accent transition-all duration-300"
-            />
-          </g>
-        ))}
-        {active !== null && (
-          <line
-            x1={checkins.pts[active]![0]}
-            x2={checkins.pts[active]![0]}
-            y1={PAD}
-            y2={H - PAD}
-            className="stroke-primary/30"
+          ))}
+          <motion.path
+            d={activity.d}
+            fill="url(#areaFill)"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: reduce ? 0 : 1, delay: reduce ? 0 : 0.5 }}
           />
-        )}
-      </svg>
+          <motion.path
+            d={
+              path(
+                points.map((p) => p.activity),
+                max,
+                false,
+              ).d
+            }
+            fill="none"
+            stroke="var(--color-accent)"
+            strokeWidth={2.5}
+            strokeLinecap="round"
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ duration: reduce ? 0 : 1.6, ease: [0.22, 1, 0.36, 1] }}
+          />
+          <motion.path
+            d={checkins.d}
+            fill="none"
+            stroke="var(--color-primary)"
+            strokeWidth={2.5}
+            strokeLinecap="round"
+            strokeDasharray="0"
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{
+              duration: reduce ? 0 : 1.6,
+              delay: reduce ? 0 : 0.25,
+              ease: [0.22, 1, 0.36, 1],
+            }}
+          />
+          {checkins.pts.map(([x, y], i) => (
+            <g key={i} onMouseEnter={() => setHover(i)} onTouchStart={() => setHover(i)}>
+              <rect x={x - 18} y={0} width={36} height={H} fill="transparent" />
+              <circle
+                cx={x}
+                cy={y}
+                r={active === i ? 6 : 3}
+                className="fill-background stroke-primary transition-all duration-300"
+                strokeWidth={2.5}
+              />
+              <circle
+                cx={activity.pts[i]![0]}
+                cy={activity.pts[i]![1]}
+                r={active === i ? 5 : 0}
+                className="fill-accent transition-all duration-300"
+              />
+            </g>
+          ))}
+          {active !== null && (
+            <line
+              x1={checkins.pts[active]![0]}
+              x2={checkins.pts[active]![0]}
+              y1={PAD}
+              y2={H - PAD}
+              className="stroke-primary/30"
+            />
+          )}
+        </svg>
         {hover !== null && (
           <motion.div
             initial={{ opacity: 0, y: 6, scale: 0.96 }}

@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { useState } from "react";
-import { Panel } from "./primitives";
+import { Panel, useEntrance } from "./primitives";
 import type { Slice } from "@/lib/dashboard-data";
 
 const COLORS = [
@@ -12,6 +12,7 @@ const COLORS = [
 
 export function HubDonut({ hub }: { hub: Slice[] }) {
   const [active, setActive] = useState(0);
+  const entrance = useEntrance();
   const total = hub.reduce((s, h) => s + h.value, 0);
   const r = 54;
   const c = 2 * Math.PI * r;
@@ -19,9 +20,13 @@ export function HubDonut({ hub }: { hub: Slice[] }) {
 
   return (
     <Panel eyebrow="Infinity Hub" title="Where People Spend Time">
-      <div className="flex flex-col items-center gap-6 sm:flex-row">
+      <div className="flex flex-col items-center gap-6 sm:flex-row lg:gap-8">
         <div className="relative shrink-0">
-          <svg viewBox="0 0 140 140" className="size-36 -rotate-90">
+          <svg
+            aria-hidden
+            viewBox="0 0 140 140"
+            className="size-36 -rotate-90 lg:size-40 xl:size-44"
+          >
             {hub.map((h, i) => {
               const frac = h.value / total;
               const dash = c * frac;
@@ -38,8 +43,7 @@ export function HubDonut({ hub }: { hub: Slice[] }) {
                   strokeDashoffset={-offset}
                   strokeLinecap="round"
                   initial={{ opacity: 0 }}
-                  whileInView={{ opacity: active === i ? 1 : 0.75 }}
-                  viewport={{ once: true }}
+                  {...entrance({ opacity: active === i ? 1 : 0.75 })}
                   transition={{ duration: 0.8, delay: i * 0.12 }}
                   onMouseEnter={() => setActive(i)}
                   className="cursor-pointer transition-all duration-300"
@@ -50,7 +54,9 @@ export function HubDonut({ hub }: { hub: Slice[] }) {
             })}
           </svg>
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-            <span className="display text-metric font-bold tabular-nums">{hub[active]!.value}%</span>
+            <span className="display text-metric font-bold tabular-nums">
+              {hub[active]!.value}%
+            </span>
             <span className="max-w-20 text-center text-label leading-tight text-muted-foreground">
               {hub[active]!.label}
             </span>

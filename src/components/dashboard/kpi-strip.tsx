@@ -1,4 +1,4 @@
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { ScanLine, Infinity as InfinityIcon, CheckCircle2 } from "lucide-react";
 import { Counter, SeeAll } from "./primitives";
 import type { MetricKey } from "@/lib/detail-data";
@@ -7,8 +7,9 @@ import { formatCompact, type DayData, type Kpis } from "@/lib/dashboard-data";
 function Ring({ progress, id }: { progress: number; id: string }) {
   const r = 26;
   const c = 2 * Math.PI * r;
+  const reduce = useReducedMotion();
   return (
-    <svg viewBox="0 0 64 64" className="size-14 -rotate-90">
+    <svg aria-hidden viewBox="0 0 64 64" className="size-14 -rotate-90">
       <defs>
         <linearGradient id={id} x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="var(--color-primary)" />
@@ -27,13 +28,14 @@ function Ring({ progress, id }: { progress: number; id: string }) {
         strokeDasharray={c}
         initial={{ strokeDashoffset: c }}
         animate={{ strokeDashoffset: c - c * Math.min(1, progress) }}
-        transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: reduce ? 0 : 1.4, ease: [0.22, 1, 0.36, 1] }}
       />
     </svg>
   );
 }
 
 export function KpiStrip({ kpis, missions }: { kpis: Kpis; missions: DayData["missions"] }) {
+  const reduce = useReducedMotion();
   const submissions = missions.reduce((s, m) => s + m.submissions, 0);
   const submissionCap = Math.max(1, kpis.checkedIn * missions.length);
   const avgPoints = Math.round(kpis.points / Math.max(1, kpis.checkedIn));
@@ -68,17 +70,23 @@ export function KpiStrip({ kpis, missions }: { kpis: Kpis; missions: DayData["mi
   ];
 
   return (
-    <div className="flex flex-col gap-3 sm:gap-4">
+    // `lg:grid` wins over the unprefixed `flex` at >=1024px and `flex-col` goes
+    // inert under grid, so the approved stacked mobile layout is untouched while
+    // desktop gets a proper three-up KPI row instead of three near-empty bands.
+    <div className="flex flex-col gap-3 sm:gap-4 lg:grid lg:grid-cols-3 lg:gap-6 xl:col-span-12 xl:row-start-1">
       {cards.map((c, i) => (
         <motion.article
           key={c.key}
           initial={{ opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
-          whileHover={{ y: -5 }}
-          className="glass-card group relative flex w-full items-center overflow-hidden p-4 sm:p-5"
+          transition={{
+            duration: reduce ? 0 : 0.6,
+            delay: reduce ? 0 : i * 0.08,
+            ease: [0.22, 1, 0.36, 1],
+          }}
+          className="glass-card relative flex w-full items-center overflow-hidden p-4 sm:p-5"
         >
-          <div className="absolute -top-16 -right-12 size-32 rounded-full bg-accent/15 blur-2xl transition-opacity duration-500 group-hover:opacity-100 sm:opacity-60" />
+          <div className="absolute -top-16 -right-12 size-32 rounded-full bg-accent/15 blur-2xl sm:opacity-60" />
           <div className="relative flex flex-1 items-center justify-between gap-4">
             <div className="min-w-0">
               <p className="text-[10px] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
