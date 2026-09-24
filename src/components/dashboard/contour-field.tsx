@@ -52,20 +52,30 @@ function Ribbon(props: BundleProps & { id: string; duration: number; delay?: num
   );
 }
 
-export function ContourField() {
+/**
+ * `quiet` drops the wash, the accent edge and the travelling beam, leaving the
+ * hairlines alone. Behind a full screen of panels those layers read as depth;
+ * behind a page that is only a few lines of type — the 404 — they have nothing
+ * to sit under and swamp it instead.
+ */
+export function ContourField({ quiet = false }: { quiet?: boolean }) {
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
       <div className="absolute inset-0 bg-background" />
 
       {/* soft luminous wash */}
-      <div className="animate-drift absolute -top-48 -left-32 size-[38rem] rounded-full bg-primary/12 blur-[140px]" />
-      <div
-        className="animate-drift absolute top-1/3 -right-44 size-[34rem] rounded-full bg-accent/14 blur-[150px]"
-        style={{ animationDelay: "-8s" }}
-      />
+      {!quiet && (
+        <>
+          <div className="animate-drift absolute -top-48 -left-32 size-[38rem] rounded-full bg-primary/12 blur-[140px]" />
+          <div
+            className="animate-drift absolute top-1/3 -right-44 size-[34rem] rounded-full bg-accent/14 blur-[150px]"
+            style={{ animationDelay: "-8s" }}
+          />
 
-      {/* diagonal violet→blue accent edge bleeding off the left margin */}
-      <div className="absolute -top-32 -left-10 h-[150%] w-10 origin-top-left -rotate-12 bg-gradient-to-b from-chart-3/18 via-primary/10 to-transparent blur-md" />
+          {/* diagonal violet→blue accent edge bleeding off the left margin */}
+          <div className="absolute -top-32 -left-10 h-[150%] w-10 origin-top-left -rotate-12 bg-gradient-to-b from-chart-3/18 via-primary/10 to-transparent blur-md" />
+        </>
+      )}
 
       <svg
         className="absolute inset-0 h-full w-full"
@@ -113,7 +123,9 @@ export function ContourField() {
       </svg>
 
       {/* single beam of light travelling along the ribbons */}
-      <div className="contour-beam absolute top-[12%] h-[26rem] w-[22rem] rounded-full bg-accent/25 blur-[90px]" />
+      {!quiet && (
+        <div className="contour-beam absolute top-[12%] h-[26rem] w-[22rem] rounded-full bg-accent/25 blur-[90px]" />
+      )}
     </div>
   );
 }
