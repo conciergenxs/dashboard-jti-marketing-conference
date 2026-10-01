@@ -188,7 +188,14 @@ export const PARTICIPANTS: Participant[] = (() => {
   });
 })();
 
-export type Column = { key: string; label: string; align?: "right"; primary?: boolean };
+export type Column = {
+  key: string;
+  label: string;
+  align?: "right";
+  primary?: boolean;
+  /** The column the row adds up to: given room and weight of its own. */
+  total?: boolean;
+};
 export type Filter = { key: string; label: string; options: string[] };
 export type DetailRow = {
   id: string;
@@ -366,7 +373,7 @@ function pointsConfig(): MetricConfig {
       { key: "done", label: "Missions" },
       { key: "missionPoints", label: "Mission pts", align: "right" },
       { key: "activityPoints", label: "Activity pts", align: "right" },
-      { key: "points", label: "Total", align: "right" },
+      { key: "points", label: "Total", align: "right", total: true },
     ],
     rows,
   };

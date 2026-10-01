@@ -164,7 +164,7 @@ function MetricDetail() {
                 {config.columns.map((c) => (
                   <th
                     key={c.key}
-                    className={`px-4 py-3 text-label font-semibold tracking-[0.14em] text-muted-foreground uppercase ${c.align === "right" ? "text-right" : "text-left"}`}
+                    className={`px-4 py-3 text-label font-semibold tracking-[0.14em] text-muted-foreground uppercase ${c.align === "right" ? "text-right" : "text-left"} ${c.total ? "w-36 pr-6 text-primary lg:w-44" : ""}`}
                   >
                     {c.label}
                   </th>
@@ -186,7 +186,7 @@ function MetricDetail() {
                     {config.columns.map((c) => (
                       <td
                         key={c.key}
-                        className={`px-4 py-3 ${c.align === "right" ? "text-right tabular-nums" : ""} ${c.primary ? "font-semibold" : "text-muted-foreground"}`}
+                        className={`px-4 py-3 ${c.align === "right" ? "text-right tabular-nums" : ""} ${c.primary || c.total ? "font-semibold" : "text-muted-foreground"} ${c.total ? "pr-6 text-foreground" : ""}`}
                       >
                         {r.cells[c.key]}
                       </td>
