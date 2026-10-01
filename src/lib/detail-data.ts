@@ -4,14 +4,55 @@
  */
 
 const FIRST = [
-  "Dimas", "Ayu", "Rangga", "Nadia", "Bagus", "Sinta", "Fajar", "Melati", "Yoga", "Prita",
-  "Arif", "Tania", "Bayu", "Gita", "Hendra", "Intan", "Joko", "Kirana", "Lukman", "Maya",
-  "Nugroho", "Oki", "Putri", "Rizky", "Sari", "Teguh", "Umi", "Vino", "Wulan", "Yudha",
+  "Dimas",
+  "Ayu",
+  "Rangga",
+  "Nadia",
+  "Bagus",
+  "Sinta",
+  "Fajar",
+  "Melati",
+  "Yoga",
+  "Prita",
+  "Arif",
+  "Tania",
+  "Bayu",
+  "Gita",
+  "Hendra",
+  "Intan",
+  "Joko",
+  "Kirana",
+  "Lukman",
+  "Maya",
+  "Nugroho",
+  "Oki",
+  "Putri",
+  "Rizky",
+  "Sari",
+  "Teguh",
+  "Umi",
+  "Vino",
+  "Wulan",
+  "Yudha",
 ];
 
 const LAST = [
-  "Pratama", "Rahmawati", "Saputra", "Hakim", "Wibowo", "Lestari", "Anggara", "Kusuma",
-  "Nugraha", "Maharani", "Budiman", "Dewanti", "Firmansyah", "Halim", "Iskandar", "Jayadi",
+  "Pratama",
+  "Rahmawati",
+  "Saputra",
+  "Hakim",
+  "Wibowo",
+  "Lestari",
+  "Anggara",
+  "Kusuma",
+  "Nugraha",
+  "Maharani",
+  "Budiman",
+  "Dewanti",
+  "Firmansyah",
+  "Halim",
+  "Iskandar",
+  "Jayadi",
 ];
 
 export const FUNCTIONS = [
@@ -31,6 +72,25 @@ export const MISSIONS_META = [
   { code: "03", name: "Win Together", points: 500 },
 ];
 
+/**
+ * The on-site activities, as the microsite passport runs them: each stamp is
+ * worth `points`, up to `quota` stamps per person.
+ */
+export const ACTIVITIES_META = [
+  { name: "Writing Photobooth", points: 100, quota: 1 },
+  { name: "Infinity Link", points: 150, quota: 1 },
+  { name: "Infinity Crossing", points: 200, quota: 2 },
+  { name: "Collective Maze Move", points: 250, quota: 2 },
+  { name: "Move Beyond", points: 250, quota: 2 },
+  { name: "Infinite Race · M1", points: 300, quota: 1 },
+  { name: "Infinite Race · M2", points: 300, quota: 1 },
+  { name: "Infinite Race · M3", points: 300, quota: 1 },
+  { name: "Infinite Race · M4", points: 300, quota: 1 },
+];
+
+export const MISSION_MAX_POINTS = MISSIONS_META.reduce((s, m) => s + m.points, 0);
+export const ACTIVITY_MAX_POINTS = ACTIVITIES_META.reduce((s, a) => s + a.points * a.quota, 0);
+
 export const TALENT_ACTS = [
   "Infinite Voices · Music / Band",
   "Beyond Motion · Contemporary Dance",
@@ -39,7 +99,12 @@ export const TALENT_ACTS = [
   "Langkah Bersama · Contemporary Dance",
 ];
 
-export const REWARDS_META = ["GBL Enamel Pin", "Coffee Tumbler", "GBL Reflective Sticker", "GBL Desk Lamp"];
+export const REWARDS_META = [
+  "GBL Enamel Pin",
+  "Coffee Tumbler",
+  "GBL Reflective Sticker",
+  "GBL Desk Lamp",
+];
 
 /** Small deterministic PRNG so server and client render identical rows. */
 function rng(seed: number) {
@@ -57,6 +122,10 @@ export type Participant = {
   checkedIn: boolean;
   checkinAt: string;
   missions: boolean[];
+  /** From approved Infinity Missions. */
+  missionPoints: number;
+  /** From activity stamps at the venue. */
+  activityPoints: number;
   points: number;
   vote: string | null;
   photos: number;
@@ -81,6 +150,9 @@ function clock(base: number, minutes: number) {
 
 export const PARTICIPANTS: Participant[] = (() => {
   const r = rng(20260826);
+  // A stream of its own, so adding activity stamps left every other number
+  // (names, check-ins, missions, votes) exactly where it was.
+  const ra = rng(20261117);
   const pool = buildFunctionPool();
   return Array.from({ length: 350 }, (_, i) => {
     const first = FIRST[Math.floor(r() * FIRST.length)]!;
@@ -91,7 +163,13 @@ export const PARTICIPANTS: Participant[] = (() => {
     const m2 = m1 && r() > 0.2;
     const m3 = m2 && r() > 0.24;
     const missions = [m1, m2, m3];
-    const points = MISSIONS_META.reduce((s, m, k) => s + (missions[k] ? m.points : 0), 0);
+    const missionPoints = MISSIONS_META.reduce((s, m, k) => s + (missions[k] ? m.points : 0), 0);
+    const activityPoints = checkedIn
+      ? ACTIVITIES_META.reduce((s, a) => {
+          const stamps = Math.floor(ra() * (a.quota + 1.6));
+          return s + Math.min(stamps, a.quota) * a.points;
+        }, 0)
+      : 0;
     return {
       id: `JTI-${String(1001 + i)}`,
       name: `${first} ${last}`,
@@ -99,7 +177,9 @@ export const PARTICIPANTS: Participant[] = (() => {
       checkedIn,
       checkinAt: checkedIn ? clock(8, Math.floor(r() * 300)) : "—",
       missions,
-      points,
+      missionPoints,
+      activityPoints,
+      points: missionPoints + activityPoints,
       vote: checkedIn && r() > 0.14 ? TALENT_ACTS[Math.floor(r() * TALENT_ACTS.length)]! : null,
       photos: checkedIn ? Math.floor(r() * 9) : 0,
       reward: m3 ? REWARDS_META[Math.floor(r() * REWARDS_META.length)]! : null,
@@ -185,7 +265,11 @@ function missionsConfig(): MetricConfig {
     title: "Mission Submissions",
     description: "Every mission proof the crew has approved in the app.",
     filters: [
-      { key: "mission", label: "Mission", options: MISSIONS_META.map((m) => `${m.code} · ${m.name}`) },
+      {
+        key: "mission",
+        label: "Mission",
+        options: MISSIONS_META.map((m) => `${m.code} · ${m.name}`),
+      },
       { key: "fn", label: "Function", options: [...FUNCTIONS] },
     ],
     columns: [
@@ -256,13 +340,21 @@ function pointsConfig(): MetricConfig {
       id: `${p.id}-pts`,
       search: `${p.name} ${p.id} ${p.fn}`.toLowerCase(),
       facets: { fn: p.fn, done },
-      cells: { name: p.name, id: p.id, fn: p.fn, done, points: p.points },
+      cells: {
+        name: p.name,
+        id: p.id,
+        fn: p.fn,
+        done,
+        missionPoints: p.missionPoints.toLocaleString("en-US"),
+        activityPoints: p.activityPoints.toLocaleString("en-US"),
+        points: p.points.toLocaleString("en-US"),
+      },
     };
   });
   return {
     key: "points",
     title: "Points per Person",
-    description: "Points come only from approved missions: 100 + 250 + 500, so 850 is the maximum.",
+    description: `Points from approved Infinity Missions (up to ${MISSION_MAX_POINTS.toLocaleString("en-US")}) and activity stamps at the venue (up to ${ACTIVITY_MAX_POINTS.toLocaleString("en-US")}).`,
     filters: [
       { key: "fn", label: "Function", options: [...FUNCTIONS] },
       { key: "done", label: "Missions done", options: ["0/3", "1/3", "2/3", "3/3"] },
@@ -272,7 +364,9 @@ function pointsConfig(): MetricConfig {
       { key: "id", label: "Pass ID" },
       { key: "fn", label: "Function" },
       { key: "done", label: "Missions" },
-      { key: "points", label: "Points", align: "right" },
+      { key: "missionPoints", label: "Mission pts", align: "right" },
+      { key: "activityPoints", label: "Activity pts", align: "right" },
+      { key: "points", label: "Total", align: "right" },
     ],
     rows,
   };
@@ -343,5 +437,5 @@ export const AGGREGATES = {
   registered: PARTICIPANTS.length,
   checkedIn: PARTICIPANTS.filter((p) => p.checkedIn).length,
   totalPoints: PARTICIPANTS.reduce((s, p) => s + p.points, 0),
-  maxPoints: 850,
+  maxPoints: MISSION_MAX_POINTS + ACTIVITY_MAX_POINTS,
 };

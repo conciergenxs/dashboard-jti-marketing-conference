@@ -36,7 +36,10 @@ function bundlePaths({ count, spread, amp, baseY, phase }: BundleProps) {
 function Ribbon(props: BundleProps & { id: string; duration: number; delay?: number }) {
   const paths = bundlePaths(props);
   return (
-    <g className="contour-drift" style={{ animationDuration: `${props.duration}s`, animationDelay: `${props.delay ?? 0}s` }}>
+    <g
+      className="contour-drift"
+      style={{ animationDuration: `${props.duration}s`, animationDelay: `${props.delay ?? 0}s` }}
+    >
       {paths.map((d, i) => (
         <path
           key={i}
@@ -44,7 +47,11 @@ function Ribbon(props: BundleProps & { id: string; duration: number; delay?: num
           fill="none"
           stroke={`url(#${props.id})`}
           strokeWidth={props.width}
-          strokeOpacity={props.opacity * (0.45 + 0.55 * Math.sin((i / paths.length) * Math.PI))}
+          // Rounded: Node and the browser disagree in the last digit of Math.sin,
+          // and an unrounded value is a hydration mismatch on every load.
+          strokeOpacity={Number(
+            (props.opacity * (0.45 + 0.55 * Math.sin((i / paths.length) * Math.PI))).toFixed(3),
+          )}
           vectorEffect="non-scaling-stroke"
         />
       ))}

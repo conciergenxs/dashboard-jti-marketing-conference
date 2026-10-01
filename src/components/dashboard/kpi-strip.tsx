@@ -1,7 +1,7 @@
 import { motion, useReducedMotion } from "motion/react";
 import { ScanLine, Infinity as InfinityIcon, CheckCircle2 } from "lucide-react";
 import { Counter, SeeAll } from "./primitives";
-import type { MetricKey } from "@/lib/detail-data";
+import { AGGREGATES, type MetricKey } from "@/lib/detail-data";
 import { formatCompact, type DayData, type Kpis } from "@/lib/dashboard-data";
 
 function Ring({ progress, id }: { progress: number; id: string }) {
@@ -34,6 +34,8 @@ function Ring({ progress, id }: { progress: number; id: string }) {
   );
 }
 
+const MAX_POINTS = AGGREGATES.maxPoints;
+
 export function KpiStrip({ kpis, missions }: { kpis: Kpis; missions: DayData["missions"] }) {
   const reduce = useReducedMotion();
   const submissions = missions.reduce((s, m) => s + m.submissions, 0);
@@ -52,10 +54,10 @@ export function KpiStrip({ kpis, missions }: { kpis: Kpis; missions: DayData["mi
     {
       key: "points",
       label: "Points / person",
-      hint: `avg of 850 · ${formatCompact(kpis.points)} total`,
+      hint: `of ${MAX_POINTS.toLocaleString("en-US")} · ${formatCompact(kpis.points)} total`,
       value: avgPoints,
       icon: InfinityIcon,
-      ring: avgPoints / 850,
+      ring: avgPoints / MAX_POINTS,
       metric: "points" as MetricKey,
     },
     {

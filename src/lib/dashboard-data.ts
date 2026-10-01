@@ -230,5 +230,7 @@ export function formatNumber(n: number) {
 }
 
 export function formatCompact(n: number) {
-  return new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 }).format(n);
+  return new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 }).format(
+    n,
+  );
 }

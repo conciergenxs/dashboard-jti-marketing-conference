@@ -20,7 +20,10 @@ export function HubDonut({ hub }: { hub: Slice[] }) {
 
   return (
     <Panel eyebrow="Infinity Hub" title="Where People Spend Time">
-      <div className="flex flex-col items-center gap-6 sm:flex-row lg:gap-8">
+      {/* Side by side only where the panel spans the page (a tablet). In the
+          desktop grid it is a third of a row — the legend goes under the
+          donut there, or it runs out of the panel. */}
+      <div className="flex flex-col items-center gap-6 sm:flex-row lg:flex-col lg:gap-6">
         <div className="relative shrink-0">
           <svg
             aria-hidden
@@ -62,7 +65,7 @@ export function HubDonut({ hub }: { hub: Slice[] }) {
             </span>
           </div>
         </div>
-        <ul className="w-full space-y-2">
+        <ul className="w-full min-w-0 space-y-2">
           {hub.map((h, i) => (
             <li
               key={h.label}
