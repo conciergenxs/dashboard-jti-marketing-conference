@@ -13,6 +13,7 @@ import { HubDonut } from "@/components/dashboard/hub-donut";
 import { LiveFeed } from "@/components/dashboard/live-feed";
 import { Rewards } from "@/components/dashboard/rewards";
 import { Checklist } from "@/components/dashboard/checklist";
+import { ActivityQuota } from "@/components/dashboard/activity-quota";
 import { Reveal } from "@/components/dashboard/primitives";
 import { useLiveDashboard } from "@/hooks/use-live-dashboard";
 import { EVENT, GALLERY_ENABLED, type DayKey } from "@/lib/dashboard-data";
@@ -67,10 +68,15 @@ function Dashboard() {
             <PulseChart points={data.pulse} />
           </Reveal>
 
+          {/* Who is in the room, stamp by stamp — the spec's hero breakdown. */}
+          <Reveal className="xl:col-span-12 xl:row-start-3">
+            <ActivityQuota stamps={data.activities} checkedIn={data.kpis.checkedIn} />
+          </Reveal>
+
           {/* Panel carries h-full, so cards in a row bottom out together rather
               than leaving ragged gaps. No `order` utilities: they would desync
               the visual order from the DOM/tab order. */}
-          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-5 sm:gap-6 lg:grid-cols-2 xl:col-span-12 xl:row-start-3 xl:grid-cols-3">
+          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-5 sm:gap-6 lg:grid-cols-2 xl:col-span-12 xl:row-start-4 xl:grid-cols-3">
             <Reveal>
               <Missions missions={data.missions} preEvent={data.checklist.preEvent} />
             </Reveal>

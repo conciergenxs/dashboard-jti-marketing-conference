@@ -48,6 +48,38 @@ export type Talent = {
 /** The passport's checklist, as head counts. */
 export type Checklist = { preEvent: number; talent: number; award: number; complete: number };
 
+/**
+ * The passport's Activity Quota, as the microsite stamps it: one stamp each,
+ * self-scanned at a venue QR or scanned by the crew. The Infinite Race is a
+ * single stamp for the whole race, not one per phase.
+ */
+export const ACTIVITIES = [
+  { id: "hotel-arrival", name: "Arrival at Hotel", day: "day1", scan: "Self scan" },
+  { id: "welcome-arrival", name: "Welcome Dinner Arrival", day: "day1", scan: "Self scan" },
+  { id: "writing-photobooth", name: "Writing Photobooth", day: "day1", scan: "Crew scan" },
+  { id: "move-beyond", name: "Move Beyond", day: "day1", scan: "Crew scan" },
+  { id: "infinity-crossing", name: "Infinity Crossing", day: "day1", scan: "Crew scan" },
+  { id: "infinity-link", name: "Infinity Link", day: "day1", scan: "Crew scan" },
+  { id: "redemption-corner", name: "Redemption Corner", day: "day1", scan: "Crew scan" },
+  { id: "conference-arrival", name: "Morning Market Conference", day: "day2", scan: "Self scan" },
+  { id: "infinite-race", name: "The Infinite Race", day: "day2", scan: "Self scan" },
+  { id: "gala-check-in", name: "Infinite Gala", day: "day2", scan: "Self scan" },
+  {
+    id: "slow-motion-photobooth",
+    name: "Super Slow Motion Photobooth",
+    day: "day2",
+    scan: "Crew scan",
+  },
+] as const;
+
+export const ACTIVITY_DAYS = [
+  { day: "day1", label: "Day 1", caption: "17 Nov · Welcome Dinner" },
+  { day: "day2", label: "Day 2", caption: "18 Nov · Conference, Race & Gala" },
+] as const;
+
+/** Stamps collected per activity, in `ACTIVITIES` order. */
+export type ActivityStamps = number[];
+
 export type DayData = {
   kpis: Kpis;
   pulse: { label: string; checkins: number; activity: number }[];
@@ -60,6 +92,7 @@ export type DayData = {
   gallery: { photos: number; likes: number; contributors: number; topMoment: string };
   hub: Slice[];
   rewards: { name: string; redeemed: number }[];
+  activities: ActivityStamps;
 };
 
 /**
@@ -117,6 +150,11 @@ const MISSIONS_FINAL = missionBase.map((m, i) => ({
   resends: [58, 44, 27][i]!,
 }));
 const TALENTS_FINAL = talentBase.map((t, i) => ({ ...t, votes: [74, 66, 51, 43, 38, 26][i]! }));
+// Day 1's stamps are final by its night; Day 2's land on the 18th. The
+// Redemption Corner stamp is the prize claim, so it matches the sunglasses.
+const DAY1_STAMPS = [318, 309, 214, 187, 168, 152, 296];
+const STAMPS_DAY1 = [...DAY1_STAMPS, 0, 0, 0, 0];
+const STAMPS_FINAL = [...DAY1_STAMPS, 329, 322, 331, 204];
 const REWARDS_FINAL = [
   { name: "Sunglasses", redeemed: 296 },
   { name: "Multifunction Bag", redeemed: 197 },
@@ -158,6 +196,7 @@ export const DATA: Record<DayKey, DayData> = {
       { label: "Content & Memories", value: 17 },
     ],
     rewards: REWARDS_FINAL,
+    activities: STAMPS_DAY1,
   },
   day2: {
     kpis: {
@@ -194,6 +233,7 @@ export const DATA: Record<DayKey, DayData> = {
       { label: "Content & Memories", value: 17 },
     ],
     rewards: REWARDS_FINAL,
+    activities: STAMPS_FINAL,
   },
   day3: {
     kpis: {
@@ -230,12 +270,15 @@ export const DATA: Record<DayKey, DayData> = {
       { label: "Content & Memories", value: 36 },
     ],
     rewards: REWARDS_FINAL,
+    activities: STAMPS_FINAL,
   },
 };
 
 /** What the activity log can say; `from` keeps a moment out of days it can't happen on. */
 export const FEED_TEMPLATES: { kind: string; text: string; from?: DayKey; until?: DayKey }[] = [
   { kind: "checkin", text: "just checked in at the venue" },
+  { kind: "checkin", text: "got a stamp at the Writing Photobooth", until: "day1" },
+  { kind: "checkin", text: "checked in at The Infinite Race", from: "day2", until: "day2" },
   { kind: "mission", text: "sent Mission 01 · Connect to Win", until: "day1" },
   { kind: "mission", text: "retook Mission 02 · Infinity Quiz", until: "day1" },
   { kind: "mission", text: "sent another pantun for Mission 03 · Win Together", until: "day1" },

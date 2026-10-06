@@ -1,3 +1,5 @@
+import { ACTIVITIES, DATA } from "@/lib/dashboard-data";
+
 /**
  * Deterministic participant-level simulation for the 350 Market Conference
  * attendees. Drives the "See all" detail pages (search / filter / pagination).
@@ -228,7 +230,7 @@ export type DetailRow = {
 };
 
 export type MetricKey =
-  "checkins" | "checklist" | "missions" | "talent" | "rewards" | "qa" | "stories";
+  "checkins" | "activities" | "checklist" | "missions" | "talent" | "rewards" | "qa" | "stories";
 
 export type MetricConfig = {
   key: MetricKey;
@@ -376,6 +378,69 @@ function rewardsConfig(): MetricConfig {
   };
 }
 
+/** When each stamp tends to land, by activity (hour of its own day). */
+const STAMP_HOUR: Record<string, number> = {
+  "hotel-arrival": 13,
+  "welcome-arrival": 18,
+  "writing-photobooth": 19,
+  "move-beyond": 19,
+  "infinity-crossing": 19,
+  "infinity-link": 20,
+  "redemption-corner": 20,
+  "conference-arrival": 8,
+  "infinite-race": 13,
+  "gala-check-in": 18,
+  "slow-motion-photobooth": 19,
+};
+
+function activitiesConfig(): MetricConfig {
+  const r = rng(20261009);
+  const here = PARTICIPANTS.filter((p) => p.checkedIn);
+  const final = DATA.day3.activities;
+  const rows: DetailRow[] = [];
+  ACTIVITIES.forEach((a, k) => {
+    const share = (final[k] ?? 0) / Math.max(1, here.length);
+    const day = a.day === "day1" ? "Day 1" : "Day 2";
+    here.forEach((p) => {
+      if (r() >= share) return;
+      rows.push({
+        id: `${p.id}-${a.id}`,
+        search: `${p.name} ${p.fn} ${a.name}`.toLowerCase(),
+        facets: { activity: a.name, day, scan: a.scan, fn: p.fn },
+        cells: {
+          name: p.name,
+          fn: p.fn,
+          activity: a.name,
+          day,
+          scan: a.scan,
+          at: clock(STAMP_HOUR[a.id] ?? 12, Math.floor(r() * 150)),
+        },
+      });
+    });
+  });
+  return {
+    key: "activities",
+    title: "Activity Quota",
+    description:
+      "Every stamp on the passport's Activity Quota, self-scanned at a venue QR or scanned by the crew. The Infinite Race is one stamp for the whole race.",
+    filters: [
+      { key: "activity", label: "Activity", options: ACTIVITIES.map((a) => a.name) },
+      { key: "day", label: "Day", options: ["Day 1", "Day 2"] },
+      { key: "scan", label: "Scan", options: ["Self scan", "Crew scan"] },
+      { key: "fn", label: "Function", options: [...FUNCTIONS] },
+    ],
+    columns: [
+      { key: "name", label: "Participant", primary: true },
+      { key: "fn", label: "Function" },
+      { key: "activity", label: "Activity" },
+      { key: "day", label: "Day" },
+      { key: "scan", label: "Scan" },
+      { key: "at", label: "Time" },
+    ],
+    rows,
+  };
+}
+
 function checklistConfig(): MetricConfig {
   const rows = PARTICIPANTS.filter((p) => p.checkedIn).map((p) => {
     const c = checklistOf(p);
@@ -506,6 +571,7 @@ function storiesConfig(): MetricConfig {
 
 export const METRICS: Record<MetricKey, MetricConfig> = {
   checkins: checkinsConfig(),
+  activities: activitiesConfig(),
   checklist: checklistConfig(),
   missions: missionsConfig(),
   talent: talentConfig(),
