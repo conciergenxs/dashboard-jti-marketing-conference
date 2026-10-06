@@ -17,8 +17,12 @@ export const DAYS: { key: DayKey; label: string; caption: string }[] = [
 export type Kpis = {
   registered: number;
   checkedIn: number;
-  points: number;
   engagement: number;
+  /** All three ticks: Pre-event, JTI Got Talent, Employee Award. */
+  complete: number;
+  /** Live Q&A: questions sent from the microsite, and by how many people. */
+  questions: number;
+  askers: number;
 };
 
 export type Mission = {
@@ -26,8 +30,10 @@ export type Mission = {
   index: string;
   name: string;
   promise: string;
-  points: number;
-  submissions: number;
+  /** People who have sent it at least once — the send that ticks Pre-event. */
+  sent: number;
+  /** Sends after someone's first: counted, never ticked twice. */
+  resends: number;
 };
 
 export type Slice = { label: string; value: number };
@@ -39,47 +45,49 @@ export type Talent = {
   votes: number;
 };
 
+/** The passport's checklist, as head counts. */
+export type Checklist = { preEvent: number; talent: number; award: number; complete: number };
+
 export type DayData = {
   kpis: Kpis;
   pulse: { label: string; checkins: number; activity: number }[];
   missions: Mission[];
+  checklist: Checklist;
   functions: Slice[];
+  /** Got Talent's ballot is hidden until 18 Nov, 20.30 — Day 1 has no votes. */
+  votingOpen: boolean;
   talents: Talent[];
   gallery: { photos: number; likes: number; contributors: number; topMoment: string };
   hub: Slice[];
   rewards: { name: string; redeemed: number }[];
 };
 
-const missionBase: Omit<Mission, "submissions">[] = [
-  {
-    id: "m1",
-    index: "01",
-    name: "Connect to Win",
-    promise: "Connect beyond your usual circle",
-    points: 100,
-  },
+/**
+ * The Gallery is built but held back on the microsite (`GALLERY_ENABLED` there);
+ * the dashboard follows it and shows the checklist in its place.
+ */
+export const GALLERY_ENABLED = false;
+
+export const VOTING_OPENS_LABEL = "Wed, 18 Nov · 20.30";
+
+const missionBase: Omit<Mission, "sent" | "resends">[] = [
+  { id: "m1", index: "01", name: "Connect to Win", promise: "Break your usual circle" },
   {
     id: "m2",
     index: "02",
-    name: "Make More Possible",
-    promise: "Bring one idea to the conference floor",
-    points: 250,
+    name: "Infinity Quiz",
+    promise: "Know the people, the brand, the journey",
   },
-  {
-    id: "m3",
-    index: "03",
-    name: "Win Together",
-    promise: "Turn connection into action",
-    points: 500,
-  },
+  { id: "m3", index: "03", name: "Win Together", promise: "Turn our shared spirit into words" },
 ];
 
 const talentBase = [
-  { id: "t1", name: "Infinite Voices", act: "Music · Band" },
-  { id: "t2", name: "Beyond Motion", act: "Contemporary Dance" },
-  { id: "t3", name: "Runaway Spirit", act: "Runway Fashion Group" },
-  { id: "t4", name: "Jingle Reimagined", act: "Music · Acoustic" },
-  { id: "t5", name: "Langkah Bersama", act: "Traditional Dance" },
+  { id: "t1", name: "The Infinity Sound", act: "Music & Band · West Region Team" },
+  { id: "t2", name: "Nada Beyond Limits", act: "Music & Band · East Region Team" },
+  { id: "t3", name: "Gerak Infinity", act: "Contemporary Dance · Central Region Team" },
+  { id: "t4", name: "Langkah Tanpa Batas", act: "Contemporary Dance · North Region Team" },
+  { id: "t5", name: "Beyond The Runway", act: "Entertainment & Fashion · Marketing Team" },
+  { id: "t6", name: "Grow Squad", act: "Entertainment & Fashion · Trade Marketing Team" },
 ];
 
 function pulse(
@@ -101,11 +109,32 @@ function pulse(
   });
 }
 
+// Missions close at the end of Day 1 and both ballots run on Day 2's night,
+// so from Day 2 on those numbers are final.
+const MISSIONS_FINAL = missionBase.map((m, i) => ({
+  ...m,
+  sent: [302, 236, 171][i]!,
+  resends: [58, 44, 27][i]!,
+}));
+const TALENTS_FINAL = talentBase.map((t, i) => ({ ...t, votes: [74, 66, 51, 43, 38, 26][i]! }));
+const REWARDS_FINAL = [
+  { name: "Sunglasses", redeemed: 296 },
+  { name: "Multifunction Bag", redeemed: 197 },
+];
+
 export const DATA: Record<DayKey, DayData> = {
   day1: {
-    kpis: { registered: 342, checkedIn: 318, points: 98600, engagement: 84 },
+    kpis: {
+      registered: 342,
+      checkedIn: 318,
+      engagement: 84,
+      complete: 0,
+      questions: 9,
+      askers: 8,
+    },
     pulse: pulse(10, 96, 210, 9),
-    missions: missionBase.map((m, i) => ({ ...m, submissions: [268, 179, 104][i]! })),
+    missions: MISSIONS_FINAL,
+    checklist: { preEvent: 309, talent: 0, award: 0, complete: 0 },
     functions: [
       { label: "Sales & Distribution", value: 108 },
       { label: "Marketing", value: 58 },
@@ -114,7 +143,8 @@ export const DATA: Record<DayKey, DayData> = {
       { label: "People & Culture", value: 34 },
       { label: "Corporate Affairs", value: 28 },
     ],
-    talents: talentBase.map((t, i) => ({ ...t, votes: [96, 84, 58, 44, 30][i]! })),
+    votingOpen: false,
+    talents: talentBase.map((t) => ({ ...t, votes: 0 })),
     gallery: {
       photos: 612,
       likes: 1840,
@@ -127,17 +157,20 @@ export const DATA: Record<DayKey, DayData> = {
       { label: "Engagement Hub", value: 24 },
       { label: "Content & Memories", value: 17 },
     ],
-    rewards: [
-      { name: "GBL Enamel Pin", redeemed: 84 },
-      { name: "Coffee Tumbler", redeemed: 66 },
-      { name: "Reflective Sticker", redeemed: 102 },
-      { name: "GBL Desk Lamp", redeemed: 41 },
-    ],
+    rewards: REWARDS_FINAL,
   },
   day2: {
-    kpis: { registered: 350, checkedIn: 341, points: 144900, engagement: 93 },
+    kpis: {
+      registered: 350,
+      checkedIn: 341,
+      engagement: 93,
+      complete: 271,
+      questions: 146,
+      askers: 118,
+    },
     pulse: pulse(11, 128, 340, 8),
-    missions: missionBase.map((m, i) => ({ ...m, submissions: [322, 259, 198][i]! })),
+    missions: MISSIONS_FINAL,
+    checklist: { preEvent: 309, talent: 298, award: 305, complete: 271 },
     functions: [
       { label: "Sales & Distribution", value: 116 },
       { label: "Marketing", value: 63 },
@@ -146,12 +179,13 @@ export const DATA: Record<DayKey, DayData> = {
       { label: "People & Culture", value: 36 },
       { label: "Corporate Affairs", value: 29 },
     ],
-    talents: talentBase.map((t, i) => ({ ...t, votes: [112, 96, 64, 42, 25][i]! })),
+    votingOpen: true,
+    talents: TALENTS_FINAL,
     gallery: {
       photos: 1284,
       likes: 4720,
       contributors: 318,
-      topMoment: "Gala Dinner · Jingle grand finale",
+      topMoment: "Infinite Gala · Got Talent finale",
     },
     hub: [
       { label: "Personal Journey", value: 21 },
@@ -159,17 +193,20 @@ export const DATA: Record<DayKey, DayData> = {
       { label: "Engagement Hub", value: 28 },
       { label: "Content & Memories", value: 17 },
     ],
-    rewards: [
-      { name: "GBL Enamel Pin", redeemed: 128 },
-      { name: "Coffee Tumbler", redeemed: 104 },
-      { name: "Reflective Sticker", redeemed: 146 },
-      { name: "GBL Desk Lamp", redeemed: 63 },
-    ],
+    rewards: REWARDS_FINAL,
   },
   day3: {
-    kpis: { registered: 350, checkedIn: 336, points: 172000, engagement: 89 },
+    kpis: {
+      registered: 350,
+      checkedIn: 336,
+      engagement: 89,
+      complete: 271,
+      questions: 146,
+      askers: 118,
+    },
     pulse: pulse(8, 74, 180, 7),
-    missions: missionBase.map((m, i) => ({ ...m, submissions: [331, 288, 241][i]! })),
+    missions: MISSIONS_FINAL,
+    checklist: { preEvent: 309, talent: 298, award: 305, complete: 271 },
     functions: [
       { label: "Sales & Distribution", value: 114 },
       { label: "Marketing", value: 62 },
@@ -178,7 +215,8 @@ export const DATA: Record<DayKey, DayData> = {
       { label: "People & Culture", value: 35 },
       { label: "Corporate Affairs", value: 30 },
     ],
-    talents: talentBase.map((t, i) => ({ ...t, votes: [118, 101, 66, 32, 18][i]! })),
+    votingOpen: true,
+    talents: TALENTS_FINAL,
     gallery: {
       photos: 1502,
       likes: 6180,
@@ -191,24 +229,21 @@ export const DATA: Record<DayKey, DayData> = {
       { label: "Engagement Hub", value: 24 },
       { label: "Content & Memories", value: 36 },
     ],
-    rewards: [
-      { name: "GBL Enamel Pin", redeemed: 149 },
-      { name: "Coffee Tumbler", redeemed: 121 },
-      { name: "Reflective Sticker", redeemed: 168 },
-      { name: "GBL Desk Lamp", redeemed: 77 },
-    ],
+    rewards: REWARDS_FINAL,
   },
 };
 
-export const FEED_TEMPLATES = [
-  { kind: "checkin", text: "just checked in at the main hall" },
-  { kind: "mission", text: "finished Mission 01 · Connect to Win" },
-  { kind: "mission", text: "sent proof for Mission 02 · Make More Possible" },
-  { kind: "mission", text: "cleared Mission 03 · Win Together" },
-  { kind: "photo", text: "posted a photo to the Growing Together wall" },
-  { kind: "vote", text: "cast a vote for JTI Got Talent" },
-  { kind: "reward", text: "spun the Infinity Wheel and claimed a reward" },
-] as const;
+/** What the activity log can say; `from` keeps a moment out of days it can't happen on. */
+export const FEED_TEMPLATES: { kind: string; text: string; from?: DayKey; until?: DayKey }[] = [
+  { kind: "checkin", text: "just checked in at the venue" },
+  { kind: "mission", text: "sent Mission 01 · Connect to Win", until: "day1" },
+  { kind: "mission", text: "retook Mission 02 · Infinity Quiz", until: "day1" },
+  { kind: "mission", text: "sent another pantun for Mission 03 · Win Together", until: "day1" },
+  { kind: "reward", text: "claimed Sunglasses at the Redemption Corner", until: "day1" },
+  { kind: "vote", text: "voted in JTI Got Talent", from: "day2", until: "day2" },
+  { kind: "vote", text: "voted in the Employee Award", from: "day2", until: "day2" },
+  { kind: "question", text: "sent a question to Live Q&A" },
+];
 
 export const FEED_NAMES = [
   "Dimas P.",

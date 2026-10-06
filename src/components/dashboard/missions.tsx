@@ -2,10 +2,9 @@ import { motion, useReducedMotion } from "motion/react";
 import { Panel, Counter, SeeAll, useEntrance } from "./primitives";
 import { EVENT, type Mission } from "@/lib/dashboard-data";
 
-export function Missions({ missions }: { missions: Mission[] }) {
+export function Missions({ missions, preEvent }: { missions: Mission[]; preEvent: number }) {
   const reduce = useReducedMotion();
   const entrance = useEntrance();
-  const proofs = missions.reduce((s, m) => s + m.submissions, 0);
 
   return (
     <Panel
@@ -15,14 +14,14 @@ export function Missions({ missions }: { missions: Mission[] }) {
     >
       <p className="-mt-3 mb-4 text-label text-muted-foreground">
         <b className="font-semibold text-foreground tabular-nums">
-          <Counter value={proofs} />
+          <Counter value={preEvent} />
         </b>{" "}
-        proofs verified so far
+        people ticked Pre-event · re-sends allowed until 17 Nov
       </p>
 
       <div className="space-y-4">
         {missions.map((m, i) => {
-          const pct = Math.min(100, (m.submissions / EVENT.target) * 100);
+          const pct = Math.min(100, (m.sent / EVENT.target) * 100);
           return (
             <motion.div
               key={m.id}
@@ -42,7 +41,7 @@ export function Missions({ missions }: { missions: Mission[] }) {
                   </p>
                 </div>
                 <span className="shrink-0 rounded-full border border-primary/25 px-2.5 py-1 text-label font-medium text-primary/90 tabular-nums">
-                  +{m.points} pts
+                  +<Counter value={m.resends} /> re-sends
                 </span>
               </div>
               <div className="mt-3 flex items-center gap-3">
@@ -60,9 +59,9 @@ export function Missions({ missions }: { missions: Mission[] }) {
                 </div>
                 <span className="w-24 shrink-0 text-right text-label text-muted-foreground tabular-nums">
                   <b className="font-semibold text-foreground">
-                    <Counter value={m.submissions} />
+                    <Counter value={m.sent} />
                   </b>{" "}
-                  done
+                  sent
                 </span>
               </div>
             </motion.div>

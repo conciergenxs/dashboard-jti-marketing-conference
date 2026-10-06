@@ -1,8 +1,8 @@
 import { motion, useReducedMotion } from "motion/react";
-import { ScanLine, Infinity as InfinityIcon, CheckCircle2 } from "lucide-react";
+import { ListChecks, MessageCircleQuestion, ScanLine } from "lucide-react";
 import { Counter, SeeAll } from "./primitives";
-import { AGGREGATES, type MetricKey } from "@/lib/detail-data";
-import { formatCompact, type DayData, type Kpis } from "@/lib/dashboard-data";
+import type { MetricKey } from "@/lib/detail-data";
+import { VOTING_OPENS_LABEL, type Kpis } from "@/lib/dashboard-data";
 
 function Ring({ progress, id }: { progress: number; id: string }) {
   const r = 26;
@@ -34,13 +34,8 @@ function Ring({ progress, id }: { progress: number; id: string }) {
   );
 }
 
-const MAX_POINTS = AGGREGATES.maxPoints;
-
-export function KpiStrip({ kpis, missions }: { kpis: Kpis; missions: DayData["missions"] }) {
+export function KpiStrip({ kpis }: { kpis: Kpis }) {
   const reduce = useReducedMotion();
-  const submissions = missions.reduce((s, m) => s + m.submissions, 0);
-  const submissionCap = Math.max(1, kpis.checkedIn * missions.length);
-  const avgPoints = Math.round(kpis.points / Math.max(1, kpis.checkedIn));
   const cards = [
     {
       key: "checked",
@@ -52,22 +47,25 @@ export function KpiStrip({ kpis, missions }: { kpis: Kpis; missions: DayData["mi
       metric: "checkins" as MetricKey,
     },
     {
-      key: "points",
-      label: "Points / person",
-      hint: `of ${MAX_POINTS.toLocaleString("en-US")} · ${formatCompact(kpis.points)} total`,
-      value: avgPoints,
-      icon: InfinityIcon,
-      ring: avgPoints / MAX_POINTS,
-      metric: "points" as MetricKey,
+      key: "checklist",
+      label: "Checklist complete",
+      hint:
+        kpis.complete > 0
+          ? `all three ticked · of ${kpis.checkedIn.toLocaleString("en-US")}`
+          : `ballots open ${VOTING_OPENS_LABEL}`,
+      value: kpis.complete,
+      icon: ListChecks,
+      ring: kpis.complete / Math.max(1, kpis.checkedIn),
+      metric: "checklist" as MetricKey,
     },
     {
-      key: "missions",
-      label: "Missions done",
-      hint: `of ${submissionCap.toLocaleString("en-US")} possible`,
-      value: submissions,
-      icon: CheckCircle2,
-      ring: submissions / submissionCap,
-      metric: "missions" as MetricKey,
+      key: "qa",
+      label: "Live Q&A",
+      hint: `questions from ${kpis.askers.toLocaleString("en-US")} people`,
+      value: kpis.questions,
+      icon: MessageCircleQuestion,
+      ring: kpis.askers / Math.max(1, kpis.checkedIn),
+      metric: "qa" as MetricKey,
     },
   ];
 

@@ -1,5 +1,5 @@
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { Gift, Heart, ScanLine, Sparkles, Vote } from "lucide-react";
+import { Gift, Heart, MessageCircleQuestion, ScanLine, Sparkles, Vote } from "lucide-react";
 import { Panel } from "./primitives";
 import type { FeedItem } from "@/hooks/use-live-dashboard";
 
@@ -9,6 +9,7 @@ const ICONS: Record<string, typeof ScanLine> = {
   photo: Heart,
   vote: Vote,
   reward: Gift,
+  question: MessageCircleQuestion,
 };
 
 export function LiveFeed({ feed }: { feed: FeedItem[] }) {

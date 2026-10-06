@@ -7,12 +7,13 @@ export function Rewards({ rewards }: { rewards: DayData["rewards"] }) {
   const entrance = useEntrance();
   const total = rewards.reduce((s, r) => s + r.redeemed, 0);
   return (
-    <Panel eyebrow="Infinity Wheel" title="Rewards Claimed" action={<SeeAll metric="rewards" />}>
+    <Panel eyebrow="Redemption Corner" title="Prizes Claimed" action={<SeeAll metric="rewards" />}>
       <p className="-mt-3 mb-4 text-label text-muted-foreground">
-        <b className="font-semibold text-foreground tabular-nums">{total}</b> rewards claimed today
+        <b className="font-semibold text-foreground tabular-nums">{total}</b> prizes handed out ·
+        missions or a dinner game → sunglasses, both → the bag too
       </p>
 
-      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2.5">
         {rewards.map((r, i) => (
           <motion.div
             key={r.name}

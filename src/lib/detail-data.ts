@@ -66,44 +66,41 @@ export const FUNCTIONS = [
 
 const FUNCTION_WEIGHTS = [116, 63, 56, 41, 36, 29];
 
+/** The microsite's three pre-event Infinity Missions — sent or not. */
 export const MISSIONS_META = [
-  { code: "01", name: "Connect to Win", points: 100 },
-  { code: "02", name: "Make More Possible", points: 250 },
-  { code: "03", name: "Win Together", points: 500 },
+  { code: "01", name: "Connect to Win", reviewed: true },
+  { code: "02", name: "Infinity Quiz", reviewed: false },
+  { code: "03", name: "Win Together", reviewed: true },
+];
+
+/** The approved acts, as the microsite's Got Talent line-up names them. */
+export const TALENT_ACTS = [
+  "The Infinity Sound · Music & Band",
+  "Nada Beyond Limits · Music & Band",
+  "Gerak Infinity · Contemporary Dance",
+  "Langkah Tanpa Batas · Contemporary Dance",
+  "Beyond The Runway · Entertainment & Fashion",
+  "Grow Squad · Entertainment & Fashion",
 ];
 
 /**
- * The on-site activities, as the microsite passport runs them: each stamp is
- * worth `points`, up to `quota` stamps per person.
+ * What the Redemption Corner hands out: Infinity Missions *or* a Welcome
+ * Dinner game earns the sunglasses; both earn the bag as well.
  */
-export const ACTIVITIES_META = [
-  { name: "Writing Photobooth", points: 100, quota: 1 },
-  { name: "Infinity Link", points: 150, quota: 1 },
-  { name: "Infinity Crossing", points: 200, quota: 2 },
-  { name: "Collective Maze Move", points: 250, quota: 2 },
-  { name: "Move Beyond", points: 250, quota: 2 },
-  { name: "Infinite Race · M1", points: 300, quota: 1 },
-  { name: "Infinite Race · M2", points: 300, quota: 1 },
-  { name: "Infinite Race · M3", points: 300, quota: 1 },
-  { name: "Infinite Race · M4", points: 300, quota: 1 },
-];
+export const REWARDS_META = ["Sunglasses", "Sunglasses + Multifunction Bag"];
 
-export const MISSION_MAX_POINTS = MISSIONS_META.reduce((s, m) => s + m.points, 0);
-export const ACTIVITY_MAX_POINTS = ACTIVITIES_META.reduce((s, a) => s + a.points * a.quota, 0);
-
-export const TALENT_ACTS = [
-  "Infinite Voices · Music / Band",
-  "Beyond Motion · Contemporary Dance",
-  "Runaway Spirit · Runway Fashion",
-  "Jingle Reimagined · Music / Band",
-  "Langkah Bersama · Contemporary Dance",
-];
-
-export const REWARDS_META = [
-  "GBL Enamel Pin",
-  "Coffee Tumbler",
-  "GBL Reflective Sticker",
-  "GBL Desk Lamp",
+/** Sample questions for the Live Q&A detail page — the real ones come from the microsite. */
+const QUESTION_BANK = [
+  "Apa prioritas utama JTI Indonesia untuk tahun depan?",
+  "Bagaimana tim lapangan bisa berbagi praktik terbaik lintas region?",
+  "What does Grow Beyond Limits mean for trade marketing next year?",
+  "Bagaimana kita mengukur keberhasilan konferensi ini?",
+  "Apa satu kebiasaan yang ingin Bapak/Ibu lihat dari tim kita?",
+  "How will we keep the momentum going after Yogyakarta?",
+  "Apa tantangan terbesar pasar kita di 2027?",
+  "Bagaimana fungsi non-lapangan bisa lebih dekat dengan konsumen?",
+  "What is one thing every team should start doing on Monday?",
+  "Apakah akan ada program pengembangan untuk talenta muda?",
 ];
 
 /** Small deterministic PRNG so server and client render identical rows. */
@@ -121,17 +118,30 @@ export type Participant = {
   fn: string;
   checkedIn: boolean;
   checkinAt: string;
-  missions: boolean[];
-  /** From approved Infinity Missions. */
-  missionPoints: number;
-  /** From activity stamps at the venue. */
-  activityPoints: number;
-  points: number;
+  /** Times each mission was sent — 0 is not yet. The first send ticks Pre-event. */
+  sends: number[];
+  firstSentAt: string;
+  /** The act they voted for in JTI Got Talent — one vote, once the window opens. */
   vote: string | null;
+  /** Both Employee Award picks in. */
+  awardVote: boolean;
+  /** Played at least one Welcome Dinner game booth. */
+  dinnerGames: boolean;
   photos: number;
   reward: string | null;
   rewardAt: string;
+  /** Questions sent from the microsite's Live Q&A page. */
+  questions: number;
 };
+
+/** Pre-event, JTI Got Talent, Employee Award — the passport's three ticks. */
+export function checklistOf(p: Participant) {
+  return {
+    preEvent: p.sends.some((n) => n > 0),
+    talent: p.vote !== null,
+    award: p.awardVote,
+  };
+}
 
 function buildFunctionPool() {
   const pool: string[] = [];
@@ -150,9 +160,9 @@ function clock(base: number, minutes: number) {
 
 export const PARTICIPANTS: Participant[] = (() => {
   const r = rng(20260826);
-  // A stream of its own, so adding activity stamps left every other number
-  // (names, check-ins, missions, votes) exactly where it was.
-  const ra = rng(20261117);
+  // A stream of its own for everything added after the first cut, so names,
+  // check-ins and votes stay exactly where they were.
+  const rx = rng(20261006);
   const pool = buildFunctionPool();
   return Array.from({ length: 350 }, (_, i) => {
     const first = FIRST[Math.floor(r() * FIRST.length)]!;
@@ -160,30 +170,36 @@ export const PARTICIPANTS: Participant[] = (() => {
     const fn = pool[i % pool.length]!;
     const checkedIn = r() > 0.026;
     const m1 = checkedIn && r() > 0.06;
-    const m2 = m1 && r() > 0.2;
-    const m3 = m2 && r() > 0.24;
-    const missions = [m1, m2, m3];
-    const missionPoints = MISSIONS_META.reduce((s, m, k) => s + (missions[k] ? m.points : 0), 0);
-    const activityPoints = checkedIn
-      ? ACTIVITIES_META.reduce((s, a) => {
-          const stamps = Math.floor(ra() * (a.quota + 1.6));
-          return s + Math.min(stamps, a.quota) * a.points;
-        }, 0)
-      : 0;
+    const m2 = checkedIn && r() > 0.25;
+    const m3 = checkedIn && r() > 0.42;
+    const sends = [m1, m2, m3].map((sent) =>
+      sent ? 1 + (rx() < 0.18 ? 1 : 0) + (rx() < 0.05 ? 1 : 0) : 0,
+    );
+    const vote =
+      checkedIn && r() > 0.14 ? TALENT_ACTS[Math.floor(r() * TALENT_ACTS.length)]! : null;
+    const awardVote = checkedIn && rx() > 0.12;
+    const dinnerGames = checkedIn && rx() > 0.28;
+    const preEvent = sends.some((n) => n > 0);
     return {
       id: `JTI-${String(1001 + i)}`,
       name: `${first} ${last}`,
       fn,
       checkedIn,
       checkinAt: checkedIn ? clock(8, Math.floor(r() * 300)) : "—",
-      missions,
-      missionPoints,
-      activityPoints,
-      points: missionPoints + activityPoints,
-      vote: checkedIn && r() > 0.14 ? TALENT_ACTS[Math.floor(r() * TALENT_ACTS.length)]! : null,
+      sends,
+      firstSentAt: preEvent ? clock(7, Math.floor(rx() * 900)) : "—",
+      vote,
+      awardVote,
+      dinnerGames,
       photos: checkedIn ? Math.floor(r() * 9) : 0,
-      reward: m3 ? REWARDS_META[Math.floor(r() * REWARDS_META.length)]! : null,
-      rewardAt: clock(13, Math.floor(r() * 420)),
+      reward:
+        preEvent && dinnerGames
+          ? REWARDS_META[1]!
+          : preEvent || dinnerGames
+            ? REWARDS_META[0]!
+            : null,
+      rewardAt: clock(19, Math.floor(rx() * 150)),
+      questions: checkedIn && rx() > 0.66 ? 1 + (rx() < 0.2 ? 1 : 0) : 0,
     };
   });
 })();
@@ -204,7 +220,8 @@ export type DetailRow = {
   cells: Record<string, string | number>;
 };
 
-export type MetricKey = "checkins" | "missions" | "talent" | "rewards" | "points" | "stories";
+export type MetricKey =
+  "checkins" | "checklist" | "missions" | "talent" | "rewards" | "qa" | "stories";
 
 export type MetricConfig = {
   key: MetricKey;
@@ -249,20 +266,28 @@ function checkinsConfig(): MetricConfig {
 
 function missionsConfig(): MetricConfig {
   const rows: DetailRow[] = [];
+  const r = rng(20261007);
   PARTICIPANTS.forEach((p) => {
-    p.missions.forEach((done, k) => {
-      if (!done) return;
+    p.sends.forEach((sends, k) => {
+      if (!sends) return;
       const m = MISSIONS_META[k]!;
+      const status = !m.reviewed || r() > 0.38 ? "Verified" : "Waiting";
       rows.push({
         id: `${p.id}-${m.code}`,
         search: `${p.name} ${p.fn} ${m.name} ${m.code}`.toLowerCase(),
-        facets: { mission: `${m.code} · ${m.name}`, fn: p.fn },
+        facets: {
+          mission: `${m.code} · ${m.name}`,
+          fn: p.fn,
+          status,
+          resent: sends > 1 ? "Re-sent" : "Sent once",
+        },
         cells: {
           name: p.name,
           fn: p.fn,
           mission: `${m.code} · ${m.name}`,
-          points: m.points,
-          status: "Verified",
+          first: p.firstSentAt,
+          sends,
+          status,
         },
       });
     });
@@ -270,20 +295,24 @@ function missionsConfig(): MetricConfig {
   return {
     key: "missions",
     title: "Mission Submissions",
-    description: "Every mission proof the crew has approved in the app.",
+    description:
+      "Every Infinity Mission sent from the microsite. A mission can be sent again until the deadline; only the first send ticks Pre-event, re-sends are counted here.",
     filters: [
       {
         key: "mission",
         label: "Mission",
         options: MISSIONS_META.map((m) => `${m.code} · ${m.name}`),
       },
+      { key: "status", label: "Status", options: ["Verified", "Waiting"] },
+      { key: "resent", label: "Sends", options: ["Sent once", "Re-sent"] },
       { key: "fn", label: "Function", options: [...FUNCTIONS] },
     ],
     columns: [
       { key: "name", label: "Participant", primary: true },
       { key: "fn", label: "Function" },
       { key: "mission", label: "Mission" },
-      { key: "points", label: "Points", align: "right" },
+      { key: "first", label: "First sent" },
+      { key: "sends", label: "Sends", align: "right" },
       { key: "status", label: "Status" },
     ],
     rows,
@@ -300,7 +329,8 @@ function talentConfig(): MetricConfig {
   return {
     key: "talent",
     title: "Talent Votes",
-    description: "One vote per colleague who has checked in.",
+    description:
+      "One vote per account. The ballot stays hidden on the microsite until it opens — Wed, 18 Nov, 20.30 to 22.00.",
     filters: [
       { key: "act", label: "Act", options: [...TALENT_ACTS] },
       { key: "fn", label: "Function", options: [...FUNCTIONS] },
@@ -324,56 +354,104 @@ function rewardsConfig(): MetricConfig {
   }));
   return {
     key: "rewards",
-    title: "Reward Redemptions",
-    description: "Rewards claimed on the Infinity Wheel after all three missions are approved.",
+    title: "Prizes Claimed",
+    description:
+      "Claimed at the Redemption Corner: Infinity Missions or a Welcome Dinner game earns the sunglasses; both earn the multifunction bag as well.",
     filters: [
-      { key: "reward", label: "Reward", options: [...REWARDS_META] },
+      { key: "reward", label: "Prize", options: [...REWARDS_META] },
       { key: "fn", label: "Function", options: [...FUNCTIONS] },
     ],
     columns: [
       { key: "name", label: "Participant", primary: true },
       { key: "fn", label: "Function" },
-      { key: "reward", label: "Reward" },
-      { key: "at", label: "Redeemed" },
+      { key: "reward", label: "Prize" },
+      { key: "at", label: "Claimed" },
     ],
     rows,
   };
 }
 
-function pointsConfig(): MetricConfig {
+function checklistConfig(): MetricConfig {
+  const tick = (on: boolean) => (on ? "✓" : "—");
   const rows = PARTICIPANTS.filter((p) => p.checkedIn).map((p) => {
-    const done = `${p.missions.filter(Boolean).length}/3`;
+    const c = checklistOf(p);
+    const checked = `${[c.preEvent, c.talent, c.award].filter(Boolean).length}/3`;
     return {
-      id: `${p.id}-pts`,
+      id: `${p.id}-checklist`,
       search: `${p.name} ${p.id} ${p.fn}`.toLowerCase(),
-      facets: { fn: p.fn, done },
+      facets: { fn: p.fn, checked },
       cells: {
         name: p.name,
         id: p.id,
         fn: p.fn,
-        done,
-        missionPoints: p.missionPoints.toLocaleString("en-US"),
-        activityPoints: p.activityPoints.toLocaleString("en-US"),
-        points: p.points.toLocaleString("en-US"),
+        preEvent: tick(c.preEvent),
+        talent: tick(c.talent),
+        award: tick(c.award),
+        checked,
       },
     };
   });
   return {
-    key: "points",
-    title: "Points per Person",
-    description: `Points from approved Infinity Missions (up to ${MISSION_MAX_POINTS.toLocaleString("en-US")}) and activity stamps at the venue (up to ${ACTIVITY_MAX_POINTS.toLocaleString("en-US")}).`,
+    key: "checklist",
+    title: "Participation Checklist",
+    description:
+      "The passport's three ticks: Pre-event (at least one Infinity Mission sent), JTI Got Talent (voted) and Employee Award (voted).",
     filters: [
       { key: "fn", label: "Function", options: [...FUNCTIONS] },
-      { key: "done", label: "Missions done", options: ["0/3", "1/3", "2/3", "3/3"] },
+      { key: "checked", label: "Checked", options: ["0/3", "1/3", "2/3", "3/3"] },
     ],
     columns: [
       { key: "name", label: "Participant", primary: true },
       { key: "id", label: "Pass ID" },
       { key: "fn", label: "Function" },
-      { key: "done", label: "Missions" },
-      { key: "missionPoints", label: "Mission pts", align: "right" },
-      { key: "activityPoints", label: "Activity pts", align: "right" },
-      { key: "points", label: "Total", align: "right", total: true },
+      { key: "preEvent", label: "Pre-event" },
+      { key: "talent", label: "JTI Got Talent" },
+      { key: "award", label: "Employee Award" },
+      { key: "checked", label: "Checked", align: "right", total: true },
+    ],
+    rows,
+  };
+}
+
+function qaConfig(): MetricConfig {
+  const r = rng(20261008);
+  const rows: DetailRow[] = [];
+  PARTICIPANTS.forEach((p) => {
+    for (let q = 0; q < p.questions; q++) {
+      const anonymous = r() < 0.3;
+      const question = QUESTION_BANK[Math.floor(r() * QUESTION_BANK.length)]!;
+      const roll = r();
+      const status = roll < 0.22 ? "On stage" : roll < 0.9 ? "Queued" : "Removed";
+      const asker = anonymous ? "Anonymous" : p.name;
+      rows.push({
+        id: `${p.id}-q${q}`,
+        search: `${asker} ${p.fn} ${question}`.toLowerCase(),
+        facets: { status, fn: anonymous ? "—" : p.fn },
+        cells: {
+          name: asker,
+          fn: anonymous ? "—" : p.fn,
+          question,
+          at: clock(9, Math.floor(r() * 210)),
+          status,
+        },
+      });
+    }
+  });
+  return {
+    key: "qa",
+    title: "Live Q&A Questions",
+    description:
+      "Questions sent from the microsite's Live Q&A page to the stage's Audience tab. Sample rows until the event.",
+    filters: [
+      { key: "status", label: "Status", options: ["On stage", "Queued", "Removed"] },
+      { key: "fn", label: "Function", options: [...FUNCTIONS] },
+    ],
+    columns: [
+      { key: "name", label: "Asked by", primary: true },
+      { key: "fn", label: "Function" },
+      { key: "question", label: "Question" },
+      { key: "at", label: "Sent" },
+      { key: "status", label: "Status" },
     ],
     rows,
   };
@@ -424,10 +502,11 @@ function storiesConfig(): MetricConfig {
 
 export const METRICS: Record<MetricKey, MetricConfig> = {
   checkins: checkinsConfig(),
-  points: pointsConfig(),
+  checklist: checklistConfig(),
   missions: missionsConfig(),
   talent: talentConfig(),
   rewards: rewardsConfig(),
+  qa: qaConfig(),
   stories: storiesConfig(),
 };
 
@@ -440,9 +519,16 @@ export const STORY_TOTALS = {
 };
 
 /** Aggregate truth used by the dashboard KPI cards so numbers stay consistent. */
-export const AGGREGATES = {
-  registered: PARTICIPANTS.length,
-  checkedIn: PARTICIPANTS.filter((p) => p.checkedIn).length,
-  totalPoints: PARTICIPANTS.reduce((s, p) => s + p.points, 0),
-  maxPoints: MISSION_MAX_POINTS + ACTIVITY_MAX_POINTS,
-};
+export const AGGREGATES = (() => {
+  const ticks = PARTICIPANTS.map(checklistOf);
+  return {
+    registered: PARTICIPANTS.length,
+    checkedIn: PARTICIPANTS.filter((p) => p.checkedIn).length,
+    preEvent: ticks.filter((t) => t.preEvent).length,
+    talent: ticks.filter((t) => t.talent).length,
+    award: ticks.filter((t) => t.award).length,
+    complete: ticks.filter((t) => t.preEvent && t.talent && t.award).length,
+    questions: PARTICIPANTS.reduce((s, p) => s + p.questions, 0),
+    askers: PARTICIPANTS.filter((p) => p.questions > 0).length,
+  };
+})();
