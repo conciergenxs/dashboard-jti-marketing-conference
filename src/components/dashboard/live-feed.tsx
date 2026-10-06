@@ -1,6 +1,6 @@
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Gift, Heart, MessageCircleQuestion, ScanLine, Sparkles, Vote } from "lucide-react";
-import { Panel } from "./primitives";
+import { Panel, SeeAll } from "./primitives";
 import type { FeedItem } from "@/hooks/use-live-dashboard";
 
 const ICONS: Record<string, typeof ScanLine> = {
@@ -15,7 +15,7 @@ const ICONS: Record<string, typeof ScanLine> = {
 export function LiveFeed({ feed }: { feed: FeedItem[] }) {
   const reduce = useReducedMotion();
   return (
-    <Panel eyebrow="Activity log" title="What Is Happening Now">
+    <Panel eyebrow="Activity log" title="What Is Happening Now" action={<SeeAll metric="log" />}>
       {/* lg:space-y-0 is required: the row exit animation drives marginBottom,
           which would otherwise fight the grid gap. */}
       <ul className="space-y-2 lg:grid lg:grid-cols-2 lg:gap-2 lg:space-y-0 xl:block xl:max-h-[21rem] xl:space-y-2 xl:overflow-y-auto">

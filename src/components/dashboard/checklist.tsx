@@ -1,11 +1,12 @@
 import { motion, useReducedMotion } from "motion/react";
-import { Award, Check, Sparkles, Trophy } from "lucide-react";
+import { Award, Check, Sparkles, Trophy, UtensilsCrossed } from "lucide-react";
 import { Counter, Panel, SeeAll, useEntrance } from "./primitives";
 import type { Checklist as ChecklistData } from "@/lib/dashboard-data";
 
 /**
  * The passport's checklist as head counts — ticked, not scored: Pre-event
- * (one Infinity Mission sent), JTI Got Talent (voted), Employee Award (voted).
+ * (one Infinity Mission sent), Welcome Dinner (took part at a booth),
+ * JTI Got Talent (voted), Employee Award (voted).
  */
 export function Checklist({
   checklist,
@@ -23,6 +24,13 @@ export function Checklist({
       hint: "an Infinity Mission sent",
       value: checklist.preEvent,
       icon: Sparkles,
+    },
+    {
+      key: "dinner",
+      label: "Welcome Dinner",
+      hint: "took part at a booth",
+      value: checklist.welcomeDinner,
+      icon: UtensilsCrossed,
     },
     {
       key: "talent",
@@ -49,7 +57,7 @@ export function Checklist({
         <b className="font-semibold text-foreground tabular-nums">
           <Counter value={checklist.complete} />
         </b>{" "}
-        with all three ticked · one tick for taking part
+        with all four ticked · one tick for taking part
       </p>
       <div className="space-y-3">
         {rows.map((r, i) => {

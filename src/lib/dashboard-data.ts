@@ -46,7 +46,14 @@ export type Talent = {
 };
 
 /** The passport's checklist, as head counts. */
-export type Checklist = { preEvent: number; talent: number; award: number; complete: number };
+export type Checklist = {
+  preEvent: number;
+  welcomeDinner: number;
+  talent: number;
+  award: number;
+  /** Everyone with all four ticked. */
+  complete: number;
+};
 
 /**
  * The passport's Activity Quota, as the microsite stamps it: one stamp each,
@@ -172,7 +179,7 @@ export const DATA: Record<DayKey, DayData> = {
     },
     pulse: pulse(10, 96, 210, 9),
     missions: MISSIONS_FINAL,
-    checklist: { preEvent: 309, talent: 0, award: 0, complete: 0 },
+    checklist: { preEvent: 309, welcomeDinner: 318, talent: 0, award: 0, complete: 0 },
     functions: [
       { label: "Sales & Distribution", value: 108 },
       { label: "Marketing", value: 58 },
@@ -209,7 +216,7 @@ export const DATA: Record<DayKey, DayData> = {
     },
     pulse: pulse(11, 128, 340, 8),
     missions: MISSIONS_FINAL,
-    checklist: { preEvent: 309, talent: 298, award: 305, complete: 271 },
+    checklist: { preEvent: 309, welcomeDinner: 332, talent: 298, award: 305, complete: 271 },
     functions: [
       { label: "Sales & Distribution", value: 116 },
       { label: "Marketing", value: 63 },
@@ -246,7 +253,7 @@ export const DATA: Record<DayKey, DayData> = {
     },
     pulse: pulse(8, 74, 180, 7),
     missions: MISSIONS_FINAL,
-    checklist: { preEvent: 309, talent: 298, award: 305, complete: 271 },
+    checklist: { preEvent: 309, welcomeDinner: 332, talent: 298, award: 305, complete: 271 },
     functions: [
       { label: "Sales & Distribution", value: 114 },
       { label: "Marketing", value: 62 },

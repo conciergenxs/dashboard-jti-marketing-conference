@@ -141,10 +141,15 @@ export type Participant = {
   questions: number;
 };
 
-/** Pre-event, JTI Got Talent, Employee Award — the passport's three ticks. */
+/**
+ * The passport's four ticks: Pre-event, Welcome Dinner, JTI Got Talent,
+ * Employee Award. The dinner ticks on taking part at a booth, the same
+ * "one is enough" rule the microsite uses for its stamps.
+ */
 export function checklistOf(p: Participant) {
   return {
     preEvent: p.sends.some((n) => n > 0),
+    welcomeDinner: p.dinnerGames,
     talent: p.vote !== null,
     award: p.awardVote,
   };
@@ -230,7 +235,15 @@ export type DetailRow = {
 };
 
 export type MetricKey =
-  "checkins" | "activities" | "checklist" | "missions" | "talent" | "rewards" | "qa" | "stories";
+  | "checkins"
+  | "activities"
+  | "checklist"
+  | "log"
+  | "missions"
+  | "talent"
+  | "rewards"
+  | "qa"
+  | "stories";
 
 export type MetricConfig = {
   key: MetricKey;
@@ -444,7 +457,7 @@ function activitiesConfig(): MetricConfig {
 function checklistConfig(): MetricConfig {
   const rows = PARTICIPANTS.filter((p) => p.checkedIn).map((p) => {
     const c = checklistOf(p);
-    const checked = `${[c.preEvent, c.talent, c.award].filter(Boolean).length}/3`;
+    const checked = `${[c.preEvent, c.welcomeDinner, c.talent, c.award].filter(Boolean).length}/4`;
     return {
       id: `${p.id}-checklist`,
       search: `${p.name} ${p.id} ${p.fn}`.toLowerCase(),
@@ -454,6 +467,7 @@ function checklistConfig(): MetricConfig {
         id: p.id,
         fn: p.fn,
         preEvent: submission(c.preEvent),
+        welcomeDinner: submission(c.welcomeDinner),
         talent: submission(c.talent),
         award: submission(c.award),
         checked,
@@ -464,16 +478,17 @@ function checklistConfig(): MetricConfig {
     key: "checklist",
     title: "Participation Checklist",
     description:
-      "The passport's three badges, Submitted or Not Submitted: Pre-event (at least one Infinity Mission sent), JTI Got Talent (voted) and Employee Award (voted).",
+      "The passport's four badges, Submitted or Not Submitted: Pre-event (at least one Infinity Mission sent), Welcome Dinner (took part at a booth), JTI Got Talent (voted) and Employee Award (voted).",
     filters: [
       { key: "fn", label: "Function", options: [...FUNCTIONS] },
-      { key: "checked", label: "Checked", options: ["0/3", "1/3", "2/3", "3/3"] },
+      { key: "checked", label: "Checked", options: ["0/4", "1/4", "2/4", "3/4", "4/4"] },
     ],
     columns: [
       { key: "name", label: "Participant", primary: true },
       { key: "id", label: "Pass ID" },
       { key: "fn", label: "Function" },
       { key: "preEvent", label: "Pre-event", badge: true },
+      { key: "welcomeDinner", label: "Welcome Dinner", badge: true },
       { key: "talent", label: "JTI Got Talent", badge: true },
       { key: "award", label: "Employee Award", badge: true },
       { key: "checked", label: "Checked", align: "right", total: true },
@@ -569,10 +584,129 @@ function storiesConfig(): MetricConfig {
   };
 }
 
+/** Every logged moment, newest first: the live feed with nothing left out. */
+const LOG_TYPES = ["Check-in", "Stamp", "Mission", "Vote", "Reward", "Story", "Q&A"];
+const LOG_DAYS = ["Day 1 · 17 Nov", "Day 2 · 18 Nov"];
+
+function logConfig(): MetricConfig {
+  const r = rng(20261106);
+  /** HH:MM:SS — the seconds are what stop the newest page repeating one time. */
+  const stamp = (hhmm: string) => `${hhmm}:${String(Math.floor(r() * 60)).padStart(2, "0")}`;
+  // Sorted on the real values rather than read back out of the cells map.
+  const entries: { row: DetailRow; day: string; at: string }[] = [];
+
+  const add = (
+    p: Participant,
+    key: string,
+    type: string,
+    day: string,
+    at: string,
+    what: string,
+  ) => {
+    const ts = at.length === 5 ? stamp(at) : at;
+    entries.push({
+      day,
+      at: ts,
+      row: {
+        id: `${p.id}-${key}`,
+        search: `${p.name} ${p.id} ${p.fn} ${what}`.toLowerCase(),
+        facets: { type, day, fn: p.fn },
+        cells: { at: ts, name: p.name, fn: p.fn, what, type, day },
+      },
+    });
+  };
+
+  PARTICIPANTS.forEach((p) => {
+    if (!p.checkedIn) return;
+    const d1 = LOG_DAYS[0]!;
+    const d2 = LOG_DAYS[1]!;
+
+    add(p, "checkin", "Check-in", d1, p.checkinAt, "Checked in at the venue");
+
+    p.sends.forEach((n, i) => {
+      if (n === 0) return;
+      const m = MISSIONS_META[i]!;
+      add(p, `m${i}`, "Mission", d1, p.firstSentAt, `Sent Mission ${m.code} · ${m.name}`);
+      if (n > 1)
+        add(
+          p,
+          `m${i}-again`,
+          "Mission",
+          d1,
+          clock(20, Math.floor(r() * 180)),
+          `Re-sent Mission ${m.code} · ${m.name} (${n}×)`,
+        );
+    });
+
+    if (p.dinnerGames)
+      add(
+        p,
+        "dinner",
+        "Stamp",
+        d1,
+        clock(19, Math.floor(r() * 150)),
+        "Stamped at a Welcome Dinner booth",
+      );
+
+    if (p.reward) add(p, "reward", "Reward", d1, p.rewardAt, `Claimed ${p.reward}`);
+
+    if (p.vote)
+      add(p, "talent", "Vote", d2, clock(20, 30 + Math.floor(r() * 85)), `Voted for ${p.vote}`);
+    if (p.awardVote)
+      add(
+        p,
+        "award",
+        "Vote",
+        d2,
+        clock(20, 30 + Math.floor(r() * 85)),
+        "Voted in the Employee Award",
+      );
+
+    if (p.photos > 0)
+      add(
+        p,
+        "story",
+        "Story",
+        d2,
+        clock(13, Math.floor(r() * 240)),
+        `Shared ${p.photos} ${p.photos === 1 ? "story" : "stories"} to the Story Wall`,
+      );
+
+    for (let q = 0; q < p.questions; q++)
+      add(p, `q${q}`, "Q&A", d2, clock(9, Math.floor(r() * 210)), "Sent a question to Live Q&A");
+  });
+
+  // Newest first, the way a log is read.
+  entries.sort((a, b) => b.day.localeCompare(a.day) || b.at.localeCompare(a.at));
+  const rows = entries.map((e) => e.row);
+
+  return {
+    key: "log",
+    title: "Activity Log",
+    description:
+      "Every moment the passport recorded, newest first — check-ins, stamps, missions, votes, rewards, stories and Live Q&A. Sample rows until the event.",
+    filters: [
+      { key: "type", label: "Type", options: LOG_TYPES },
+      { key: "day", label: "Day", options: LOG_DAYS },
+      { key: "fn", label: "Function", options: [...FUNCTIONS] },
+    ],
+    columns: [
+      { key: "at", label: "Time" },
+      { key: "name", label: "Participant", primary: true },
+      { key: "fn", label: "Function" },
+      { key: "what", label: "Activity" },
+      { key: "type", label: "Type" },
+      { key: "day", label: "Day" },
+    ],
+    rows,
+  };
+}
+
 export const METRICS: Record<MetricKey, MetricConfig> = {
   checkins: checkinsConfig(),
   activities: activitiesConfig(),
   checklist: checklistConfig(),
+  log: logConfig(),
   missions: missionsConfig(),
   talent: talentConfig(),
   rewards: rewardsConfig(),
