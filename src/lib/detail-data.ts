@@ -68,10 +68,15 @@ const FUNCTION_WEIGHTS = [116, 63, 56, 41, 36, 29];
 
 /** The microsite's three pre-event Infinity Missions — sent or not. */
 export const MISSIONS_META = [
-  { code: "01", name: "Connect to Win", reviewed: true },
-  { code: "02", name: "Infinity Quiz", reviewed: false },
-  { code: "03", name: "Win Together", reviewed: true },
+  { code: "01", name: "Connect to Win" },
+  { code: "02", name: "Infinity Quiz" },
+  { code: "03", name: "Win Together" },
 ];
+
+/** The only two states the microsite shows for a mission or a ballot (client, 6 Oct). */
+export const SUBMITTED = "Submitted";
+export const NOT_SUBMITTED = "Not Submitted";
+const submission = (on: boolean) => (on ? SUBMITTED : NOT_SUBMITTED);
 
 /** The approved acts, as the microsite's Got Talent line-up names them. */
 export const TALENT_ACTS = [
@@ -211,6 +216,8 @@ export type Column = {
   primary?: boolean;
   /** The column the row adds up to: given room and weight of its own. */
   total?: boolean;
+  /** Submitted / Not Submitted, drawn as the microsite's badge. */
+  badge?: boolean;
 };
 export type Filter = { key: string; label: string; options: string[] };
 export type DetailRow = {
@@ -266,12 +273,10 @@ function checkinsConfig(): MetricConfig {
 
 function missionsConfig(): MetricConfig {
   const rows: DetailRow[] = [];
-  const r = rng(20261007);
   PARTICIPANTS.forEach((p) => {
     p.sends.forEach((sends, k) => {
-      if (!sends) return;
       const m = MISSIONS_META[k]!;
-      const status = !m.reviewed || r() > 0.38 ? "Verified" : "Waiting";
+      const status = submission(sends > 0);
       rows.push({
         id: `${p.id}-${m.code}`,
         search: `${p.name} ${p.fn} ${m.name} ${m.code}`.toLowerCase(),
@@ -279,13 +284,13 @@ function missionsConfig(): MetricConfig {
           mission: `${m.code} · ${m.name}`,
           fn: p.fn,
           status,
-          resent: sends > 1 ? "Re-sent" : "Sent once",
+          resent: sends === 0 ? "Not sent" : sends > 1 ? "Re-sent" : "Sent once",
         },
         cells: {
           name: p.name,
           fn: p.fn,
           mission: `${m.code} · ${m.name}`,
-          first: p.firstSentAt,
+          first: sends > 0 ? p.firstSentAt : "—",
           sends,
           status,
         },
@@ -296,15 +301,15 @@ function missionsConfig(): MetricConfig {
     key: "missions",
     title: "Mission Submissions",
     description:
-      "Every Infinity Mission sent from the microsite. A mission can be sent again until the deadline; only the first send ticks Pre-event, re-sends are counted here.",
+      "Every participant's three Infinity Missions, Submitted or Not Submitted. A mission can be sent again until the deadline; only the first send ticks Pre-event, re-sends are counted here.",
     filters: [
       {
         key: "mission",
         label: "Mission",
         options: MISSIONS_META.map((m) => `${m.code} · ${m.name}`),
       },
-      { key: "status", label: "Status", options: ["Verified", "Waiting"] },
-      { key: "resent", label: "Sends", options: ["Sent once", "Re-sent"] },
+      { key: "status", label: "Status", options: [SUBMITTED, NOT_SUBMITTED] },
+      { key: "resent", label: "Sends", options: ["Not sent", "Sent once", "Re-sent"] },
       { key: "fn", label: "Function", options: [...FUNCTIONS] },
     ],
     columns: [
@@ -313,7 +318,7 @@ function missionsConfig(): MetricConfig {
       { key: "mission", label: "Mission" },
       { key: "first", label: "First sent" },
       { key: "sends", label: "Sends", align: "right" },
-      { key: "status", label: "Status" },
+      { key: "status", label: "Status", badge: true },
     ],
     rows,
   };
@@ -372,7 +377,6 @@ function rewardsConfig(): MetricConfig {
 }
 
 function checklistConfig(): MetricConfig {
-  const tick = (on: boolean) => (on ? "✓" : "—");
   const rows = PARTICIPANTS.filter((p) => p.checkedIn).map((p) => {
     const c = checklistOf(p);
     const checked = `${[c.preEvent, c.talent, c.award].filter(Boolean).length}/3`;
@@ -384,9 +388,9 @@ function checklistConfig(): MetricConfig {
         name: p.name,
         id: p.id,
         fn: p.fn,
-        preEvent: tick(c.preEvent),
-        talent: tick(c.talent),
-        award: tick(c.award),
+        preEvent: submission(c.preEvent),
+        talent: submission(c.talent),
+        award: submission(c.award),
         checked,
       },
     };
@@ -395,7 +399,7 @@ function checklistConfig(): MetricConfig {
     key: "checklist",
     title: "Participation Checklist",
     description:
-      "The passport's three ticks: Pre-event (at least one Infinity Mission sent), JTI Got Talent (voted) and Employee Award (voted).",
+      "The passport's three badges, Submitted or Not Submitted: Pre-event (at least one Infinity Mission sent), JTI Got Talent (voted) and Employee Award (voted).",
     filters: [
       { key: "fn", label: "Function", options: [...FUNCTIONS] },
       { key: "checked", label: "Checked", options: ["0/3", "1/3", "2/3", "3/3"] },
@@ -404,9 +408,9 @@ function checklistConfig(): MetricConfig {
       { key: "name", label: "Participant", primary: true },
       { key: "id", label: "Pass ID" },
       { key: "fn", label: "Function" },
-      { key: "preEvent", label: "Pre-event" },
-      { key: "talent", label: "JTI Got Talent" },
-      { key: "award", label: "Employee Award" },
+      { key: "preEvent", label: "Pre-event", badge: true },
+      { key: "talent", label: "JTI Got Talent", badge: true },
+      { key: "award", label: "Employee Award", badge: true },
       { key: "checked", label: "Checked", align: "right", total: true },
     ],
     rows,

@@ -3,15 +3,36 @@ import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
   ArrowLeft,
+  Check,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  CircleDashed,
   Search,
   SlidersHorizontal,
   X,
 } from "lucide-react";
 import { ContourField } from "@/components/dashboard/contour-field";
-import { METRICS, METRIC_KEYS, type MetricKey } from "@/lib/detail-data";
+import { METRICS, METRIC_KEYS, SUBMITTED, type Column, type MetricKey } from "@/lib/detail-data";
+
+/** The microsite's status badge: Submitted, or Not Submitted. */
+function SubmissionBadge({ value }: { value: string }) {
+  const on = value === SUBMITTED;
+  const Icon = on ? Check : CircleDashed;
+  return (
+    <span
+      className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-label font-semibold tracking-[0.06em] uppercase ${
+        on ? "bg-primary/10 text-primary" : "bg-secondary text-muted-foreground"
+      }`}
+    >
+      <Icon className="size-3" />
+      {value}
+    </span>
+  );
+}
+
+const cell = (c: Column, value: string | number) =>
+  c.badge ? <SubmissionBadge value={String(value)} /> : value;
 
 const PAGE_SIZE = 12;
 
@@ -188,7 +209,7 @@ function MetricDetail() {
                         key={c.key}
                         className={`px-4 py-3 ${c.align === "right" ? "text-right tabular-nums" : ""} ${c.primary || c.total ? "font-semibold" : "text-muted-foreground"} ${c.total ? "pr-6 text-foreground" : ""}`}
                       >
-                        {r.cells[c.key]}
+                        {cell(c, r.cells[c.key]!)}
                       </td>
                     ))}
                   </motion.tr>
@@ -250,7 +271,7 @@ function MetricDetail() {
                                 {c.label}
                               </span>
                               <span className="min-w-0 truncate text-label font-semibold text-foreground tabular-nums">
-                                {r.cells[c.key]}
+                                {cell(c, r.cells[c.key]!)}
                               </span>
                             </div>
                           ))}
