@@ -1,20 +1,33 @@
 import { motion, useReducedMotion } from "motion/react";
 import { Counter, Panel, SeeAll, useEntrance } from "./primitives";
-import type { DayData } from "@/lib/dashboard-data";
+import { PRIZE_TOTALS, REDEEMERS, SHORT } from "@/lib/detail-data";
 
-export function Rewards({ rewards }: { rewards: DayData["rewards"] }) {
+/** The last few hand-overs, newest first. */
+const LATEST = [...REDEEMERS].sort((a, b) => b.rewardAt.localeCompare(a.rewardAt)).slice(0, 6);
+
+/**
+ * The Redemption Corner's hand-overs, counted from the same per-person records
+ * the "See all" page lists — so the tiles and the table always agree.
+ */
+export function Rewards() {
   const reduce = useReducedMotion();
   const entrance = useEntrance();
-  const total = rewards.reduce((s, r) => s + r.redeemed, 0);
+  const total = PRIZE_TOTALS.reduce((s, r) => s + r.redeemed, 0);
   return (
     <Panel eyebrow="Redemption Corner" title="Prizes Claimed" action={<SeeAll metric="rewards" />}>
       <p className="-mt-3 mb-4 text-label text-muted-foreground">
-        <b className="font-semibold text-foreground tabular-nums">{total}</b> prizes handed out ·
-        missions or a dinner game → sunglasses, both → the bag too
+        <b className="font-semibold text-foreground tabular-nums">
+          <Counter value={total} />
+        </b>{" "}
+        prizes to{" "}
+        <b className="font-semibold text-foreground tabular-nums">
+          <Counter value={REDEEMERS.length} />
+        </b>{" "}
+        people · see who took what
       </p>
 
-      <div className="grid grid-cols-2 gap-2.5">
-        {rewards.map((r, i) => (
+      <div className="grid grid-cols-3 gap-2.5">
+        {PRIZE_TOTALS.map((r, i) => (
           <motion.div
             key={r.name}
             initial={{ opacity: 0, y: 16 }}
@@ -29,6 +42,34 @@ export function Rewards({ rewards }: { rewards: DayData["rewards"] }) {
           </motion.div>
         ))}
       </div>
+
+      <p className="mt-5 text-label tracking-[0.12em] text-muted-foreground uppercase">
+        Latest hand-overs
+      </p>
+      <ul className="mt-2 divide-y divide-border/60">
+        {LATEST.map((p, i) => (
+          <motion.li
+            key={p.id}
+            initial={{ opacity: 0, x: -12 }}
+            {...entrance({ opacity: 1, x: 0 })}
+            transition={{ duration: reduce ? 0 : 0.45, delay: reduce ? 0 : 0.2 + i * 0.06 }}
+            className="flex items-baseline justify-between gap-3 py-2"
+          >
+            <span className="min-w-0">
+              <span className="block truncate text-body font-semibold text-foreground">
+                {p.name}
+              </span>
+              <span className="block truncate text-label text-muted-foreground">
+                {p.prizes.map((x) => SHORT[x]).join(" · ")}
+                {p.journal ? ` · ${p.journal.leather}` : ""}
+              </span>
+            </span>
+            <span className="shrink-0 text-label text-muted-foreground tabular-nums">
+              {p.rewardAt}
+            </span>
+          </motion.li>
+        ))}
+      </ul>
     </Panel>
   );
 }

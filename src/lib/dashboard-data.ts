@@ -98,7 +98,6 @@ export type DayData = {
   talents: Talent[];
   gallery: { photos: number; likes: number; contributors: number; topMoment: string };
   hub: Slice[];
-  rewards: { name: string; redeemed: number }[];
   activities: ActivityStamps;
 };
 
@@ -162,10 +161,6 @@ const TALENTS_FINAL = talentBase.map((t, i) => ({ ...t, votes: [74, 66, 51, 43, 
 const DAY1_STAMPS = [318, 309, 214, 187, 168, 152, 296];
 const STAMPS_DAY1 = [...DAY1_STAMPS, 0, 0, 0, 0];
 const STAMPS_FINAL = [...DAY1_STAMPS, 329, 322, 331, 204];
-const REWARDS_FINAL = [
-  { name: "Sunglasses", redeemed: 296 },
-  { name: "Multifunction Bag", redeemed: 197 },
-];
 
 export const DATA: Record<DayKey, DayData> = {
   day1: {
@@ -202,7 +197,6 @@ export const DATA: Record<DayKey, DayData> = {
       { label: "Engagement Hub", value: 24 },
       { label: "Content & Memories", value: 17 },
     ],
-    rewards: REWARDS_FINAL,
     activities: STAMPS_DAY1,
   },
   day2: {
@@ -239,7 +233,6 @@ export const DATA: Record<DayKey, DayData> = {
       { label: "Engagement Hub", value: 28 },
       { label: "Content & Memories", value: 17 },
     ],
-    rewards: REWARDS_FINAL,
     activities: STAMPS_FINAL,
   },
   day3: {
@@ -276,7 +269,6 @@ export const DATA: Record<DayKey, DayData> = {
       { label: "Engagement Hub", value: 24 },
       { label: "Content & Memories", value: 36 },
     ],
-    rewards: REWARDS_FINAL,
     activities: STAMPS_FINAL,
   },
 };

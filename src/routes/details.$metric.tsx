@@ -207,7 +207,7 @@ function MetricDetail() {
                     {config.columns.map((c) => (
                       <td
                         key={c.key}
-                        className={`px-4 py-3 ${c.align === "right" ? "text-right tabular-nums" : ""} ${c.primary || c.total ? "font-semibold" : "text-muted-foreground"} ${c.total ? "pr-6 text-foreground" : ""}`}
+                        className={`px-4 py-3 ${c.nowrap ? "whitespace-nowrap" : ""} ${c.align === "right" ? "text-right tabular-nums" : ""} ${c.primary || c.total ? "font-semibold" : "text-muted-foreground"} ${c.total ? "pr-6 text-foreground" : ""}`}
                       >
                         {cell(c, r.cells[c.key]!)}
                       </td>

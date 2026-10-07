@@ -91,10 +91,50 @@ export const TALENT_ACTS = [
 ];
 
 /**
- * What the Redemption Corner hands out: Infinity Missions *or* a Welcome
- * Dinner game earns the sunglasses; both earn the bag as well.
+ * What the Redemption Corner hands out — the microsite's catalogue
+ * (`src/lib/redemption.ts`): Sunglasses and the Multifunction Bag from JTI,
+ * and AYÊM Studio's Handcrafted Leather Journal, made to each person's picks.
  */
-export const REWARDS_META = ["Sunglasses", "Sunglasses + Multifunction Bag"];
+export const PRIZES = ["Sunglasses", "Multifunction Bag", "Handcrafted Leather Journal"] as const;
+export type Prize = (typeof PRIZES)[number];
+
+/** The journal card's options, as the Redemption Checker offers them. */
+const JOURNAL_LEATHERS = [
+  "Synthetic Black",
+  "Synthetic Light",
+  "Synthetic Dark",
+  "Grain Navy",
+  "Grain Red",
+  "Grain Blue",
+  "Glow Brown",
+  "Glow Maroon",
+  "Matte Tan",
+  "Croco Tan",
+  "Croco Black",
+  "Vegetan Blue",
+  "Vegetan Pink",
+  "Crazy Horse Red",
+  "Crazy Horse Navy",
+];
+const JOURNAL_CORDS = [
+  "Black",
+  "Brown",
+  "Navy",
+  "Maroon",
+  "Fuchsia",
+  "Tosca",
+  "Olive",
+  "Red",
+  "Cream",
+  "Pink",
+  "Peach",
+  "Blue",
+];
+const JOURNAL_GROMMETS = ["Silver", "Gold"];
+/** The crew logins at the Redemption Corner. */
+const REDEEM_CREW = ["crew.redemption1", "crew.redemption2", "crew.redemption3"];
+
+export type JournalPicks = { leather: string; cord: string; grommet: string; engraving: string };
 
 /** Sample questions for the Live Q&A detail page — the real ones come from the microsite. */
 const QUESTION_BANK = [
@@ -135,7 +175,11 @@ export type Participant = {
   /** Played at least one Welcome Dinner game booth. */
   dinnerGames: boolean;
   photos: number;
-  reward: string | null;
+  /** What they took home from the Redemption Corner, in hand-over order. */
+  prizes: Prize[];
+  /** The leather journal as they ordered it; null without one. */
+  journal: JournalPicks | null;
+  redeemBy: string;
   rewardAt: string;
   /** Questions sent from the microsite's Live Q&A page. */
   questions: number;
@@ -161,6 +205,38 @@ function buildFunctionPool() {
     for (let n = 0; n < FUNCTION_WEIGHTS[i]!; n++) pool.push(f);
   });
   return pool;
+}
+
+/**
+ * Missions or a dinner game earns the sunglasses, both the bag as well; about
+ * one in five of those served also orders the leather journal.
+ */
+function redemption(
+  atCorner: boolean,
+  preEvent: boolean,
+  dinnerGames: boolean,
+  name: string,
+  r: () => number,
+) {
+  const prizes: Prize[] = [];
+  if (!atCorner) return { prizes, journal: null, redeemBy: "—" };
+  if (preEvent || dinnerGames) prizes.push("Sunglasses");
+  if (preEvent && dinnerGames) prizes.push("Multifunction Bag");
+  let journal: JournalPicks | null = null;
+  if (prizes.length && r() < 0.22) {
+    prizes.push("Handcrafted Leather Journal");
+    const initials = name
+      .split(" ")
+      .map((w) => w[0])
+      .join(".");
+    journal = {
+      leather: JOURNAL_LEATHERS[Math.floor(r() * JOURNAL_LEATHERS.length)]!,
+      cord: JOURNAL_CORDS[Math.floor(r() * JOURNAL_CORDS.length)]!,
+      grommet: JOURNAL_GROMMETS[Math.floor(r() * JOURNAL_GROMMETS.length)]!,
+      engraving: r() < 0.3 ? "" : r() < 0.5 ? `${initials}.` : name.split(" ")[0]!,
+    };
+  }
+  return { prizes, journal, redeemBy: REDEEM_CREW[Math.floor(r() * REDEEM_CREW.length)]! };
 }
 
 function clock(base: number, minutes: number) {
@@ -204,12 +280,8 @@ export const PARTICIPANTS: Participant[] = (() => {
       awardVote,
       dinnerGames,
       photos: checkedIn ? Math.floor(r() * 9) : 0,
-      reward:
-        preEvent && dinnerGames
-          ? REWARDS_META[1]!
-          : preEvent || dinnerGames
-            ? REWARDS_META[0]!
-            : null,
+      // Not everyone eligible makes it to the corner on the night.
+      ...redemption(checkedIn && rx() < 0.86, preEvent, dinnerGames, `${first} ${last}`, rx),
       rewardAt: clock(19, Math.floor(rx() * 150)),
       questions: checkedIn && rx() > 0.66 ? 1 + (rx() < 0.2 ? 1 : 0) : 0,
     };
@@ -225,6 +297,8 @@ export type Column = {
   total?: boolean;
   /** Submitted / Not Submitted, drawn as the microsite's badge. */
   badge?: boolean;
+  /** Short values (IDs, times) that read wrong when they break. */
+  nowrap?: boolean;
 };
 export type Filter = { key: string; label: string; options: string[] };
 export type DetailRow = {
@@ -365,27 +439,70 @@ function talentConfig(): MetricConfig {
   };
 }
 
+export const REDEEMERS = PARTICIPANTS.filter((p) => p.prizes.length);
+
+/** Pieces handed out per prize, from the same records the detail page lists. */
+export const PRIZE_TOTALS = PRIZES.map((name) => ({
+  name,
+  redeemed: REDEEMERS.filter((p) => p.prizes.includes(name)).length,
+}));
+
+export const SHORT: Record<Prize, string> = {
+  Sunglasses: "Sunglasses",
+  "Multifunction Bag": "Bag",
+  "Handcrafted Leather Journal": "Journal",
+};
+
+function journalLabel(j: JournalPicks | null) {
+  if (!j) return "—";
+  return [
+    j.leather,
+    `${j.cord} cord`,
+    `${j.grommet} grommets`,
+    j.engraving ? `“${j.engraving}”` : "no engraving",
+  ].join(" · ");
+}
+
 function rewardsConfig(): MetricConfig {
-  const rows = PARTICIPANTS.filter((p) => p.reward).map((p) => ({
-    id: `${p.id}-reward`,
-    search: `${p.name} ${p.fn} ${p.reward}`.toLowerCase(),
-    facets: { reward: p.reward!, fn: p.fn },
-    cells: { name: p.name, fn: p.fn, reward: p.reward!, at: p.rewardAt },
-  }));
+  const rows = REDEEMERS.map((p) => {
+    const set = p.prizes.map((x) => SHORT[x]).join(" + ");
+    return {
+      id: `${p.id}-reward`,
+      search:
+        `${p.name} ${p.id} ${p.fn} ${p.prizes.join(" ")} ${journalLabel(p.journal)}`.toLowerCase(),
+      facets: { set, fn: p.fn, crew: p.redeemBy },
+      cells: {
+        name: p.name,
+        id: p.id,
+        fn: p.fn,
+        prizes: p.prizes.map((x) => SHORT[x]).join(" · "),
+        journal: journalLabel(p.journal),
+        crew: p.redeemBy,
+        at: p.rewardAt,
+        count: `${p.prizes.length}/${PRIZES.length}`,
+      },
+    };
+  });
+  const sets = [...new Set(rows.map((r) => r.facets.set))].sort((a, b) => a.length - b.length);
   return {
     key: "rewards",
     title: "Prizes Claimed",
     description:
-      "Claimed at the Redemption Corner: Infinity Missions or a Welcome Dinner game earns the sunglasses; both earn the multifunction bag as well.",
+      "Who took what from the Redemption Corner, one row per person: Sunglasses, the Multifunction Bag and AYÊM Studio's Handcrafted Leather Journal, with the journal as ordered and the crew who handed it over.",
     filters: [
-      { key: "reward", label: "Prize", options: [...REWARDS_META] },
+      { key: "set", label: "Prizes", options: sets },
+      { key: "crew", label: "Crew", options: [...REDEEM_CREW] },
       { key: "fn", label: "Function", options: [...FUNCTIONS] },
     ],
     columns: [
       { key: "name", label: "Participant", primary: true },
+      { key: "id", label: "Pass ID", nowrap: true },
       { key: "fn", label: "Function" },
-      { key: "reward", label: "Prize" },
-      { key: "at", label: "Claimed" },
+      { key: "prizes", label: "Prizes" },
+      { key: "journal", label: "Leather Journal" },
+      { key: "crew", label: "Crew", nowrap: true },
+      { key: "at", label: "Time", nowrap: true },
+      { key: "count", label: "Taken", align: "right", total: true },
     ],
     rows,
   };
@@ -648,7 +765,8 @@ function logConfig(): MetricConfig {
         "Stamped at a Welcome Dinner booth",
       );
 
-    if (p.reward) add(p, "reward", "Reward", d1, p.rewardAt, `Claimed ${p.reward}`);
+    if (p.prizes.length)
+      add(p, "reward", "Reward", d1, p.rewardAt, `Redeemed ${p.prizes.join(", ")}`);
 
     if (p.vote)
       add(p, "talent", "Vote", d2, clock(20, 30 + Math.floor(r() * 85)), `Voted for ${p.vote}`);

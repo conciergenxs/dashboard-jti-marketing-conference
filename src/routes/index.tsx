@@ -97,7 +97,7 @@ function Dashboard() {
               )}
             </Reveal>
             <Reveal delay={0.08}>
-              <Rewards rewards={data.rewards} />
+              <Rewards />
             </Reveal>
           </div>
 
