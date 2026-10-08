@@ -6,7 +6,7 @@ import type { Checklist as ChecklistData } from "@/lib/dashboard-data";
 /**
  * The passport's checklist as head counts — ticked, not scored: Pre-event
  * (one Infinity Mission sent), Welcome Dinner (took part at a booth),
- * JTI Got Talent (voted), Employee Award (voted).
+ * JTI Got Talent (voted), Inspire Awards (voted in Field, Non-Field or both).
  */
 export function Checklist({
   checklist,
@@ -41,8 +41,8 @@ export function Checklist({
     },
     {
       key: "award",
-      label: "Employee Award",
-      hint: "voted for two colleagues",
+      label: "Inspire Awards",
+      hint: "voted in Field or Non-Field",
       value: checklist.award,
       icon: Award,
     },

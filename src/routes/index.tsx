@@ -20,7 +20,7 @@ import { EVENT, GALLERY_ENABLED, type DayKey } from "@/lib/dashboard-data";
 
 const TITLE = "Grow Beyond Limits — Market Conference 2026 Live Analytics";
 const DESCRIPTION =
-  "Live analytics for JTI Indonesia Market Conference 2026: check-ins, the passport checklist, Infinity Missions, JTI Got Talent voting and Live Q&A in real time.";
+  "Live analytics for JTI Indonesia Market Conference 2026: check-ins, the passport checklist, Infinity Missions, JTI Got Talent standings and Q&A in real time.";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -38,7 +38,7 @@ export const Route = createFileRoute("/")({
 
 function Dashboard() {
   const [day, setDay] = useState<DayKey>("day2");
-  const { data, feed } = useLiveDashboard(day);
+  const { data, feed, quiet } = useLiveDashboard(day);
 
   return (
     <main className="relative min-h-screen overflow-x-clip">
@@ -81,7 +81,7 @@ function Dashboard() {
               <Missions missions={data.missions} preEvent={data.checklist.preEvent} />
             </Reveal>
             <Reveal delay={0.08}>
-              <TalentBoard talents={data.talents} votingOpen={data.votingOpen} />
+              <TalentBoard talents={data.talents} />
             </Reveal>
             <Reveal>
               <FunctionBars functions={data.functions} />
@@ -105,7 +105,7 @@ function Dashboard() {
               explicit grid coordinates lift it into the rail beside the chart,
               which CSS grid placement does independently of source order. */}
           <Reveal className="xl:col-span-4 xl:col-start-9 xl:row-start-2">
-            <LiveFeed feed={feed} />
+            <LiveFeed feed={feed} quiet={quiet} />
           </Reveal>
         </motion.div>
 

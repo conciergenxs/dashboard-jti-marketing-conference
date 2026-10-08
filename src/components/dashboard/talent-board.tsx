@@ -1,72 +1,137 @@
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { Clock } from "lucide-react";
-import { Panel, Counter, SeeAll } from "./primitives";
-import { VOTING_OPENS_LABEL, type Talent } from "@/lib/dashboard-data";
+import { motion, useReducedMotion } from "motion/react";
+import { Lock, Trophy } from "lucide-react";
+import { Counter, Panel, SeeAll, useEntrance } from "./primitives";
+import type { Talent } from "@/lib/dashboard-data";
+import { TALENT_VOTE } from "@/lib/detail-data";
 
-export function TalentBoard({ talents, votingOpen }: { talents: Talent[]; votingOpen: boolean }) {
+const EASE = [0.22, 1, 0.36, 1] as const;
+
+/**
+ * JTI Got Talent's final standings. The ballot ran before the event and the
+ * Top 3 were announced on 5 Nov, so on every event day this board is closed:
+ * the Top 3 sit in their own frame, the rest of the line-up below it.
+ */
+export function TalentBoard({ talents }: { talents: Talent[] }) {
   const reduce = useReducedMotion();
+  const entrance = useEntrance();
   const ranked = [...talents].sort((a, b) => b.votes - a.votes);
-  const max = ranked[0]?.votes ?? 1;
+  const max = ranked[0]?.votes || 1;
+  const total = ranked.reduce((s, t) => s + t.votes, 0);
 
   return (
-    <Panel eyebrow="JTI Got Talent" title="Vote Leaderboard" action={<SeeAll metric="talent" />}>
-      {/* The ballot is hidden on the microsite until its window opens. */}
-      {!votingOpen ? (
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: reduce ? 0 : 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className="rounded-xl border border-dashed border-border bg-surface/60 px-5 py-8 text-center"
-        >
-          <span className="mx-auto grid size-11 place-items-center rounded-full bg-primary/10 text-primary">
-            <Clock className="size-5" />
+    <Panel eyebrow="JTI Got Talent" title="Final Standings" action={<SeeAll metric="talent" />}>
+      <p className="-mt-3 mb-4 flex min-w-0 items-center gap-2 text-label text-muted-foreground">
+        <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 font-semibold tracking-[0.1em] text-primary uppercase">
+          <Lock className="size-3" aria-hidden />
+          Final
+        </span>
+        <span className="min-w-0 truncate">
+          <b className="font-semibold text-foreground tabular-nums">
+            <Counter value={total} />
+          </b>{" "}
+          votes · voting closed {TALENT_VOTE.closes}
+        </span>
+      </p>
+
+      <motion.section
+        aria-label="Top 3"
+        initial={{ opacity: 0, y: 12, scale: 0.98 }}
+        {...entrance({ opacity: 1, y: 0, scale: 1 })}
+        transition={{ duration: reduce ? 0 : 0.5, ease: EASE }}
+        className="rounded-2xl border border-primary/25 bg-gradient-to-br from-primary/[0.07] via-surface/50 to-accent/[0.08] p-2 sm:p-2.5"
+      >
+        <div className="flex items-center justify-between gap-3 px-1.5 pt-0.5 pb-2 text-label">
+          <span className="inline-flex shrink-0 items-center gap-1.5 font-semibold tracking-[0.14em] text-primary uppercase">
+            <Trophy className="size-3.5" aria-hidden />
+            Top 3
           </span>
-          <p className="display mt-3 text-title font-semibold uppercase">Voting Opens Soon</p>
-          <p className="mt-1 text-label text-muted-foreground">
-            {VOTING_OPENS_LABEL} · {talents.length} acts in the line-up
-          </p>
-        </motion.div>
-      ) : (
-        <ul className="space-y-2.5">
-          <AnimatePresence initial={false}>
-            {ranked.map((t, i) => (
-              <motion.li
-                key={t.id}
-                layout
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={
-                  reduce ? { duration: 0 } : { type: "spring", stiffness: 260, damping: 28 }
-                }
-                className="hover-warm relative overflow-hidden rounded-xl border border-border/70 bg-surface/60 p-3"
-              >
-                <motion.div
-                  className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary/12 to-accent/10"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${(t.votes / max) * 100}%` }}
-                  transition={{ duration: reduce ? 0 : 1, ease: [0.22, 1, 0.36, 1] }}
-                />
-                <div className="relative flex items-center gap-3">
-                  <span
-                    className={`display flex size-8 shrink-0 items-center justify-center rounded-lg text-body font-semibold tabular-nums ${
-                      i === 0 ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary"
-                    }`}
-                  >
-                    {i + 1}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="display truncate text-body font-semibold uppercase">{t.name}</p>
-                    <p className="truncate text-label text-muted-foreground">{t.act}</p>
-                  </div>
-                  <span className="shrink-0 text-body font-semibold text-foreground tabular-nums">
-                    <Counter value={t.votes} />
-                  </span>
-                </div>
-              </motion.li>
-            ))}
-          </AnimatePresence>
-        </ul>
-      )}
+          <span className="min-w-0 truncate text-muted-foreground">
+            Announced {TALENT_VOTE.announced}
+          </span>
+        </div>
+        <ol className="space-y-2">
+          {ranked.slice(0, 3).map((t, i) => (
+            <Standing key={t.id} talent={t} rank={i + 1} max={max} top />
+          ))}
+        </ol>
+      </motion.section>
+
+      <ol className="mt-2.5 space-y-1.5">
+        {ranked.slice(3).map((t, i) => (
+          <Standing key={t.id} talent={t} rank={i + 4} max={max} />
+        ))}
+      </ol>
     </Panel>
+  );
+}
+
+function Standing({
+  talent,
+  rank,
+  max,
+  top = false,
+}: {
+  talent: Talent;
+  rank: number;
+  max: number;
+  top?: boolean;
+}) {
+  const reduce = useReducedMotion();
+  const entrance = useEntrance();
+  const delay = 0.08 + (rank - 1) * 0.06;
+  return (
+    <motion.li
+      initial={{ opacity: 0, y: 10 }}
+      {...entrance({ opacity: 1, y: 0 })}
+      transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 260, damping: 28, delay }}
+      className={`hover-warm relative overflow-hidden rounded-xl border ${
+        top ? "border-primary/15 bg-surface/90 p-3" : "border-border/70 bg-surface/60 px-3 py-2"
+      }`}
+    >
+      <motion.div
+        aria-hidden
+        className={`absolute inset-y-0 left-0 bg-gradient-to-r ${
+          top ? "from-primary/14 to-accent/12" : "from-primary/8 to-accent/6"
+        }`}
+        initial={{ width: 0 }}
+        {...entrance({ width: `${(talent.votes / max) * 100}%` })}
+        transition={{ duration: reduce ? 0 : 1, delay: reduce ? 0 : delay + 0.1, ease: EASE }}
+      />
+      <div className="relative flex items-center gap-3">
+        <motion.span
+          initial={{ opacity: 0, scale: 0.4 }}
+          {...entrance({ opacity: 1, scale: 1 })}
+          transition={
+            reduce
+              ? { duration: 0 }
+              : { type: "spring", stiffness: 420, damping: 17, delay: delay + 0.15 }
+          }
+          className={`display grid shrink-0 place-items-center rounded-lg font-bold tabular-nums ${
+            top
+              ? "size-8 bg-gradient-to-br from-primary to-accent text-body text-primary-foreground shadow-[0_6px_16px_-8px_var(--color-primary)]"
+              : "size-7 bg-secondary text-label text-muted-foreground"
+          }`}
+        >
+          {rank}
+        </motion.span>
+        <div className="min-w-0 flex-1">
+          <p
+            className={`display truncate text-body font-semibold uppercase ${
+              top ? "" : "text-foreground/75"
+            }`}
+          >
+            {talent.name}
+          </p>
+          {top && <p className="truncate text-label text-muted-foreground">{talent.act}</p>}
+        </div>
+        <span
+          className={`shrink-0 text-body font-semibold tabular-nums ${
+            top ? "text-foreground" : "text-muted-foreground"
+          }`}
+        >
+          <Counter value={talent.votes} />
+        </span>
+      </div>
+    </motion.li>
   );
 }

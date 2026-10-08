@@ -3,7 +3,9 @@ import { Counter, Panel, SeeAll, useEntrance } from "./primitives";
 import { PRIZE_TOTALS, REDEEMERS, SHORT } from "@/lib/detail-data";
 
 /** The last few hand-overs, newest first. */
-const LATEST = [...REDEEMERS].sort((a, b) => b.rewardAt.localeCompare(a.rewardAt)).slice(0, 6);
+const LATEST = [...REDEEMERS]
+  .sort((a, b) => (b.rewardAt ?? "").localeCompare(a.rewardAt ?? ""))
+  .slice(0, 6);
 
 /**
  * The Redemption Corner's hand-overs, counted from the same per-person records
@@ -61,11 +63,10 @@ export function Rewards() {
               </span>
               <span className="block truncate text-label text-muted-foreground">
                 {p.prizes.map((x) => SHORT[x]).join(" · ")}
-                {p.journal ? ` · ${p.journal.leather}` : ""}
               </span>
             </span>
             <span className="shrink-0 text-label text-muted-foreground tabular-nums">
-              {p.rewardAt}
+              {p.rewardAt?.slice(11, 16)}
             </span>
           </motion.li>
         ))}

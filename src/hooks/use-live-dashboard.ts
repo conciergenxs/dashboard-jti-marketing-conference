@@ -12,7 +12,7 @@ export type FeedItem = {
 
 const ORDER: DayKey[] = ["day1", "day2", "day3"];
 
-/** Only what can happen that day: no votes before Day 2's night, no missions after Day 1. */
+/** Only what can happen that day: no votes (both closed before the event), no missions after Day 1. */
 function templatesFor(day: DayKey) {
   const at = ORDER.indexOf(day);
   return FEED_TEMPLATES.filter(
@@ -26,6 +26,7 @@ function templatesFor(day: DayKey) {
  */
 function buildFeed(day: DayKey): FeedItem[] {
   const pool = templatesFor(day);
+  if (!pool.length) return [];
   return Array.from({ length: 7 }, (_, i) => {
     const t = pool[Math.floor(Math.random() * pool.length)]!;
     return {
@@ -48,6 +49,8 @@ export function useLiveDashboard(day: DayKey) {
   }, [day]);
 
   const data = useMemo(() => DATA[day], [day]);
+  // Known from the day alone, so the quiet state never flashes in on load.
+  const quiet = useMemo(() => templatesFor(day).length === 0, [day]);
 
-  return { data, feed, updatedAt };
+  return { data, feed, quiet, updatedAt };
 }

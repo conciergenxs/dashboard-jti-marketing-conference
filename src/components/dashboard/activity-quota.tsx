@@ -1,6 +1,7 @@
 import { motion, useReducedMotion } from "motion/react";
 import { Counter, Panel, SeeAll, useEntrance } from "./primitives";
-import { ACTIVITIES, ACTIVITY_DAYS, type ActivityStamps } from "@/lib/dashboard-data";
+import type { ActivityStamps } from "@/lib/dashboard-data";
+import { ACTIVITIES, ACTIVITY_DAYS } from "@/lib/detail-data";
 
 /**
  * Who is in the room, activity by activity: the passport's Activity Quota as

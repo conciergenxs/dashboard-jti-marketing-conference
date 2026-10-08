@@ -1,8 +1,10 @@
-import { ACTIVITIES, DATA } from "@/lib/dashboard-data";
+import type { DayKey } from "@/lib/dashboard-data";
 
 /**
  * Deterministic participant-level simulation for the 350 Market Conference
- * attendees. Drives the "See all" detail pages (search / filter / pagination).
+ * attendees. Every number on the dashboard that has a "See all" page is
+ * counted from these records — the panels, the detail tables and the Activity
+ * Log all read the same rows, so they always agree.
  */
 
 const FIRST = [
@@ -91,52 +93,58 @@ export const TALENT_ACTS = [
 ];
 
 /**
+ * Both ballots run before the event (client, 7 Oct), so on every event day
+ * they are closed and their numbers are final.
+ * JTI Got Talent: one vote, Mon 26 Oct – Mon 2 Nov; the Top 3 are announced
+ * Thu 5 Nov.
+ */
+export const TALENT_VOTE = { opens: "Mon, 26 Oct", closes: "Mon, 2 Nov", announced: "Thu, 5 Nov" };
+
+/** Inspire Awards: Mon 26 Oct – Fri 6 Nov, a vote in Field, Non-Field or both, each final. */
+export const INSPIRE_VOTE = { opens: "Mon, 26 Oct", closes: "Fri, 6 Nov" };
+export const INSPIRE_CATEGORIES = ["Field", "Non-Field"] as const;
+export type InspireCategory = (typeof INSPIRE_CATEGORIES)[number];
+
+/**
  * What the Redemption Corner hands out — the microsite's catalogue
  * (`src/lib/redemption.ts`): Sunglasses and the Multifunction Bag from JTI,
- * and AYÊM Studio's Handcrafted Leather Journal, made to each person's picks.
+ * and AYÊM Studio's Handcrafted Leather Journal. The journal is handed over
+ * like the others; nothing is customised at the corner.
  */
 export const PRIZES = ["Sunglasses", "Multifunction Bag", "Handcrafted Leather Journal"] as const;
 export type Prize = (typeof PRIZES)[number];
 
-/** The journal card's options, as the Redemption Checker offers them. */
-const JOURNAL_LEATHERS = [
-  "Synthetic Black",
-  "Synthetic Light",
-  "Synthetic Dark",
-  "Grain Navy",
-  "Grain Red",
-  "Grain Blue",
-  "Glow Brown",
-  "Glow Maroon",
-  "Matte Tan",
-  "Croco Tan",
-  "Croco Black",
-  "Vegetan Blue",
-  "Vegetan Pink",
-  "Crazy Horse Red",
-  "Crazy Horse Navy",
-];
-const JOURNAL_CORDS = [
-  "Black",
-  "Brown",
-  "Navy",
-  "Maroon",
-  "Fuchsia",
-  "Tosca",
-  "Olive",
-  "Red",
-  "Cream",
-  "Pink",
-  "Peach",
-  "Blue",
-];
-const JOURNAL_GROMMETS = ["Silver", "Gold"];
 /** The crew logins at the Redemption Corner. */
 const REDEEM_CREW = ["crew.redemption1", "crew.redemption2", "crew.redemption3"];
 
-export type JournalPicks = { leather: string; cord: string; grommet: string; engraving: string };
+/**
+ * The passport's Activity Quota, as the client approved it on 7 Oct: eight
+ * stamps, one each. The crew scans the participant's QR everywhere except The
+ * Infinite Race, where participants scan the venue QR themselves — one stamp
+ * for the whole race, no phases.
+ */
+export const ACTIVITIES = [
+  { id: "welcome-arrival", name: "Welcome Dinner Arrival", day: "day1", scan: "Crew scan" },
+  { id: "infinity-crossing", name: "Infinity Crossing", day: "day1", scan: "Crew scan" },
+  { id: "infinity-link", name: "Infinity Link", day: "day1", scan: "Crew scan" },
+  { id: "move-beyond", name: "Move Beyond", day: "day1", scan: "Crew scan" },
+  { id: "redemption-corner", name: "Redemption Corner", day: "day1", scan: "Crew scan" },
+  { id: "conference-arrival", name: "Morning Market Conference", day: "day2", scan: "Crew scan" },
+  { id: "infinite-race", name: "The Infinite Race", day: "day2", scan: "Self scan" },
+  { id: "gala-check-in", name: "Infinite Gala", day: "day2", scan: "Crew scan" },
+] as const satisfies readonly { id: string; name: string; day: DayKey; scan: string }[];
+export type ActivityId = (typeof ACTIVITIES)[number]["id"];
 
-/** Sample questions for the Live Q&A detail page — the real ones come from the microsite. */
+export const ACTIVITY_DAYS = [
+  { day: "day1", label: "Day 1", caption: "17 Nov · Welcome Dinner" },
+  { day: "day2", label: "Day 2", caption: "18 Nov · Conference, Race & Gala" },
+] as const;
+
+/** The Welcome Dinner's three game booths. */
+const BOOTHS: ActivityId[] = ["infinity-crossing", "infinity-link", "move-beyond"];
+const BOOTH_ODDS = [0.72, 0.6, 0.68];
+
+/** Sample questions for the Q&A detail page — the real ones come from the microsite. */
 const QUESTION_BANK = [
   "Apa prioritas utama JTI Indonesia untuk tahun depan?",
   "Bagaimana tim lapangan bisa berbagi praktik terbaik lintas region?",
@@ -159,43 +167,82 @@ function rng(seed: number) {
   };
 }
 
+/* ── Time ─────────────────────────────────────────────────────────────── */
+
+export const EVENT_DATES = { day1: "2026-11-17", day2: "2026-11-18" } as const;
+/** Mon 26 Oct 2026, when both ballots open. */
+const BALLOTS_OPEN = Date.UTC(2026, 9, 26);
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const pad = (n: number) => String(n).padStart(2, "0");
+
+/** A sortable moment, "2026-11-17 18:42:10". Minutes may run past the hour. */
+function moment(date: string, hour: number, minutes: number, seconds: number) {
+  const total = hour * 60 + Math.floor(minutes);
+  return `${date} ${pad(Math.floor(total / 60) % 24)}:${pad(total % 60)}:${pad(Math.floor(seconds))}`;
+}
+
+/** A moment inside the ballot window: at most `days` after 26 Oct, 07.00–23.00. */
+function ballotMoment(days: number, r: () => number) {
+  const date = new Date(BALLOTS_OPEN + Math.floor(r() * (days + 1)) * 86_400_000);
+  return moment(date.toISOString().slice(0, 10), 7, r() * 960, r() * 60);
+}
+
+/** "17 Nov" */
+const shortDate = (t: string) => `${Number(t.slice(8, 10))} ${MONTHS[Number(t.slice(5, 7)) - 1]}`;
+/** "18:42" */
+const hhmm = (t: string) => t.slice(11, 16);
+/** "17 Nov · 18:42" — the one way a table shows a moment. */
+export const when = (t: string | null) => (t ? `${shortDate(t)} · ${hhmm(t)}` : "—");
+
+/* ── Participants ─────────────────────────────────────────────────────── */
+
 export type Participant = {
   id: string;
   name: string;
   fn: string;
   checkedIn: boolean;
-  checkinAt: string;
+  /**
+   * The first time the crew scanned them in: at the Welcome Dinner door on
+   * Day 1, or at the Morning Market Conference for the few who arrive on Day 2.
+   */
+  checkinAt: string | null;
   /** Times each mission was sent — 0 is not yet. The first send ticks Pre-event. */
   sends: number[];
-  firstSentAt: string;
-  /** The act they voted for in JTI Got Talent — one vote, once the window opens. */
+  /** When each mission was first sent. */
+  sentAt: (string | null)[];
+  /** The last re-send of each mission, if there was one. */
+  resentAt: (string | null)[];
+  /** The act they voted for in JTI Got Talent — one vote, cast before the event. */
   vote: string | null;
-  /** Both Employee Award picks in. */
-  awardVote: boolean;
+  voteAt: string | null;
+  /** Inspire Awards ballots: Field, Non-Field or both, cast before the event. */
+  inspire: { category: InspireCategory; at: string }[];
   /** Played at least one Welcome Dinner game booth. */
   dinnerGames: boolean;
+  /** Activity Quota stamps, keyed by activity, with when each landed. */
+  stamps: Partial<Record<ActivityId, string>>;
   photos: number;
+  storyAt: string | null;
   /** What they took home from the Redemption Corner, in hand-over order. */
   prizes: Prize[];
-  /** The leather journal as they ordered it; null without one. */
-  journal: JournalPicks | null;
   redeemBy: string;
-  rewardAt: string;
-  /** Questions sent from the microsite's Live Q&A page. */
-  questions: number;
+  rewardAt: string | null;
+  /** When each question was sent from the microsite's Q&A page. */
+  questions: string[];
 };
 
 /**
  * The passport's four ticks: Pre-event, Welcome Dinner, JTI Got Talent,
- * Employee Award. The dinner ticks on taking part at a booth, the same
- * "one is enough" rule the microsite uses for its stamps.
+ * Inspire Awards. The dinner ticks on taking part at a booth, the awards on a
+ * vote in at least one category — the same "one is enough" rule the microsite
+ * uses. All four are settled by the end of Day 1.
  */
 export function checklistOf(p: Participant) {
   return {
     preEvent: p.sends.some((n) => n > 0),
     welcomeDinner: p.dinnerGames,
     talent: p.vote !== null,
-    award: p.awardVote,
+    award: p.inspire.length > 0,
   };
 }
 
@@ -209,49 +256,31 @@ function buildFunctionPool() {
 
 /**
  * Missions or a dinner game earns the sunglasses, both the bag as well; about
- * one in five of those served also orders the leather journal.
+ * one in five of those served also takes the leather journal.
  */
-function redemption(
-  atCorner: boolean,
-  preEvent: boolean,
-  dinnerGames: boolean,
-  name: string,
-  r: () => number,
-) {
+function redemption(atCorner: boolean, preEvent: boolean, dinnerGames: boolean, r: () => number) {
   const prizes: Prize[] = [];
-  if (!atCorner) return { prizes, journal: null, redeemBy: "—" };
+  if (!atCorner) return { prizes, redeemBy: "—" };
   if (preEvent || dinnerGames) prizes.push("Sunglasses");
   if (preEvent && dinnerGames) prizes.push("Multifunction Bag");
-  let journal: JournalPicks | null = null;
-  if (prizes.length && r() < 0.22) {
-    prizes.push("Handcrafted Leather Journal");
-    const initials = name
-      .split(" ")
-      .map((w) => w[0])
-      .join(".");
-    journal = {
-      leather: JOURNAL_LEATHERS[Math.floor(r() * JOURNAL_LEATHERS.length)]!,
-      cord: JOURNAL_CORDS[Math.floor(r() * JOURNAL_CORDS.length)]!,
-      grommet: JOURNAL_GROMMETS[Math.floor(r() * JOURNAL_GROMMETS.length)]!,
-      engraving: r() < 0.3 ? "" : r() < 0.5 ? `${initials}.` : name.split(" ")[0]!,
-    };
-  }
-  return { prizes, journal, redeemBy: REDEEM_CREW[Math.floor(r() * REDEEM_CREW.length)]! };
+  if (prizes.length && r() < 0.22) prizes.push("Handcrafted Leather Journal");
+  return { prizes, redeemBy: REDEEM_CREW[Math.floor(r() * REDEEM_CREW.length)]! };
 }
 
-function clock(base: number, minutes: number) {
-  const total = base * 60 + minutes;
-  const h = Math.floor(total / 60) % 24;
-  const m = total % 60;
-  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
-}
+/** Missions are sent from 07.00 on Day 1 and close at 23.59: minutes after 07.00. */
+const MISSIONS_CLOSE = 16 * 60 + 59;
 
 export const PARTICIPANTS: Participant[] = (() => {
   const r = rng(20260826);
   // A stream of its own for everything added after the first cut, so names,
   // check-ins and votes stay exactly where they were.
   const rx = rng(20261006);
+  // And one for the 7 Oct model: arrival day, stamps, ballot dates and times.
+  const rs = rng(20261007);
   const pool = buildFunctionPool();
+  const d1 = EVENT_DATES.day1;
+  const d2 = EVENT_DATES.day2;
+
   return Array.from({ length: 350 }, (_, i) => {
     const first = FIRST[Math.floor(r() * FIRST.length)]!;
     const last = LAST[Math.floor(r() * LAST.length)]!;
@@ -265,28 +294,119 @@ export const PARTICIPANTS: Participant[] = (() => {
     );
     const vote =
       checkedIn && r() > 0.14 ? TALENT_ACTS[Math.floor(r() * TALENT_ACTS.length)]! : null;
-    const awardVote = checkedIn && rx() > 0.12;
-    const dinnerGames = checkedIn && rx() > 0.28;
+    const inspireVoter = checkedIn && rx() > 0.12;
+    // Most arrive for the Welcome Dinner; a few are first scanned in on Day 2.
+    const day1 = checkedIn && rs() > 0.07;
+    const dinnerGames = checkedIn && rx() > 0.28 && day1;
     const preEvent = sends.some((n) => n > 0);
+
+    // Day 1 runs in minutes after 18.00, Day 2's door in minutes after 07.00.
+    const arrival = checkedIn ? r() : 0;
+    const arrivedAt = day1 ? arrival * 75 : 30 + arrival * 75;
+    const checkinAt = !checkedIn
+      ? null
+      : day1
+        ? moment(d1, 18, arrivedAt, rs() * 60)
+        : moment(d2, 7, arrivedAt, rs() * 60);
+
+    const firstSend = preEvent ? Math.floor(rx() * 900) : 0;
+    const sentMin = sends.map((n, k) => (n ? Math.min(900, firstSend + k * rs() * 50) : null));
+    const sentAt = sentMin.map((m) => (m === null ? null : moment(d1, 7, m, rs() * 60)));
+    const resentAt = sentMin.map((m, k) =>
+      m !== null && sends[k]! > 1
+        ? moment(d1, 7, m + 5 + rs() * (MISSIONS_CLOSE - m - 5), rs() * 60)
+        : null,
+    );
+
+    const photos = checkedIn ? Math.floor(r() * 9) : 0;
+    const { prizes, redeemBy } = redemption(
+      // Not everyone eligible makes it to the corner on the night.
+      checkedIn && rx() < 0.86 && day1,
+      preEvent,
+      dinnerGames,
+      rx,
+    );
+    const rewardRoll = rx();
+    const questionCount = checkedIn && rx() > 0.66 ? 1 + (rx() < 0.2 ? 1 : 0) : 0;
+
+    // ── Activity Quota ──
+    const stamps: Partial<Record<ActivityId, string>> = {};
+    let lastOnDay1 = arrivedAt;
+    if (day1 && checkinAt) {
+      stamps["welcome-arrival"] = checkinAt;
+      if (dinnerGames) {
+        const played = BOOTHS.filter((_, k) => rs() < BOOTH_ODDS[k]!);
+        if (!played.length) played.push(BOOTHS[Math.floor(rs() * BOOTHS.length)]!);
+        played.forEach((b) => {
+          const m = 75 + rs() * 105;
+          lastOnDay1 = Math.max(lastOnDay1, m);
+          stamps[b] = moment(d1, 18, m, rs() * 60);
+        });
+      }
+    }
+    // The first hand-over stamps the Redemption Corner, after the games.
+    const rewardAt = prizes.length
+      ? moment(d1, 18, Math.min(270, lastOnDay1 + 5 + rewardRoll * 45), rs() * 60)
+      : null;
+    if (rewardAt) stamps["redemption-corner"] = rewardAt;
+
+    if (checkinAt) {
+      const atConference = !day1 || rs() < 0.97;
+      if (atConference)
+        stamps["conference-arrival"] = day1 ? moment(d2, 7, 30 + rs() * 75, rs() * 60) : checkinAt;
+      if (atConference && rs() < 0.95)
+        stamps["infinite-race"] = moment(d2, 13, rs() * 120, rs() * 60);
+      if (rs() < 0.96) stamps["gala-check-in"] = moment(d2, 18, 30 + rs() * 90, rs() * 60);
+    }
+
+    // ── Ballots, cast before the event ──
+    const voteAt = vote ? ballotMoment(7, rs) : null;
+    const inspire: Participant["inspire"] = [];
+    if (inspireVoter) {
+      const roll = rs();
+      const cats: InspireCategory[] =
+        roll < 0.6 ? [...INSPIRE_CATEGORIES] : roll < 0.82 ? ["Field"] : ["Non-Field"];
+      cats.forEach((category) => inspire.push({ category, at: ballotMoment(11, rs) }));
+    }
+
+    const questions = Array.from({ length: questionCount }, () =>
+      day1 && rs() < 0.1
+        ? moment(d1, 19, rs() * 180, rs() * 60)
+        : moment(d2, 9, rs() * 210, rs() * 60),
+    );
+
     return {
       id: `JTI-${String(1001 + i)}`,
       name: `${first} ${last}`,
       fn,
       checkedIn,
-      checkinAt: checkedIn ? clock(8, Math.floor(r() * 300)) : "—",
+      checkinAt,
       sends,
-      firstSentAt: preEvent ? clock(7, Math.floor(rx() * 900)) : "—",
+      sentAt,
+      resentAt,
       vote,
-      awardVote,
+      voteAt,
+      inspire,
       dinnerGames,
-      photos: checkedIn ? Math.floor(r() * 9) : 0,
-      // Not everyone eligible makes it to the corner on the night.
-      ...redemption(checkedIn && rx() < 0.86, preEvent, dinnerGames, `${first} ${last}`, rx),
-      rewardAt: clock(19, Math.floor(rx() * 150)),
-      questions: checkedIn && rx() > 0.66 ? 1 + (rx() < 0.2 ? 1 : 0) : 0,
+      stamps,
+      photos,
+      storyAt: photos > 0 ? moment(d2, 13, rs() * 240, rs() * 60) : null,
+      prizes,
+      redeemBy,
+      rewardAt,
+      questions,
     };
   });
 })();
+
+/** Final standings: each act's votes, most first. */
+export const TALENT_STANDINGS = TALENT_ACTS.map((act) => ({
+  act,
+  votes: PARTICIPANTS.filter((p) => p.vote === act).length,
+})).sort((a, b) => b.votes - a.votes);
+const TOP_3 = new Set(TALENT_STANDINGS.slice(0, 3).map((s) => s.act));
+
+/* ── Detail pages ─────────────────────────────────────────────────────── */
 
 export type Column = {
   key: string;
@@ -328,32 +448,46 @@ export type MetricConfig = {
   rows: DetailRow[];
 };
 
+const FIRST_SCAN = ["Welcome Dinner", "Morning Market Conference"];
+
 function checkinsConfig(): MetricConfig {
-  const rows = PARTICIPANTS.map((p) => ({
-    id: p.id,
-    search: `${p.name} ${p.id} ${p.fn}`.toLowerCase(),
-    facets: { fn: p.fn, status: p.checkedIn ? "Checked in" : "Not yet" },
-    cells: {
-      name: p.name,
+  const rows = PARTICIPANTS.map((p) => {
+    const status = p.checkedIn ? "Checked in" : "Not yet";
+    const where = !p.checkedIn
+      ? "—"
+      : p.stamps["welcome-arrival"]
+        ? FIRST_SCAN[0]!
+        : FIRST_SCAN[1]!;
+    return {
       id: p.id,
-      fn: p.fn,
-      checkinAt: p.checkinAt,
-      status: p.checkedIn ? "Checked in" : "Not yet",
-    },
-  }));
+      search: `${p.name} ${p.id} ${p.fn}`.toLowerCase(),
+      facets: { fn: p.fn, where, status },
+      cells: {
+        name: p.name,
+        id: p.id,
+        fn: p.fn,
+        where,
+        checkinAt: when(p.checkinAt),
+        status,
+      },
+    };
+  });
   return {
     key: "checkins",
     title: "Check-ins",
-    description: "Everyone registered, and who has scanned their pass at the door.",
+    description:
+      "Everyone registered, and where the crew first scanned them in: the Welcome Dinner on 17 Nov, or the Morning Market Conference for those arriving on 18 Nov.",
     filters: [
       { key: "fn", label: "Function", options: [...FUNCTIONS] },
+      { key: "where", label: "First scan", options: FIRST_SCAN },
       { key: "status", label: "Status", options: ["Checked in", "Not yet"] },
     ],
     columns: [
       { key: "name", label: "Participant", primary: true },
-      { key: "id", label: "Pass ID" },
+      { key: "id", label: "Pass ID", nowrap: true },
       { key: "fn", label: "Function" },
-      { key: "checkinAt", label: "Scan time" },
+      { key: "where", label: "First scan" },
+      { key: "checkinAt", label: "Scan time", nowrap: true },
       { key: "status", label: "Status" },
     ],
     rows,
@@ -379,7 +513,7 @@ function missionsConfig(): MetricConfig {
           name: p.name,
           fn: p.fn,
           mission: `${m.code} · ${m.name}`,
-          first: sends > 0 ? p.firstSentAt : "—",
+          first: when(p.sentAt[k] ?? null),
           sends,
           status,
         },
@@ -405,7 +539,7 @@ function missionsConfig(): MetricConfig {
       { key: "name", label: "Participant", primary: true },
       { key: "fn", label: "Function" },
       { key: "mission", label: "Mission" },
-      { key: "first", label: "First sent" },
+      { key: "first", label: "First sent", nowrap: true },
       { key: "sends", label: "Sends", align: "right" },
       { key: "status", label: "Status", badge: true },
     ],
@@ -413,27 +547,29 @@ function missionsConfig(): MetricConfig {
   };
 }
 
+const STANDING = ["Top 3", "Rest of the line-up"];
+
 function talentConfig(): MetricConfig {
   const rows = PARTICIPANTS.filter((p) => p.vote).map((p) => ({
     id: `${p.id}-vote`,
     search: `${p.name} ${p.fn} ${p.vote}`.toLowerCase(),
-    facets: { act: p.vote!, fn: p.fn },
-    cells: { name: p.name, fn: p.fn, act: p.vote!, at: p.checkinAt },
+    facets: { act: p.vote!, standing: STANDING[TOP_3.has(p.vote!) ? 0 : 1]!, fn: p.fn },
+    cells: { name: p.name, fn: p.fn, act: p.vote!, at: when(p.voteAt) },
   }));
   return {
     key: "talent",
     title: "Talent Votes",
-    description:
-      "One vote per account. The ballot stays hidden on the microsite until it opens — Wed, 18 Nov, 20.30 to 22.00.",
+    description: `One vote per account, final once cast. Voting ran ${TALENT_VOTE.opens} – ${TALENT_VOTE.closes}, before the event; the Top 3 were announced ${TALENT_VOTE.announced}.`,
     filters: [
-      { key: "act", label: "Act", options: [...TALENT_ACTS] },
+      { key: "act", label: "Act", options: TALENT_STANDINGS.map((s) => s.act) },
+      { key: "standing", label: "Standing", options: STANDING },
       { key: "fn", label: "Function", options: [...FUNCTIONS] },
     ],
     columns: [
       { key: "name", label: "Voter", primary: true },
       { key: "fn", label: "Function" },
       { key: "act", label: "Act" },
-      { key: "at", label: "Time" },
+      { key: "at", label: "Voted", nowrap: true },
     ],
     rows,
   };
@@ -453,32 +589,20 @@ export const SHORT: Record<Prize, string> = {
   "Handcrafted Leather Journal": "Journal",
 };
 
-function journalLabel(j: JournalPicks | null) {
-  if (!j) return "—";
-  return [
-    j.leather,
-    `${j.cord} cord`,
-    `${j.grommet} grommets`,
-    j.engraving ? `“${j.engraving}”` : "no engraving",
-  ].join(" · ");
-}
-
 function rewardsConfig(): MetricConfig {
   const rows = REDEEMERS.map((p) => {
     const set = p.prizes.map((x) => SHORT[x]).join(" + ");
     return {
       id: `${p.id}-reward`,
-      search:
-        `${p.name} ${p.id} ${p.fn} ${p.prizes.join(" ")} ${journalLabel(p.journal)}`.toLowerCase(),
+      search: `${p.name} ${p.id} ${p.fn} ${p.prizes.join(" ")}`.toLowerCase(),
       facets: { set, fn: p.fn, crew: p.redeemBy },
       cells: {
         name: p.name,
         id: p.id,
         fn: p.fn,
         prizes: p.prizes.map((x) => SHORT[x]).join(" · "),
-        journal: journalLabel(p.journal),
         crew: p.redeemBy,
-        at: p.rewardAt,
+        at: when(p.rewardAt),
         count: `${p.prizes.length}/${PRIZES.length}`,
       },
     };
@@ -488,7 +612,7 @@ function rewardsConfig(): MetricConfig {
     key: "rewards",
     title: "Prizes Claimed",
     description:
-      "Who took what from the Redemption Corner, one row per person: Sunglasses, the Multifunction Bag and AYÊM Studio's Handcrafted Leather Journal, with the journal as ordered and the crew who handed it over.",
+      "Who took what from the Redemption Corner on 17 Nov, one row per person — Sunglasses, the Multifunction Bag and the Handcrafted Leather Journal — and the crew who handed it over.",
     filters: [
       { key: "set", label: "Prizes", options: sets },
       { key: "crew", label: "Crew", options: [...REDEEM_CREW] },
@@ -499,7 +623,6 @@ function rewardsConfig(): MetricConfig {
       { key: "id", label: "Pass ID", nowrap: true },
       { key: "fn", label: "Function" },
       { key: "prizes", label: "Prizes" },
-      { key: "journal", label: "Leather Journal" },
       { key: "crew", label: "Crew", nowrap: true },
       { key: "at", label: "Time", nowrap: true },
       { key: "count", label: "Taken", align: "right", total: true },
@@ -508,55 +631,29 @@ function rewardsConfig(): MetricConfig {
   };
 }
 
-/** When each stamp tends to land, by activity (hour of its own day). */
-const STAMP_HOUR: Record<string, number> = {
-  "hotel-arrival": 13,
-  "welcome-arrival": 18,
-  "writing-photobooth": 19,
-  "move-beyond": 19,
-  "infinity-crossing": 19,
-  "infinity-link": 20,
-  "redemption-corner": 20,
-  "conference-arrival": 8,
-  "infinite-race": 13,
-  "gala-check-in": 18,
-  "slow-motion-photobooth": 19,
-};
-
 function activitiesConfig(): MetricConfig {
-  const r = rng(20261009);
-  const here = PARTICIPANTS.filter((p) => p.checkedIn);
-  const final = DATA.day3.activities;
   const rows: DetailRow[] = [];
-  ACTIVITIES.forEach((a, k) => {
-    const share = (final[k] ?? 0) / Math.max(1, here.length);
+  ACTIVITIES.forEach((a) => {
     const day = a.day === "day1" ? "Day 1" : "Day 2";
-    here.forEach((p) => {
-      if (r() >= share) return;
+    PARTICIPANTS.forEach((p) => {
+      const t = p.stamps[a.id];
+      if (!t) return;
       rows.push({
         id: `${p.id}-${a.id}`,
         search: `${p.name} ${p.fn} ${a.name}`.toLowerCase(),
         facets: { activity: a.name, day, scan: a.scan, fn: p.fn },
-        cells: {
-          name: p.name,
-          fn: p.fn,
-          activity: a.name,
-          day,
-          scan: a.scan,
-          at: clock(STAMP_HOUR[a.id] ?? 12, Math.floor(r() * 150)),
-        },
+        cells: { name: p.name, fn: p.fn, activity: a.name, day, scan: a.scan, at: hhmm(t) },
       });
     });
   });
   return {
     key: "activities",
     title: "Activity Quota",
-    description:
-      "Every stamp on the passport's Activity Quota, self-scanned at a venue QR or scanned by the crew. The Infinite Race is one stamp for the whole race.",
+    description: `Every stamp on the passport's Activity Quota: ${ACTIVITIES.length} activities, one stamp each. The crew scans the participant's QR everywhere except The Infinite Race, where participants scan the venue QR themselves — one stamp for the whole race.`,
     filters: [
       { key: "activity", label: "Activity", options: ACTIVITIES.map((a) => a.name) },
       { key: "day", label: "Day", options: ["Day 1", "Day 2"] },
-      { key: "scan", label: "Scan", options: ["Self scan", "Crew scan"] },
+      { key: "scan", label: "Scan", options: ["Crew scan", "Self scan"] },
       { key: "fn", label: "Function", options: [...FUNCTIONS] },
     ],
     columns: [
@@ -565,7 +662,7 @@ function activitiesConfig(): MetricConfig {
       { key: "activity", label: "Activity" },
       { key: "day", label: "Day" },
       { key: "scan", label: "Scan" },
-      { key: "at", label: "Time" },
+      { key: "at", label: "Time", nowrap: true },
     ],
     rows,
   };
@@ -595,19 +692,19 @@ function checklistConfig(): MetricConfig {
     key: "checklist",
     title: "Participation Checklist",
     description:
-      "The passport's four badges, Submitted or Not Submitted: Pre-event (at least one Infinity Mission sent), Welcome Dinner (took part at a booth), JTI Got Talent (voted) and Employee Award (voted).",
+      "The passport's four badges, Submitted or Not Submitted: Pre-event (at least one Infinity Mission sent), Welcome Dinner (took part at a booth), JTI Got Talent (voted) and Inspire Awards (voted in Field, Non-Field or both).",
     filters: [
       { key: "fn", label: "Function", options: [...FUNCTIONS] },
       { key: "checked", label: "Checked", options: ["0/4", "1/4", "2/4", "3/4", "4/4"] },
     ],
     columns: [
       { key: "name", label: "Participant", primary: true },
-      { key: "id", label: "Pass ID" },
+      { key: "id", label: "Pass ID", nowrap: true },
       { key: "fn", label: "Function" },
       { key: "preEvent", label: "Pre-event", badge: true },
       { key: "welcomeDinner", label: "Welcome Dinner", badge: true },
       { key: "talent", label: "JTI Got Talent", badge: true },
-      { key: "award", label: "Employee Award", badge: true },
+      { key: "award", label: "Inspire Awards", badge: true },
       { key: "checked", label: "Checked", align: "right", total: true },
     ],
     rows,
@@ -618,7 +715,7 @@ function qaConfig(): MetricConfig {
   const r = rng(20261008);
   const rows: DetailRow[] = [];
   PARTICIPANTS.forEach((p) => {
-    for (let q = 0; q < p.questions; q++) {
+    p.questions.forEach((sentAt, q) => {
       const anonymous = r() < 0.3;
       const question = QUESTION_BANK[Math.floor(r() * QUESTION_BANK.length)]!;
       const roll = r();
@@ -632,17 +729,17 @@ function qaConfig(): MetricConfig {
           name: asker,
           fn: anonymous ? "—" : p.fn,
           question,
-          at: clock(9, Math.floor(r() * 210)),
+          at: when(sentAt),
           status,
         },
       });
-    }
+    });
   });
   return {
     key: "qa",
-    title: "Live Q&A Questions",
+    title: "Q&A Questions",
     description:
-      "Questions sent from the microsite's Live Q&A page to the stage's Audience tab. Sample rows until the event.",
+      "Questions sent from the microsite's Q&A page to the stage's Audience tab. Sample rows until the event.",
     filters: [
       { key: "status", label: "Status", options: ["On stage", "Queued", "Removed"] },
       { key: "fn", label: "Function", options: [...FUNCTIONS] },
@@ -651,7 +748,7 @@ function qaConfig(): MetricConfig {
       { key: "name", label: "Asked by", primary: true },
       { key: "fn", label: "Function" },
       { key: "question", label: "Question" },
-      { key: "at", label: "Sent" },
+      { key: "at", label: "Sent", nowrap: true },
       { key: "status", label: "Status" },
     ],
     rows,
@@ -703,133 +800,136 @@ function storiesConfig(): MetricConfig {
 
 /** Every logged moment, newest first: the live feed with nothing left out. */
 const LOG_TYPES = ["Check-in", "Stamp", "Mission", "Vote", "Reward", "Story", "Q&A"];
-const LOG_DAYS = ["Day 1 · 17 Nov", "Day 2 · 18 Nov"];
+const LOG_DAYS = ["Pre-event", "Day 1 · 17 Nov", "Day 2 · 18 Nov"];
+
+/**
+ * How each Activity Quota stamp reads in the log. Arrival scans are
+ * check-ins; the Redemption Corner's stamp is the hand-over itself, so it is
+ * logged once, as the reward.
+ */
+const STAMP_LOG: Record<ActivityId, { type: string; what: string } | null> = {
+  "welcome-arrival": { type: "Check-in", what: "Checked in at the Welcome Dinner" },
+  "infinity-crossing": { type: "Stamp", what: "Stamped at Infinity Crossing" },
+  "infinity-link": { type: "Stamp", what: "Stamped at Infinity Link" },
+  "move-beyond": { type: "Stamp", what: "Stamped at Move Beyond" },
+  "redemption-corner": null,
+  "conference-arrival": { type: "Check-in", what: "Checked in at the Morning Market Conference" },
+  "infinite-race": { type: "Stamp", what: "Scanned in at The Infinite Race" },
+  "gala-check-in": { type: "Check-in", what: "Checked in at the Infinite Gala" },
+};
 
 function logConfig(): MetricConfig {
-  const r = rng(20261106);
-  /** HH:MM:SS — the seconds are what stop the newest page repeating one time. */
-  const stamp = (hhmm: string) => `${hhmm}:${String(Math.floor(r() * 60)).padStart(2, "0")}`;
-  // Sorted on the real values rather than read back out of the cells map.
-  const entries: { row: DetailRow; day: string; at: string }[] = [];
+  const entries: { at: string; row: DetailRow }[] = [];
 
-  const add = (
-    p: Participant,
-    key: string,
-    type: string,
-    day: string,
-    at: string,
-    what: string,
-  ) => {
-    const ts = at.length === 5 ? stamp(at) : at;
+  const add = (p: Participant, key: string, type: string, at: string, what: string) => {
+    const day = at.startsWith(EVENT_DATES.day1)
+      ? LOG_DAYS[1]!
+      : at.startsWith(EVENT_DATES.day2)
+        ? LOG_DAYS[2]!
+        : LOG_DAYS[0]!;
     entries.push({
-      day,
-      at: ts,
+      at,
       row: {
         id: `${p.id}-${key}`,
         search: `${p.name} ${p.id} ${p.fn} ${what}`.toLowerCase(),
         facets: { type, day, fn: p.fn },
-        cells: { at: ts, name: p.name, fn: p.fn, what, type, day },
+        cells: {
+          at: at.slice(11, 19),
+          name: p.name,
+          fn: p.fn,
+          what,
+          type,
+          day: day === LOG_DAYS[0] ? `Pre-event · ${shortDate(at)}` : day,
+        },
       },
     });
   };
 
   PARTICIPANTS.forEach((p) => {
-    if (!p.checkedIn) return;
-    const d1 = LOG_DAYS[0]!;
-    const d2 = LOG_DAYS[1]!;
+    if (p.vote && p.voteAt)
+      add(p, "talent", "Vote", p.voteAt, `Voted for ${p.vote.split(" · ")[0]} in JTI Got Talent`);
+    p.inspire.forEach((v) =>
+      add(p, `inspire-${v.category}`, "Vote", v.at, `Voted in Inspire Awards · ${v.category}`),
+    );
 
-    add(p, "checkin", "Check-in", d1, p.checkinAt, "Checked in at the venue");
-
-    p.sends.forEach((n, i) => {
-      if (n === 0) return;
-      const m = MISSIONS_META[i]!;
-      add(p, `m${i}`, "Mission", d1, p.firstSentAt, `Sent Mission ${m.code} · ${m.name}`);
-      if (n > 1)
-        add(
-          p,
-          `m${i}-again`,
-          "Mission",
-          d1,
-          clock(20, Math.floor(r() * 180)),
-          `Re-sent Mission ${m.code} · ${m.name} (${n}×)`,
-        );
+    p.sends.forEach((n, k) => {
+      const m = MISSIONS_META[k]!;
+      const sent = p.sentAt[k];
+      const again = p.resentAt[k];
+      if (sent) add(p, `m${k}`, "Mission", sent, `Sent Mission ${m.code} · ${m.name}`);
+      if (again)
+        add(p, `m${k}-again`, "Mission", again, `Re-sent Mission ${m.code} · ${m.name} (${n}×)`);
     });
 
-    if (p.dinnerGames)
+    ACTIVITIES.forEach((a) => {
+      const t = p.stamps[a.id];
+      const log = STAMP_LOG[a.id];
+      if (t && log) add(p, a.id, log.type, t, log.what);
+    });
+
+    if (p.rewardAt)
       add(
         p,
-        "dinner",
-        "Stamp",
-        d1,
-        clock(19, Math.floor(r() * 150)),
-        "Stamped at a Welcome Dinner booth",
+        "reward",
+        "Reward",
+        p.rewardAt,
+        `Redeemed ${p.prizes.join(", ")} at the Redemption Corner`,
       );
 
-    if (p.prizes.length)
-      add(p, "reward", "Reward", d1, p.rewardAt, `Redeemed ${p.prizes.join(", ")}`);
-
-    if (p.vote)
-      add(p, "talent", "Vote", d2, clock(20, 30 + Math.floor(r() * 85)), `Voted for ${p.vote}`);
-    if (p.awardVote)
-      add(
-        p,
-        "award",
-        "Vote",
-        d2,
-        clock(20, 30 + Math.floor(r() * 85)),
-        "Voted in the Employee Award",
-      );
-
-    if (p.photos > 0)
+    if (p.storyAt)
       add(
         p,
         "story",
         "Story",
-        d2,
-        clock(13, Math.floor(r() * 240)),
+        p.storyAt,
         `Shared ${p.photos} ${p.photos === 1 ? "story" : "stories"} to the Story Wall`,
       );
 
-    for (let q = 0; q < p.questions; q++)
-      add(p, `q${q}`, "Q&A", d2, clock(9, Math.floor(r() * 210)), "Sent a question to Live Q&A");
+    p.questions.forEach((t, q) => add(p, `q${q}`, "Q&A", t, "Sent a question to Q&A"));
   });
 
-  // Newest first, the way a log is read.
-  entries.sort((a, b) => b.day.localeCompare(a.day) || b.at.localeCompare(a.at));
+  // Newest first, the way a log is read — sorted on the full moment.
+  entries.sort((a, b) => b.at.localeCompare(a.at));
   const rows = entries.map((e) => e.row);
 
   return {
     key: "log",
     title: "Activity Log",
     description:
-      "Every moment the passport recorded, newest first — check-ins, stamps, missions, votes, rewards, stories and Live Q&A. Sample rows until the event.",
+      "Every moment the passport recorded, newest first — votes cast before the event, then check-ins, stamps, missions, rewards, stories and Q&A. Sample rows until the event.",
     filters: [
       { key: "type", label: "Type", options: LOG_TYPES },
       { key: "day", label: "Day", options: LOG_DAYS },
       { key: "fn", label: "Function", options: [...FUNCTIONS] },
     ],
     columns: [
-      { key: "at", label: "Time" },
+      { key: "at", label: "Time", nowrap: true },
       { key: "name", label: "Participant", primary: true },
       { key: "fn", label: "Function" },
       { key: "what", label: "Activity" },
       { key: "type", label: "Type" },
-      { key: "day", label: "Day" },
+      { key: "day", label: "Day", nowrap: true },
     ],
     rows,
   };
 }
 
+/** "17 Nov" never breaks across a line in a description. */
+const keepDates = (c: MetricConfig): MetricConfig => ({
+  ...c,
+  description: c.description.replace(/\b(\d{1,2}) (Oct|Nov)\b/g, "$1\u00a0$2"),
+});
+
 export const METRICS: Record<MetricKey, MetricConfig> = {
-  checkins: checkinsConfig(),
-  activities: activitiesConfig(),
-  checklist: checklistConfig(),
-  log: logConfig(),
-  missions: missionsConfig(),
-  talent: talentConfig(),
-  rewards: rewardsConfig(),
-  qa: qaConfig(),
-  stories: storiesConfig(),
+  checkins: keepDates(checkinsConfig()),
+  activities: keepDates(activitiesConfig()),
+  checklist: keepDates(checklistConfig()),
+  log: keepDates(logConfig()),
+  missions: keepDates(missionsConfig()),
+  talent: keepDates(talentConfig()),
+  rewards: keepDates(rewardsConfig()),
+  qa: keepDates(qaConfig()),
+  stories: keepDates(storiesConfig()),
 };
 
 export const METRIC_KEYS = Object.keys(METRICS) as MetricKey[];
@@ -839,18 +939,3 @@ export const STORY_TOTALS = {
   contributors: STORYTELLERS.length,
   moments: STORY_MOMENTS.length,
 };
-
-/** Aggregate truth used by the dashboard KPI cards so numbers stay consistent. */
-export const AGGREGATES = (() => {
-  const ticks = PARTICIPANTS.map(checklistOf);
-  return {
-    registered: PARTICIPANTS.length,
-    checkedIn: PARTICIPANTS.filter((p) => p.checkedIn).length,
-    preEvent: ticks.filter((t) => t.preEvent).length,
-    talent: ticks.filter((t) => t.talent).length,
-    award: ticks.filter((t) => t.award).length,
-    complete: ticks.filter((t) => t.preEvent && t.talent && t.award).length,
-    questions: PARTICIPANTS.reduce((s, p) => s + p.questions, 0),
-    askers: PARTICIPANTS.filter((p) => p.questions > 0).length,
-  };
-})();

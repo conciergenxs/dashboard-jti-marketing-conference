@@ -2,7 +2,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { ListChecks, MessageCircleQuestion, ScanLine } from "lucide-react";
 import { Counter, SeeAll } from "./primitives";
 import type { MetricKey } from "@/lib/detail-data";
-import { VOTING_OPENS_LABEL, type Kpis } from "@/lib/dashboard-data";
+import type { Kpis } from "@/lib/dashboard-data";
 
 function Ring({ progress, id }: { progress: number; id: string }) {
   const r = 26;
@@ -49,10 +49,7 @@ export function KpiStrip({ kpis }: { kpis: Kpis }) {
     {
       key: "checklist",
       label: "Checklist complete",
-      hint:
-        kpis.complete > 0
-          ? `all three ticked · of ${kpis.checkedIn.toLocaleString("en-US")}`
-          : `ballots open ${VOTING_OPENS_LABEL}`,
+      hint: `all four ticked · of ${kpis.checkedIn.toLocaleString("en-US")}`,
       value: kpis.complete,
       icon: ListChecks,
       ring: kpis.complete / Math.max(1, kpis.checkedIn),
@@ -60,7 +57,7 @@ export function KpiStrip({ kpis }: { kpis: Kpis }) {
     },
     {
       key: "qa",
-      label: "Live Q&A",
+      label: "Q&A",
       hint: `questions from ${kpis.askers.toLocaleString("en-US")} people`,
       value: kpis.questions,
       icon: MessageCircleQuestion,
