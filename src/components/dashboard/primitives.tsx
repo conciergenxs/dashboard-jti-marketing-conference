@@ -155,12 +155,15 @@ export function Panel({
   className,
   title,
   eyebrow,
+  meta,
   action,
 }: {
   children: ReactNode;
   className?: string;
   title?: string;
   eyebrow?: string;
+  /** A headline figure that belongs beside the title, ruled off from it. */
+  meta?: ReactNode;
   action?: ReactNode;
 }) {
   return (
@@ -168,14 +171,20 @@ export function Panel({
     // to its body (`h-full` inside) instead of sitting on a pool of dead space.
     <div className={cn("glass-card flex h-full min-w-0 flex-col p-5 sm:p-6", className)}>
       {(title || eyebrow) && (
-        <div className="mb-5 flex shrink-0 items-center justify-between gap-3">
-          <div className="min-w-0">
-            {eyebrow && (
-              <p className="text-[10px] font-semibold tracking-[0.22em] text-primary uppercase">
-                {eyebrow}
-              </p>
-            )}
-            {title && <h2 className="display mt-1 text-title font-bold uppercase">{title}</h2>}
+        <div className="mb-5 flex shrink-0 items-start justify-between gap-3">
+          {/* `meta` sits beside the title with a rule between them, and drops
+              under it below 640px, where the rule would have nothing to
+              separate. */}
+          <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+            <div className="min-w-0">
+              {eyebrow && (
+                <p className="text-[10px] font-semibold tracking-[0.22em] text-primary uppercase">
+                  {eyebrow}
+                </p>
+              )}
+              {title && <h2 className="display mt-1 text-title font-bold uppercase">{title}</h2>}
+            </div>
+            {meta && <div className="shrink-0 sm:border-l sm:border-border/70 sm:pl-4">{meta}</div>}
           </div>
           {action && <div className="shrink-0">{action}</div>}
         </div>

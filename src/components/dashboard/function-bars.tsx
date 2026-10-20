@@ -18,12 +18,12 @@ export function FunctionBars({ functions }: { functions: Slice[] }) {
         </span>
       }
     >
-      <ul className="flex h-full flex-col justify-between gap-3.5">
+      <ul className="space-y-3.5">
         {functions.map((f, i) => (
           <li key={f.label}>
-            <div className="mb-1.5 flex items-center justify-between text-label">
-              <span className="font-medium text-foreground/85">{f.label}</span>
-              <span className="text-muted-foreground tabular-nums">
+            <div className="mb-1.5 flex items-center justify-between gap-3 text-body">
+              <span className="min-w-0 truncate font-medium text-foreground/85">{f.label}</span>
+              <span className="shrink-0 text-muted-foreground tabular-nums">
                 <Counter value={f.value} /> · {Math.round((f.value / total) * 100)}%
               </span>
             </div>

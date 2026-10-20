@@ -46,7 +46,9 @@ export function DashboardHeader({
             Limits
           </h1>
           <p className="mt-2.5 max-w-none text-body text-muted-foreground lg:max-w-[34rem]">
-            {EVENT.subtitle}. Check-ins, missions and ballots, day by day.
+            {EVENT.subtitle}.
+            <br />
+            Check-ins, missions and ballots, day by day.
           </p>
         </div>
 

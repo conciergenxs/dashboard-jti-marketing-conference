@@ -21,22 +21,34 @@ export function ActivityQuota({
     <Panel
       eyebrow="Infinity Passport"
       title="Activity Quota"
+      meta={
+        <p className="text-label text-muted-foreground">
+          <b className="display mr-1 text-title font-bold text-foreground tabular-nums">
+            <Counter value={total} />
+          </b>
+          stamps
+        </p>
+      }
       action={<SeeAll metric="activities" />}
     >
-      <p className="-mt-3 mb-5 text-label text-muted-foreground">
-        <b className="font-semibold text-foreground tabular-nums">
-          <Counter value={total} />
-        </b>{" "}
-        stamps across {ACTIVITIES.length} activities · one stamp each, the race included
-      </p>
-      <div className="grid gap-6 lg:grid-cols-2 lg:gap-8">
-        {ACTIVITY_DAYS.map((group) => {
+      <div className="grid lg:grid-cols-2">
+        {ACTIVITY_DAYS.map((group, g) => {
           const rows = ACTIVITIES.map((a, i) => ({ ...a, value: stamps[i] ?? 0 })).filter(
             (a) => a.day === group.day,
           );
           const open = rows.some((r) => r.value > 0);
           return (
-            <section key={group.day}>
+            // The two days are separate counts, so they get a rule between
+            // them: horizontal while they stack, vertical once they sit side
+            // by side.
+            <section
+              key={group.day}
+              className={
+                g === 0
+                  ? "lg:pr-8"
+                  : "mt-6 border-t border-border/70 pt-6 lg:mt-0 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-8"
+              }
+            >
               <p className="flex items-baseline justify-between gap-3 border-b border-border/70 pb-2">
                 <span className="display text-body font-semibold uppercase">{group.label}</span>
                 <span className="text-label text-muted-foreground">{group.caption}</span>

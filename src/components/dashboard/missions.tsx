@@ -33,7 +33,7 @@ export function Missions({ missions, preEvent }: { missions: Mission[]; preEvent
               <div className="flex items-baseline gap-3">
                 <span className="display text-title font-semibold text-primary/35">{m.index}</span>
                 <div className="min-w-0 flex-1">
-                  <h3 className="display text-title leading-tight font-semibold uppercase">
+                  <h3 className="display text-body leading-tight font-semibold uppercase">
                     {m.name}
                   </h3>
                   <p className="mt-0.5 line-clamp-2 text-label text-muted-foreground">
