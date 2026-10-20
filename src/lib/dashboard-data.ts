@@ -2,6 +2,7 @@ import {
   ACTIVITIES,
   EVENT_DATES,
   FUNCTIONS,
+  INSPIRE_CATEGORY_META,
   PARTICIPANTS,
   TALENT_ACTS,
   checklistOf,
@@ -27,8 +28,7 @@ export const DAYS: { key: DayKey; label: string; caption: string }[] = [
 export type Kpis = {
   registered: number;
   checkedIn: number;
-  engagement: number;
-  /** All four ticks: Pre-event, Welcome Dinner, JTI Got Talent, Inspire Awards. */
+  /** All four ticks: Pre-event, Welcome Dinner, JTI Got Talent, Inspired By You. */
   complete: number;
   /** Q&A: questions sent from the microsite, and by how many people. */
   questions: number;
@@ -55,6 +55,23 @@ export type Talent = {
   votes: number;
 };
 
+/**
+ * Inspired By You, counted as participation. Everyone registered is on the
+ * ballot and may vote once in each category, so `eligible` is the roster.
+ */
+export type Inspired = {
+  categories: { id: string; label: string; voters: number }[];
+  /** Sent a ballot in at least one category. */
+  any: number;
+  /**
+   * How the roster splits — both categories, one only, or none. The four
+   * groups are exclusive and add up to `eligible`, and they are the same four
+   * the detail page's Ballot filter offers.
+   */
+  mix: { label: string; value: number }[];
+  eligible: number;
+};
+
 /** The passport's checklist, as head counts. */
 export type Checklist = {
   preEvent: number;
@@ -70,14 +87,14 @@ export type ActivityStamps = number[];
 
 export type DayData = {
   kpis: Kpis;
-  pulse: { label: string; checkins: number; activity: number }[];
   missions: Mission[];
   checklist: Checklist;
   functions: Slice[];
   /** JTI Got Talent's final standings — the ballot closed before the event. */
   talents: Talent[];
+  /** Inspired By You — the other ballot, also closed before the event. */
+  inspired: Inspired;
   gallery: { photos: number; likes: number; contributors: number; topMoment: string };
-  hub: Slice[];
   activities: ActivityStamps;
 };
 
@@ -108,28 +125,9 @@ const talentBase = [
   { id: "t6", name: "Grow Squad", act: "Entertainment & Fashion · Trade Marketing Team" },
 ];
 
-function pulse(
-  points: number,
-  peakCheckins: number,
-  peakActivity: number,
-  startHour: number,
-): { label: string; checkins: number; activity: number }[] {
-  return Array.from({ length: points }, (_, i) => {
-    const t = i / (points - 1);
-    const bell = Math.exp(-Math.pow((t - 0.45) * 2.4, 2));
-    const wave = 0.85 + 0.15 * Math.sin(i * 1.7);
-    const hour = startHour + i;
-    return {
-      label: `${String(hour).padStart(2, "0")}:00`,
-      checkins: Math.round(peakCheckins * bell * wave),
-      activity: Math.round(peakActivity * (0.35 + bell * 0.8) * wave),
-    };
-  });
-}
-
 /*
- * Everything with a detail page is counted from PARTICIPANTS, so a panel,
- * its "See all" table and the Activity Log can never disagree. Each day shows
+ * Everything with a detail page is counted from PARTICIPANTS, so a panel and
+ * its "See all" table can never disagree. Each day shows
  * what had happened by its end: both ballots closed before the event, missions
  * close with Day 1, and nothing is recorded on Day 3, so Day 2 and Day 3 are
  * the final numbers.
@@ -154,6 +152,29 @@ const TALENTS = talentBase.map((t, i) => ({
   votes: count((p) => p.vote === TALENT_ACTS[i]),
 }));
 
+/** Both ballots closed before the event, so the award's numbers are final on every day. */
+const INSPIRED: Inspired = (() => {
+  const [field, nonField] = INSPIRE_CATEGORY_META;
+  const sent = (p: Participant, id: string) => p.inspire.some((v) => v.category === id);
+  const inField = (p: Participant) => sent(p, field!.id);
+  const inNonField = (p: Participant) => sent(p, nonField!.id);
+  return {
+    categories: INSPIRE_CATEGORY_META.map((c) => ({
+      id: c.id,
+      label: c.name,
+      voters: count((p) => sent(p, c.id)),
+    })),
+    any: count((p) => p.inspire.length > 0),
+    mix: [
+      { label: "Both categories", value: count((p) => inField(p) && inNonField(p)) },
+      { label: `${field!.id} only`, value: count((p) => inField(p) && !inNonField(p)) },
+      { label: `${nonField!.id} only`, value: count((p) => !inField(p) && inNonField(p)) },
+      { label: "No ballot", value: count((p) => p.inspire.length === 0) },
+    ],
+    eligible: PARTICIPANTS.length,
+  };
+})();
+
 /** Every tick is settled by the end of Day 1, so the checklist reads the same from then on. */
 const CHECKLIST: Checklist = {
   preEvent: TICKS.filter((t) => t.preEvent).length,
@@ -163,76 +184,50 @@ const CHECKLIST: Checklist = {
   complete: TICKS.filter((t) => t.preEvent && t.welcomeDinner && t.talent && t.award).length,
 };
 
-/** What the records can't say yet: hub traffic, the hourly pulse and the gallery. */
-const AMBIENT: Record<DayKey, Pick<DayData, "pulse" | "gallery" | "hub"> & { engagement: number }> =
-  {
-    day1: {
-      engagement: 84,
-      pulse: pulse(10, 96, 210, 9),
-      gallery: {
-        photos: 612,
-        likes: 1840,
-        contributors: 246,
-        topMoment: "Welcome Dinner · Infinite Night gate",
-      },
-      hub: [
-        { label: "Personal Journey", value: 32 },
-        { label: "Live Interaction", value: 27 },
-        { label: "Engagement Hub", value: 24 },
-        { label: "Content & Memories", value: 17 },
-      ],
+/** The one surface with no records behind it: the Gallery, held back for now. */
+const AMBIENT: Record<DayKey, Pick<DayData, "gallery">> = {
+  day1: {
+    gallery: {
+      photos: 612,
+      likes: 1840,
+      contributors: 246,
+      topMoment: "Welcome Dinner · Infinite Night gate",
     },
-    day2: {
-      engagement: 93,
-      pulse: pulse(11, 128, 340, 8),
-      gallery: {
-        photos: 1284,
-        likes: 4720,
-        contributors: 318,
-        topMoment: "Infinite Gala · Got Talent finale",
-      },
-      hub: [
-        { label: "Personal Journey", value: 21 },
-        { label: "Live Interaction", value: 34 },
-        { label: "Engagement Hub", value: 28 },
-        { label: "Content & Memories", value: 17 },
-      ],
+  },
+  day2: {
+    gallery: {
+      photos: 1284,
+      likes: 4720,
+      contributors: 318,
+      topMoment: "Infinite Gala · Got Talent finale",
     },
-    day3: {
-      engagement: 89,
-      pulse: pulse(8, 74, 180, 7),
-      gallery: {
-        photos: 1502,
-        likes: 6180,
-        contributors: 329,
-        topMoment: "Collective Time Capsule reveal",
-      },
-      hub: [
-        { label: "Personal Journey", value: 18 },
-        { label: "Live Interaction", value: 22 },
-        { label: "Engagement Hub", value: 24 },
-        { label: "Content & Memories", value: 36 },
-      ],
+  },
+  day3: {
+    gallery: {
+      photos: 1502,
+      likes: 6180,
+      contributors: 329,
+      topMoment: "Collective Time Capsule reveal",
     },
-  };
+  },
+};
 
 function dayData(day: DayKey): DayData {
   const end = END_OF[day];
   const here = (p: Participant) => p.checkinAt !== null && p.checkinAt <= end;
   const asked = PARTICIPANTS.map((p) => p.questions.filter((t) => t <= end).length);
-  const { engagement, ...ambient } = AMBIENT[day];
   return {
-    ...ambient,
+    ...AMBIENT[day],
     kpis: {
       registered: PARTICIPANTS.length,
       checkedIn: count(here),
-      engagement,
       complete: CHECKLIST.complete,
       questions: asked.reduce((s, n) => s + n, 0),
       askers: asked.filter((n) => n > 0).length,
     },
     missions: MISSIONS,
     checklist: CHECKLIST,
+    inspired: INSPIRED,
     functions: FUNCTIONS.map((f) => ({ label: f, value: count((p) => p.fn === f && here(p)) })),
     talents: TALENTS,
     activities: ACTIVITIES.map((a) =>
@@ -249,58 +244,3 @@ export const DATA: Record<DayKey, DayData> = {
   day2: dayData("day2"),
   day3: dayData("day3"),
 };
-
-/**
- * What the live feed can say; `from`/`until` keep a moment out of days it
- * can't happen on. Nobody votes during the event — both ballots closed before
- * it — and nothing is scanned on Day 3, so its feed is quiet.
- */
-export const FEED_TEMPLATES: { kind: string; text: string; from?: DayKey; until?: DayKey }[] = [
-  { kind: "checkin", text: "checked in at the Welcome Dinner", until: "day1" },
-  { kind: "checkin", text: "got a stamp at Infinity Crossing", until: "day1" },
-  { kind: "checkin", text: "got a stamp at Infinity Link", until: "day1" },
-  { kind: "checkin", text: "got a stamp at Move Beyond", until: "day1" },
-  { kind: "mission", text: "sent Mission 01 · Connect to Win", until: "day1" },
-  { kind: "mission", text: "retook Mission 02 · Infinity Quiz", until: "day1" },
-  { kind: "mission", text: "sent another pantun for Mission 03 · Win Together", until: "day1" },
-  { kind: "reward", text: "claimed Sunglasses at the Redemption Corner", until: "day1" },
-  {
-    kind: "reward",
-    text: "claimed the Handcrafted Leather Journal at the Redemption Corner",
-    until: "day1",
-  },
-  {
-    kind: "checkin",
-    text: "checked in at the Morning Market Conference",
-    from: "day2",
-    until: "day2",
-  },
-  { kind: "checkin", text: "checked in at The Infinite Race", from: "day2", until: "day2" },
-  { kind: "checkin", text: "checked in at the Infinite Gala", from: "day2", until: "day2" },
-  { kind: "question", text: "sent a question to Q&A", until: "day2" },
-];
-
-export const FEED_NAMES = [
-  "Dimas P.",
-  "Ayu R.",
-  "Rangga S.",
-  "Nadia H.",
-  "Bagus W.",
-  "Sinta L.",
-  "Fajar A.",
-  "Melati K.",
-  "Yoga N.",
-  "Prita M.",
-  "Arif B.",
-  "Tania D.",
-];
-
-export function formatNumber(n: number) {
-  return new Intl.NumberFormat("en-US").format(Math.round(n));
-}
-
-export function formatCompact(n: number) {
-  return new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 }).format(
-    n,
-  );
-}

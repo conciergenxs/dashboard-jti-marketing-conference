@@ -3,8 +3,8 @@ import type { DayKey } from "@/lib/dashboard-data";
 /**
  * Deterministic participant-level simulation for the 350 Market Conference
  * attendees. Every number on the dashboard that has a "See all" page is
- * counted from these records — the panels, the detail tables and the Activity
- * Log all read the same rows, so they always agree.
+ * counted from these records — the panels and their detail tables read the
+ * same rows, so they always agree.
  */
 
 const FIRST = [
@@ -100,10 +100,21 @@ export const TALENT_ACTS = [
  */
 export const TALENT_VOTE = { opens: "Mon, 26 Oct", closes: "Mon, 2 Nov", announced: "Thu, 5 Nov" };
 
-/** Inspire Awards: Mon 26 Oct – Fri 6 Nov, a vote in Field, Non-Field or both, each final. */
+/**
+ * Inspired By You, the peer award ("Inspire Awards" until the client renamed
+ * it, 20 Oct): Mon 26 Oct – Fri 6 Nov, a vote in Field, Non-Field or both,
+ * each final. Every registered participant is on the ballot and may vote in
+ * each category once, so the eligible population is the whole roster.
+ */
 export const INSPIRE_VOTE = { opens: "Mon, 26 Oct", closes: "Fri, 6 Nov" };
 export const INSPIRE_CATEGORIES = ["Field", "Non-Field"] as const;
 export type InspireCategory = (typeof INSPIRE_CATEGORIES)[number];
+
+/** The two categories as the microsite's ballot names them. */
+export const INSPIRE_CATEGORY_META: { id: InspireCategory; name: string }[] = [
+  { id: "Field", name: "Field Employee" },
+  { id: "Non-Field", name: "Non-Field Employee" },
+];
 
 /**
  * What the Redemption Corner hands out — the microsite's catalogue
@@ -215,7 +226,7 @@ export type Participant = {
   /** The act they voted for in JTI Got Talent — one vote, cast before the event. */
   vote: string | null;
   voteAt: string | null;
-  /** Inspire Awards ballots: Field, Non-Field or both, cast before the event. */
+  /** Inspired By You ballots: Field, Non-Field or both, cast before the event. */
   inspire: { category: InspireCategory; at: string }[];
   /** Played at least one Welcome Dinner game booth. */
   dinnerGames: boolean;
@@ -233,7 +244,7 @@ export type Participant = {
 
 /**
  * The passport's four ticks: Pre-event, Welcome Dinner, JTI Got Talent,
- * Inspire Awards. The dinner ticks on taking part at a booth, the awards on a
+ * Inspired By You. The dinner ticks on taking part at a booth, the award on a
  * vote in at least one category — the same "one is enough" rule the microsite
  * uses. All four are settled by the end of Day 1.
  */
@@ -432,9 +443,9 @@ export type MetricKey =
   | "checkins"
   | "activities"
   | "checklist"
-  | "log"
   | "missions"
   | "talent"
+  | "inspire"
   | "rewards"
   | "qa"
   | "stories";
@@ -575,6 +586,66 @@ function talentConfig(): MetricConfig {
   };
 }
 
+/** Only what the committee may see before the Gala: whether a ballot was sent. */
+const INSPIRE_SENT = ["Both", "Field only", "Non-Field only", "None"];
+
+/**
+ * Inspired By You, as participation. The microsite keeps the peer award's
+ * tally sealed until The Infinity Gala on purpose — a running scoreboard of
+ * who is ahead in an award about colleagues invites the wrong behaviour — so
+ * this page reports who sent a ballot in each category and never who they
+ * picked.
+ */
+function inspiredConfig(): MetricConfig {
+  const rows = PARTICIPANTS.map((p) => {
+    const cast = new Set(p.inspire.map((v) => v.category));
+    const field = cast.has("Field");
+    const nonField = cast.has("Non-Field");
+    const sent =
+      field && nonField
+        ? INSPIRE_SENT[0]!
+        : field
+          ? INSPIRE_SENT[1]!
+          : nonField
+            ? INSPIRE_SENT[2]!
+            : INSPIRE_SENT[3]!;
+    const first = p.inspire.map((v) => v.at).sort()[0] ?? null;
+    return {
+      id: `${p.id}-inspired`,
+      search: `${p.name} ${p.id} ${p.fn}`.toLowerCase(),
+      facets: { fn: p.fn, sent },
+      cells: {
+        name: p.name,
+        id: p.id,
+        fn: p.fn,
+        field: submission(field),
+        nonField: submission(nonField),
+        at: when(first),
+        ballots: `${cast.size}/${INSPIRE_CATEGORIES.length}`,
+      },
+    };
+  });
+  return {
+    key: "inspire",
+    title: "Inspired By You",
+    description: `Who sent a ballot in each category, Submitted or Not Submitted — everyone registered is eligible for both. One vote per category and one is enough; voting ran ${INSPIRE_VOTE.opens} – ${INSPIRE_VOTE.closes}, before the event. Who each person picked stays sealed until The Infinity Gala.`,
+    filters: [
+      { key: "sent", label: "Ballot", options: INSPIRE_SENT },
+      { key: "fn", label: "Function", options: [...FUNCTIONS] },
+    ],
+    columns: [
+      { key: "name", label: "Participant", primary: true },
+      { key: "id", label: "Pass ID", nowrap: true },
+      { key: "fn", label: "Function" },
+      { key: "field", label: "Field Employee", badge: true },
+      { key: "nonField", label: "Non-Field Employee", badge: true },
+      { key: "at", label: "First sent", nowrap: true },
+      { key: "ballots", label: "Ballots", align: "right", total: true },
+    ],
+    rows,
+  };
+}
+
 export const REDEEMERS = PARTICIPANTS.filter((p) => p.prizes.length);
 
 /** Pieces handed out per prize, from the same records the detail page lists. */
@@ -692,7 +763,7 @@ function checklistConfig(): MetricConfig {
     key: "checklist",
     title: "Participation Checklist",
     description:
-      "The passport's four badges, Submitted or Not Submitted: Pre-event (at least one Infinity Mission sent), Welcome Dinner (took part at a booth), JTI Got Talent (voted) and Inspire Awards (voted in Field, Non-Field or both).",
+      "The passport's four badges, Submitted or Not Submitted: Pre-event (at least one Infinity Mission sent), Welcome Dinner (took part at a booth), JTI Got Talent (voted) and Inspired By You (voted in Field, Non-Field or both).",
     filters: [
       { key: "fn", label: "Function", options: [...FUNCTIONS] },
       { key: "checked", label: "Checked", options: ["0/4", "1/4", "2/4", "3/4", "4/4"] },
@@ -704,7 +775,7 @@ function checklistConfig(): MetricConfig {
       { key: "preEvent", label: "Pre-event", badge: true },
       { key: "welcomeDinner", label: "Welcome Dinner", badge: true },
       { key: "talent", label: "JTI Got Talent", badge: true },
-      { key: "award", label: "Inspire Awards", badge: true },
+      { key: "award", label: "Inspired By You", badge: true },
       { key: "checked", label: "Checked", align: "right", total: true },
     ],
     rows,
@@ -739,7 +810,7 @@ function qaConfig(): MetricConfig {
     key: "qa",
     title: "Q&A Questions",
     description:
-      "Questions sent from the microsite's Q&A page to the stage's Audience tab. Sample rows until the event.",
+      "Questions sent from the microsite's Q&A page to the stage's Audience tab, one row per question.",
     filters: [
       { key: "status", label: "Status", options: ["On stage", "Queued", "Removed"] },
       { key: "fn", label: "Function", options: [...FUNCTIONS] },
@@ -798,122 +869,6 @@ function storiesConfig(): MetricConfig {
   };
 }
 
-/** Every logged moment, newest first: the live feed with nothing left out. */
-const LOG_TYPES = ["Check-in", "Stamp", "Mission", "Vote", "Reward", "Story", "Q&A"];
-const LOG_DAYS = ["Pre-event", "Day 1 · 17 Nov", "Day 2 · 18 Nov"];
-
-/**
- * How each Activity Quota stamp reads in the log. Arrival scans are
- * check-ins; the Redemption Corner's stamp is the hand-over itself, so it is
- * logged once, as the reward.
- */
-const STAMP_LOG: Record<ActivityId, { type: string; what: string } | null> = {
-  "welcome-arrival": { type: "Check-in", what: "Checked in at the Welcome Dinner" },
-  "infinity-crossing": { type: "Stamp", what: "Stamped at Infinity Crossing" },
-  "infinity-link": { type: "Stamp", what: "Stamped at Infinity Link" },
-  "move-beyond": { type: "Stamp", what: "Stamped at Move Beyond" },
-  "redemption-corner": null,
-  "conference-arrival": { type: "Check-in", what: "Checked in at the Morning Market Conference" },
-  "infinite-race": { type: "Stamp", what: "Scanned in at The Infinite Race" },
-  "gala-check-in": { type: "Check-in", what: "Checked in at the Infinite Gala" },
-};
-
-function logConfig(): MetricConfig {
-  const entries: { at: string; row: DetailRow }[] = [];
-
-  const add = (p: Participant, key: string, type: string, at: string, what: string) => {
-    const day = at.startsWith(EVENT_DATES.day1)
-      ? LOG_DAYS[1]!
-      : at.startsWith(EVENT_DATES.day2)
-        ? LOG_DAYS[2]!
-        : LOG_DAYS[0]!;
-    entries.push({
-      at,
-      row: {
-        id: `${p.id}-${key}`,
-        search: `${p.name} ${p.id} ${p.fn} ${what}`.toLowerCase(),
-        facets: { type, day, fn: p.fn },
-        cells: {
-          at: at.slice(11, 19),
-          name: p.name,
-          fn: p.fn,
-          what,
-          type,
-          day: day === LOG_DAYS[0] ? `Pre-event · ${shortDate(at)}` : day,
-        },
-      },
-    });
-  };
-
-  PARTICIPANTS.forEach((p) => {
-    if (p.vote && p.voteAt)
-      add(p, "talent", "Vote", p.voteAt, `Voted for ${p.vote.split(" · ")[0]} in JTI Got Talent`);
-    p.inspire.forEach((v) =>
-      add(p, `inspire-${v.category}`, "Vote", v.at, `Voted in Inspire Awards · ${v.category}`),
-    );
-
-    p.sends.forEach((n, k) => {
-      const m = MISSIONS_META[k]!;
-      const sent = p.sentAt[k];
-      const again = p.resentAt[k];
-      if (sent) add(p, `m${k}`, "Mission", sent, `Sent Mission ${m.code} · ${m.name}`);
-      if (again)
-        add(p, `m${k}-again`, "Mission", again, `Re-sent Mission ${m.code} · ${m.name} (${n}×)`);
-    });
-
-    ACTIVITIES.forEach((a) => {
-      const t = p.stamps[a.id];
-      const log = STAMP_LOG[a.id];
-      if (t && log) add(p, a.id, log.type, t, log.what);
-    });
-
-    if (p.rewardAt)
-      add(
-        p,
-        "reward",
-        "Reward",
-        p.rewardAt,
-        `Redeemed ${p.prizes.join(", ")} at the Redemption Corner`,
-      );
-
-    if (p.storyAt)
-      add(
-        p,
-        "story",
-        "Story",
-        p.storyAt,
-        `Shared ${p.photos} ${p.photos === 1 ? "story" : "stories"} to the Story Wall`,
-      );
-
-    p.questions.forEach((t, q) => add(p, `q${q}`, "Q&A", t, "Sent a question to Q&A"));
-  });
-
-  // Newest first, the way a log is read — sorted on the full moment.
-  entries.sort((a, b) => b.at.localeCompare(a.at));
-  const rows = entries.map((e) => e.row);
-
-  return {
-    key: "log",
-    title: "Activity Log",
-    description:
-      "Every moment the passport recorded, newest first — votes cast before the event, then check-ins, stamps, missions, rewards, stories and Q&A. Sample rows until the event.",
-    filters: [
-      { key: "type", label: "Type", options: LOG_TYPES },
-      { key: "day", label: "Day", options: LOG_DAYS },
-      { key: "fn", label: "Function", options: [...FUNCTIONS] },
-    ],
-    columns: [
-      { key: "at", label: "Time", nowrap: true },
-      { key: "name", label: "Participant", primary: true },
-      { key: "fn", label: "Function" },
-      { key: "what", label: "Activity" },
-      { key: "type", label: "Type" },
-      { key: "day", label: "Day", nowrap: true },
-    ],
-    rows,
-  };
-}
-
 /** "17 Nov" never breaks across a line in a description. */
 const keepDates = (c: MetricConfig): MetricConfig => ({
   ...c,
@@ -924,9 +879,9 @@ export const METRICS: Record<MetricKey, MetricConfig> = {
   checkins: keepDates(checkinsConfig()),
   activities: keepDates(activitiesConfig()),
   checklist: keepDates(checklistConfig()),
-  log: keepDates(logConfig()),
   missions: keepDates(missionsConfig()),
   talent: keepDates(talentConfig()),
+  inspire: keepDates(inspiredConfig()),
   rewards: keepDates(rewardsConfig()),
   qa: keepDates(qaConfig()),
   stories: keepDates(storiesConfig()),

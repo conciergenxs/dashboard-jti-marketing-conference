@@ -18,7 +18,7 @@ export function FunctionBars({ functions }: { functions: Slice[] }) {
         </span>
       }
     >
-      <ul className="space-y-3.5">
+      <ul className="flex h-full flex-col justify-between gap-3.5">
         {functions.map((f, i) => (
           <li key={f.label}>
             <div className="mb-1.5 flex items-center justify-between text-label">

@@ -164,9 +164,11 @@ export function Panel({
   action?: ReactNode;
 }) {
   return (
-    <div className={cn("glass-card h-full min-w-0 p-5 sm:p-6", className)}>
+    // A column, so a panel shorter than its row can hand the leftover height
+    // to its body (`h-full` inside) instead of sitting on a pool of dead space.
+    <div className={cn("glass-card flex h-full min-w-0 flex-col p-5 sm:p-6", className)}>
       {(title || eyebrow) && (
-        <div className="mb-5 flex items-center justify-between gap-3">
+        <div className="mb-5 flex shrink-0 items-center justify-between gap-3">
           <div className="min-w-0">
             {eyebrow && (
               <p className="text-[10px] font-semibold tracking-[0.22em] text-primary uppercase">
@@ -178,7 +180,7 @@ export function Panel({
           {action && <div className="shrink-0">{action}</div>}
         </div>
       )}
-      {children}
+      <div className="min-h-0 flex-1">{children}</div>
     </div>
   );
 }
