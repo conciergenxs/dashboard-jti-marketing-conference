@@ -106,10 +106,10 @@ function Standing({
               ? { duration: 0 }
               : { type: "spring", stiffness: 420, damping: 17, delay: delay + 0.15 }
           }
-          className={`display grid shrink-0 place-items-center rounded-lg font-bold tabular-nums ${
+          className={`display grid shrink-0 place-items-center rounded-lg text-label font-bold tabular-nums ${
             top
-              ? "size-8 bg-gradient-to-br from-primary to-accent text-body text-primary-foreground shadow-[0_6px_16px_-8px_var(--color-primary)]"
-              : "size-7 bg-secondary text-label text-muted-foreground"
+              ? "size-8 bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-[0_6px_16px_-8px_var(--color-primary)]"
+              : "size-7 bg-secondary text-muted-foreground"
           }`}
         >
           {rank}
@@ -122,7 +122,6 @@ function Standing({
           >
             {talent.name}
           </p>
-          {top && <p className="truncate text-label text-muted-foreground">{talent.act}</p>}
         </div>
         <span
           className={`shrink-0 text-body font-semibold tabular-nums ${
