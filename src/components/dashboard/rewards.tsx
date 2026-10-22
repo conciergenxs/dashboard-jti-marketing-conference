@@ -28,7 +28,9 @@ export function Rewards() {
         people · see who took what
       </p>
 
-      <div className="grid grid-cols-3 gap-2.5">
+      {/* Two up, not three: the catalogue is four items since 20 Oct, and a
+          3 + 1 row leaves a hole where a tile should be. */}
+      <div className="grid grid-cols-2 gap-2.5">
         {PRIZE_TOTALS.map((r, i) => (
           <motion.div
             key={r.name}

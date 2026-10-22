@@ -3,9 +3,11 @@ import {
   EVENT_DATES,
   FUNCTIONS,
   INSPIRE_CATEGORY_META,
+  INSPIRE_STANDINGS,
   PARTICIPANTS,
   TALENT_ACTS,
   checklistOf,
+  type AwardStanding,
   type Participant,
 } from "@/lib/detail-data";
 
@@ -70,6 +72,20 @@ export type Inspired = {
    */
   mix: { label: string; value: number }[];
   eligible: number;
+  /**
+   * The standings the committee reads the winners from, per category: the
+   * leader first, then the two behind them. The microsite shows no tally, so
+   * this never leaves the dashboard.
+   */
+  standings: {
+    id: string;
+    label: string;
+    /** How many colleagues stood in this category. */
+    onBallot: number;
+    /** How many of them took at least one vote. */
+    named: number;
+    top: AwardStanding[];
+  }[];
 };
 
 /** The passport's checklist, as head counts. */
@@ -172,6 +188,16 @@ const INSPIRED: Inspired = (() => {
       { label: "No ballot", value: count((p) => p.inspire.length === 0) },
     ],
     eligible: PARTICIPANTS.length,
+    standings: INSPIRE_CATEGORY_META.map((c) => {
+      const rows = INSPIRE_STANDINGS.filter((row) => row.category === c.id);
+      return {
+        id: c.id,
+        label: c.name,
+        onBallot: count((p) => p.klass === c.id),
+        named: rows.length,
+        top: rows.slice(0, 3),
+      };
+    }),
   };
 })();
 

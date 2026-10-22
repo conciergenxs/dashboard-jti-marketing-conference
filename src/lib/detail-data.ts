@@ -117,12 +117,30 @@ export const INSPIRE_CATEGORY_META: { id: InspireCategory; name: string }[] = [
 ];
 
 /**
+ * Which half of the room someone belongs to. The committee's roster carries
+ * this per person; here it follows the Function, the way the roster's own
+ * teams do — the regional sales force is Field, and Head Office, Verticalized
+ * and GSC are Non-Field. ASSUMPTION: swap this for the roster's own
+ * classification when the committee's export lands.
+ */
+const FIELD_FUNCTIONS = new Set<string>(["Sales & Distribution"]);
+export const classOf = (fn: string): InspireCategory =>
+  FIELD_FUNCTIONS.has(fn) ? "Field" : "Non-Field";
+
+/**
  * What the Redemption Corner hands out — the microsite's catalogue
  * (`src/lib/redemption.ts`): Sunglasses and the Multifunction Bag from JTI,
- * and AYÊM Studio's Handcrafted Leather Journal. The journal is handed over
- * like the others; nothing is customised at the corner.
+ * AYÊM Studio's Handcrafted Leather Journal, and the Surprise Gift added on
+ * 20 Oct. The journal is handed over like the others; nothing is customised
+ * at the corner. The Surprise Gift is deliberately unnamed here as it is on
+ * the microsite — the corner gives nothing away before the hand-over.
  */
-export const PRIZES = ["Sunglasses", "Multifunction Bag", "Handcrafted Leather Journal"] as const;
+export const PRIZES = [
+  "Sunglasses",
+  "Multifunction Bag",
+  "Handcrafted Leather Journal",
+  "Surprise Gift",
+] as const;
 export type Prize = (typeof PRIZES)[number];
 
 /** The crew logins at the Redemption Corner. */
@@ -226,8 +244,14 @@ export type Participant = {
   /** The act they voted for in JTI Got Talent — one vote, cast before the event. */
   vote: string | null;
   voteAt: string | null;
-  /** Inspired By You ballots: Field, Non-Field or both, cast before the event. */
-  inspire: { category: InspireCategory; at: string }[];
+  /** Field or Non-Field — which half of the room they stand for on the ballot. */
+  klass: InspireCategory;
+  /**
+   * Inspired By You ballots: Field, Non-Field or both, cast before the event.
+   * `nomineeId` is the colleague the vote went to — a participant of that
+   * category, never the voter.
+   */
+  inspire: { category: InspireCategory; at: string; nomineeId: string }[];
   /** Played at least one Welcome Dinner game booth. */
   dinnerGames: boolean;
   /** Activity Quota stamps, keyed by activity, with when each landed. */
@@ -275,11 +299,50 @@ function redemption(atCorner: boolean, preEvent: boolean, dinnerGames: boolean, 
   if (preEvent || dinnerGames) prizes.push("Sunglasses");
   if (preEvent && dinnerGames) prizes.push("Multifunction Bag");
   if (prizes.length && r() < 0.22) prizes.push("Handcrafted Leather Journal");
+  // The Surprise Gift carries no rule of its own: anyone the corner already
+  // serves goes home with one, so it never changes who turns up there.
+  if (prizes.length) prizes.push("Surprise Gift");
   return { prizes, redeemBy: REDEEM_CREW[Math.floor(r() * REDEEM_CREW.length)]! };
 }
 
 /** Missions are sent from 07.00 on Day 1 and close at 23.59: minutes after 07.00. */
 const MISSIONS_CLOSE = 16 * 60 + 59;
+
+/**
+ * Who each ballot went to. The ballot is the roster itself: a vote goes to a
+ * colleague of that category, never to the voter — the microsite's own rule
+ * for a peer award. The pick is weighted on a shuffled order so the standings
+ * have a shape a room recognises, a few names well clear and a long tail,
+ * rather than 119 nominees on one vote each.
+ */
+function assignNominees(people: Participant[]) {
+  const rn = rng(20261020);
+  INSPIRE_CATEGORIES.forEach((category) => {
+    const ranked = people.filter((n) => n.klass === category);
+    if (ranked.length < 2) return;
+    for (let i = ranked.length - 1; i > 0; i--) {
+      const j = Math.floor(rn() * (i + 1));
+      [ranked[i], ranked[j]] = [ranked[j]!, ranked[i]!];
+    }
+    // A long tail: the k-th most recognised name draws about 1/k of the first.
+    let running = 0;
+    const cum = ranked.map((_, i) => (running += 1 / Math.pow(i + 1, 0.95)));
+    const pick = (voterId: string) => {
+      for (let tries = 0; tries < 8; tries++) {
+        const t = rn() * running;
+        const k = cum.findIndex((c) => c >= t);
+        const n = ranked[k === -1 ? ranked.length - 1 : k]!;
+        if (n.id !== voterId) return n.id;
+      }
+      return ranked.find((n) => n.id !== voterId)!.id;
+    };
+    people.forEach((voter) => {
+      voter.inspire.forEach((v) => {
+        if (v.category === category) v.nomineeId = pick(voter.id);
+      });
+    });
+  });
+}
 
 export const PARTICIPANTS: Participant[] = (() => {
   const r = rng(20260826);
@@ -292,7 +355,7 @@ export const PARTICIPANTS: Participant[] = (() => {
   const d1 = EVENT_DATES.day1;
   const d2 = EVENT_DATES.day2;
 
-  return Array.from({ length: 350 }, (_, i) => {
+  const people = Array.from({ length: 350 }, (_, i) => {
     const first = FIRST[Math.floor(r() * FIRST.length)]!;
     const last = LAST[Math.floor(r() * LAST.length)]!;
     const fn = pool[i % pool.length]!;
@@ -377,7 +440,11 @@ export const PARTICIPANTS: Participant[] = (() => {
       const roll = rs();
       const cats: InspireCategory[] =
         roll < 0.6 ? [...INSPIRE_CATEGORIES] : roll < 0.82 ? ["Field"] : ["Non-Field"];
-      cats.forEach((category) => inspire.push({ category, at: ballotMoment(11, rs) }));
+      // The nominee is filled in once the whole roster exists — a vote needs
+      // someone to go to, and that someone is another row of this same list.
+      cats.forEach((category) =>
+        inspire.push({ category, at: ballotMoment(11, rs), nomineeId: "" }),
+      );
     }
 
     const questions = Array.from({ length: questionCount }, () =>
@@ -390,6 +457,7 @@ export const PARTICIPANTS: Participant[] = (() => {
       id: `JTI-${String(1001 + i)}`,
       name: `${first} ${last}`,
       fn,
+      klass: classOf(fn),
       checkedIn,
       checkinAt,
       sends,
@@ -408,7 +476,52 @@ export const PARTICIPANTS: Participant[] = (() => {
       questions,
     };
   });
+  assignNominees(people);
+  return people;
 })();
+
+/**
+ * Inspired By You's standings: every colleague who was voted for, ranked
+ * inside their own category. This is what the committee reads the winners
+ * out from — the microsite never shows it, and neither should anything a
+ * participant can open.
+ */
+export type AwardStanding = {
+  id: string;
+  name: string;
+  fn: string;
+  category: InspireCategory;
+  votes: number;
+  rank: number;
+};
+
+export const INSPIRE_STANDINGS: AwardStanding[] = (() => {
+  const tally = new Map<string, number>();
+  PARTICIPANTS.forEach((p) =>
+    p.inspire.forEach((v) => tally.set(v.nomineeId, (tally.get(v.nomineeId) ?? 0) + 1)),
+  );
+  const byId = new Map(PARTICIPANTS.map((p) => [p.id, p]));
+  return INSPIRE_CATEGORIES.flatMap((category) =>
+    [...tally.entries()]
+      .map(([id, votes]) => ({ p: byId.get(id)!, votes }))
+      .filter((row) => row.p.klass === category)
+      // A tie breaks on the name, so the order never shifts between reloads.
+      .sort((a, b) => b.votes - a.votes || a.p.name.localeCompare(b.p.name))
+      .map((row, i) => ({
+        id: row.p.id,
+        name: row.p.name,
+        fn: row.p.fn,
+        category,
+        votes: row.votes,
+        rank: i + 1,
+      })),
+  );
+})();
+
+/** The leader in each category — who the award goes to on the night. */
+export const INSPIRE_WINNERS = INSPIRE_CATEGORIES.map(
+  (category) => INSPIRE_STANDINGS.find((s) => s.category === category && s.rank === 1) ?? null,
+);
 
 /** Final standings: each act's votes, most first. */
 export const TALENT_STANDINGS = TALENT_ACTS.map((act) => ({
@@ -446,6 +559,7 @@ export type MetricKey =
   | "missions"
   | "talent"
   | "inspire"
+  | "inspire-ballots"
   | "rewards"
   | "qa"
   | "stories";
@@ -586,17 +700,78 @@ function talentConfig(): MetricConfig {
   };
 }
 
-/** Only what the committee may see before the Gala: whether a ballot was sent. */
+/** How a ballot reads once it is in: both categories, one only, or none. */
 const INSPIRE_SENT = ["Both", "Field only", "Non-Field only", "None"];
 
+/** The one row that matters on the night, and everyone else. */
+const STANDING_HERE = ["Category winner", "Rest of the ballot"];
+
 /**
- * Inspired By You, as participation. The microsite keeps the peer award's
- * tally sealed until The Infinity Gala on purpose — a running scoreboard of
- * who is ahead in an award about colleagues invites the wrong behaviour — so
- * this page reports who sent a ballot in each category and never who they
- * picked.
+ * Inspired By You's standings — who the room voted for, ranked inside their
+ * own category. This is the committee's page: the microsite shows no tally,
+ * so nothing here may be read out before the award is given at The Infinity
+ * Gala.
  */
-function inspiredConfig(): MetricConfig {
+function inspiredStandingsConfig(): MetricConfig {
+  const byCategory = new Map(INSPIRE_CATEGORY_META.map((c) => [c.id, c.name]));
+  // Share is read against the votes cast in that category, not against both:
+  // a Field nominee is only ever compared with other Field nominees.
+  const castIn = new Map(
+    INSPIRE_CATEGORIES.map((id) => [
+      id,
+      INSPIRE_STANDINGS.filter((r) => r.category === id).reduce((sum, r) => sum + r.votes, 0),
+    ]),
+  );
+  const rows = INSPIRE_STANDINGS.map((r) => {
+    const category = byCategory.get(r.category)!;
+    const total = castIn.get(r.category) ?? 0;
+    return {
+      id: `${r.id}-standing`,
+      search: `${r.name} ${r.id} ${r.fn} ${category}`.toLowerCase(),
+      facets: {
+        category,
+        fn: r.fn,
+        standing: r.rank === 1 ? STANDING_HERE[0]! : STANDING_HERE[1]!,
+      },
+      cells: {
+        rank: r.rank,
+        name: r.name,
+        id: r.id,
+        fn: r.fn,
+        category,
+        share: `${((r.votes / Math.max(1, total)) * 100).toFixed(1)}%`,
+        votes: r.votes,
+      },
+    };
+  });
+  return {
+    key: "inspire",
+    title: "Inspired By You",
+    description: `Who the room voted for, ranked inside their own category. Everyone registered is on the ballot and a vote never goes to the voter. Voting ran ${INSPIRE_VOTE.opens} – ${INSPIRE_VOTE.closes}, before the event; the award is given at The Infinity Gala, and the microsite shows none of this.`,
+    filters: [
+      { key: "category", label: "Category", options: INSPIRE_CATEGORY_META.map((c) => c.name) },
+      { key: "standing", label: "Standing", options: STANDING_HERE },
+      { key: "fn", label: "Function", options: [...FUNCTIONS] },
+    ],
+    columns: [
+      { key: "name", label: "Nominee", primary: true },
+      { key: "rank", label: "Rank", align: "right" },
+      { key: "id", label: "Pass ID", nowrap: true },
+      { key: "fn", label: "Function" },
+      { key: "category", label: "Category", nowrap: true },
+      { key: "share", label: "Share", align: "right" },
+      { key: "votes", label: "Votes", align: "right", total: true },
+    ],
+    rows,
+  };
+}
+
+/**
+ * Inspired By You, as participation: who sent a ballot in each category,
+ * Submitted or Not Submitted, and never who they picked — that is the
+ * standings page's job.
+ */
+function inspiredBallotsConfig(): MetricConfig {
   const rows = PARTICIPANTS.map((p) => {
     const cast = new Set(p.inspire.map((v) => v.category));
     const field = cast.has("Field");
@@ -626,9 +801,9 @@ function inspiredConfig(): MetricConfig {
     };
   });
   return {
-    key: "inspire",
-    title: "Inspired By You",
-    description: `Who sent a ballot in each category, Submitted or Not Submitted — everyone registered is eligible for both. One vote per category and one is enough; voting ran ${INSPIRE_VOTE.opens} – ${INSPIRE_VOTE.closes}, before the event. Who each person picked stays sealed until The Infinity Gala.`,
+    key: "inspire-ballots",
+    title: "Inspired By You Ballots",
+    description: `Who sent a ballot in each category, Submitted or Not Submitted — everyone registered is eligible for both. One vote per category and one is enough; voting ran ${INSPIRE_VOTE.opens} – ${INSPIRE_VOTE.closes}, before the event.`,
     filters: [
       { key: "sent", label: "Ballot", options: INSPIRE_SENT },
       { key: "fn", label: "Function", options: [...FUNCTIONS] },
@@ -658,6 +833,7 @@ export const SHORT: Record<Prize, string> = {
   Sunglasses: "Sunglasses",
   "Multifunction Bag": "Bag",
   "Handcrafted Leather Journal": "Journal",
+  "Surprise Gift": "Surprise",
 };
 
 function rewardsConfig(): MetricConfig {
@@ -881,7 +1057,8 @@ export const METRICS: Record<MetricKey, MetricConfig> = {
   checklist: keepDates(checklistConfig()),
   missions: keepDates(missionsConfig()),
   talent: keepDates(talentConfig()),
-  inspire: keepDates(inspiredConfig()),
+  inspire: keepDates(inspiredStandingsConfig()),
+  "inspire-ballots": keepDates(inspiredBallotsConfig()),
   rewards: keepDates(rewardsConfig()),
   qa: keepDates(qaConfig()),
   stories: keepDates(storiesConfig()),
