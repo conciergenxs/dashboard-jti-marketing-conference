@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import { Building2, EyeOff, MapPinned, Trophy } from "lucide-react";
+import { Search, Trophy, X } from "lucide-react";
 import { Counter, Panel, PanelPager, SeeAll, useEntrance } from "./primitives";
 import type { Inspired } from "@/lib/dashboard-data";
 import type { AwardStanding } from "@/lib/detail-data";
@@ -8,53 +8,165 @@ import { INSPIRE_VOTE } from "@/lib/detail-data";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
-/** Field is out in the market, Non-Field is Head Office, Verticalized and GSC. */
-const ICONS = [MapPinned, Building2];
-
-/** Runners-up shown at a time. The winner is pinned above and never pages away. */
-const PER_PAGE = 3;
+/** Names on a page. */
+const PER_PAGE = 10;
 
 /**
- * Inspired By You: who the room voted for, and how much of the room voted.
+ * Inspired By You: who the room voted for, one category at a time.
  *
- * The microsite deliberately shows no tally — a running scoreboard of who is
- * ahead in an award about colleagues invites the wrong behaviour on the night
- * — so the counts live in Redis for whoever reads the winners out. This panel
- * is that read, which is why it says so out loud. The ballot closed before the
- * event, so every day shows the same final numbers.
+ * The ballot closed before the event, so every day shows the same final
+ * numbers. Rank 1 wears the winner's frame wherever it appears, which on an
+ * unsearched first page is the top row — the answer the panel exists to give.
  */
 export function InspiredByYou({ inspired }: { inspired: Inspired }) {
-  const reduce = useReducedMotion();
-  const entrance = useEntrance();
+  const [tab, setTab] = useState(0);
+  const [query, setQuery] = useState("");
+  const [page, setPage] = useState(0);
+
+  const group = inspired.standings[tab] ?? inspired.standings[0]!;
   const share = Math.round((inspired.any / Math.max(1, inspired.eligible)) * 100);
+
+  const matches = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return group.nominees;
+    return group.nominees.filter((n) => `${n.name} ${n.fn}`.toLowerCase().includes(q));
+  }, [group, query]);
+
+  // A page that no longer exists after a search would render empty.
+  const pages = Math.max(1, Math.ceil(matches.length / PER_PAGE));
+  const current = Math.min(page, pages - 1);
+  const shown = matches.slice(current * PER_PAGE, (current + 1) * PER_PAGE);
+  const lead = group.nominees[0]?.votes ?? 1;
+
+  // Roving focus: role="tab" promises arrow keys, so it has to deliver them.
+  const move = (i: number) => {
+    const next = (i + inspired.standings.length) % inspired.standings.length;
+    setTab(next);
+    setPage(0);
+    document.getElementById(`award-tab-${inspired.standings[next]!.id}`)?.focus();
+  };
 
   return (
     <Panel eyebrow="Inspired By You" title="Award Standings" action={<SeeAll metric="inspire" />}>
       <div className="flex h-full flex-col">
-        {/* Both halves of this line earn their place — why it is sealed, and
-            when it stops being sealed — so it wraps rather than truncates. */}
-        <p className="-mt-3 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-label text-muted-foreground">
-          <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 font-semibold tracking-[0.1em] text-primary uppercase">
-            <EyeOff className="size-3" aria-hidden />
-            Not public
-          </span>
-          <span className="min-w-0">Closed {INSPIRE_VOTE.closes} · announced at the Gala</span>
+        <p className="-mt-3 text-label text-muted-foreground">
+          <b className="font-semibold text-foreground tabular-nums">
+            <Counter value={inspired.any} /> of {inspired.eligible}
+          </b>{" "}
+          vote ({share}%) · Closed {INSPIRE_VOTE.closes}
         </p>
 
-        <div className="mt-4 space-y-4">
-          {inspired.standings.map((group, g) => (
-            <CategoryBoard key={group.id} group={group} index={g} />
-          ))}
+        <div
+          role="tablist"
+          aria-label="Award category"
+          className="mt-3.5 grid grid-cols-2 gap-1 rounded-xl border border-border bg-surface/70 p-1"
+        >
+          {inspired.standings.map((g, i) => {
+            const active = i === tab;
+            return (
+              <button
+                key={g.id}
+                id={`award-tab-${g.id}`}
+                role="tab"
+                aria-selected={active}
+                aria-controls="award-panel"
+                tabIndex={active ? 0 : -1}
+                onClick={() => {
+                  setTab(i);
+                  setPage(0);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "ArrowRight") {
+                    e.preventDefault();
+                    move(i + 1);
+                  } else if (e.key === "ArrowLeft") {
+                    e.preventDefault();
+                    move(i - 1);
+                  }
+                }}
+                className={`relative min-w-0 rounded-lg px-2 py-1.5 text-center transition-colors duration-300 ${
+                  active ? "text-primary-foreground" : "text-foreground/70 hover:text-foreground"
+                }`}
+              >
+                {active && (
+                  <motion.span
+                    layoutId="award-tab-pill"
+                    className="absolute inset-0 rounded-lg bg-gradient-to-br from-primary to-accent shadow-[0_6px_18px_-8px_var(--color-primary)]"
+                    transition={{ type: "spring", stiffness: 320, damping: 32 }}
+                  />
+                )}
+                {/* "Non-Field Employee" wraps rather than truncating on a
+                    320px phone; the grid keeps both tabs the same height. */}
+                <span className="relative display block text-[12px] leading-tight font-bold uppercase">
+                  {g.label}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
-        {/* The other half of the metric: how much of the room took part. */}
+        <label className="relative mt-2.5 flex items-center">
+          <Search className="pointer-events-none absolute left-3 size-4 text-muted-foreground" />
+          <input
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setPage(0);
+            }}
+            placeholder="Search name or function…"
+            aria-label="Search nominees"
+            className="h-10 w-full min-w-0 rounded-xl border border-border bg-surface/70 pr-9 pl-9 text-body outline-none transition-colors duration-200 focus:border-primary/50"
+          />
+          {query && (
+            <button
+              type="button"
+              aria-label="Clear search"
+              onClick={() => {
+                setQuery("");
+                setPage(0);
+              }}
+              className="absolute right-2 grid size-7 place-items-center rounded-lg text-muted-foreground transition-colors duration-200 hover:text-foreground active:scale-95"
+            >
+              <X className="size-4" />
+            </button>
+          )}
+        </label>
+
+        {/* The count sits with the controls that narrow it, ruled off the list. */}
+        <p className="mt-2.5 border-b border-border/70 pb-2 text-right text-label text-muted-foreground tabular-nums">
+          {query.trim()
+            ? `${matches.length} ${matches.length === 1 ? "match" : "matches"}`
+            : `${group.named} of ${group.onBallot} named`}
+        </p>
+
+        <div id="award-panel" role="tabpanel" aria-labelledby={`award-tab-${group.id}`}>
+          {shown.length ? (
+            <>
+              {/* Keyed by position, not by id: paging then slides each row's bar
+                  and springs its count to the next name, rather than replaying
+                  ten entrances from nothing. */}
+              <ol className="mt-2.5 space-y-1.5">
+                {shown.map((n, i) => (
+                  <Nominee key={i} nominee={n} lead={lead} delay={0.06 + i * 0.03} />
+                ))}
+              </ol>
+              <PanelPager
+                page={current}
+                pageSize={PER_PAGE}
+                total={matches.length}
+                unit="nominees"
+                onChange={setPage}
+              />
+            </>
+          ) : (
+            <p className="mt-3 rounded-xl border border-dashed border-border bg-surface/60 px-3 py-6 text-center text-label text-muted-foreground">
+              No one in {group.label} matches “{query.trim()}”.
+            </p>
+          )}
+        </div>
+
         <div className="mt-auto flex items-center justify-between gap-3 border-t border-border/60 pt-3.5">
-          <p className="min-w-0 text-label text-muted-foreground">
-            <b className="font-semibold text-foreground tabular-nums">
-              <Counter value={inspired.any} /> of {inspired.eligible}
-            </b>{" "}
-            sent a ballot · {share}%
-          </p>
+          <p className="min-w-0 truncate text-label text-muted-foreground">Who sent a ballot</p>
           <SeeAll metric="inspire-ballots" label="Detail" variant="text" />
         </div>
       </div>
@@ -62,74 +174,19 @@ export function InspiredByYou({ inspired }: { inspired: Inspired }) {
   );
 }
 
-function CategoryBoard({ group, index }: { group: Inspired["standings"][number]; index: number }) {
-  const [page, setPage] = useState(0);
-  const Icon = ICONS[index % ICONS.length]!;
-  const [winner, ...runnersUp] = group.nominees;
-  const shown = runnersUp.slice(page * PER_PAGE, (page + 1) * PER_PAGE);
-
-  return (
-    <section>
-      <p className="flex items-baseline justify-between gap-3 border-b border-border/70 pb-2">
-        <span className="display flex min-w-0 items-center gap-2 text-body font-semibold uppercase">
-          <Icon className="size-3.5 shrink-0 text-primary" strokeWidth={2} aria-hidden />
-          {/* "Non-Field Employee" wraps rather than losing its noun on a 320px
-              phone, where the count sits beside it. */}
-          <span className="min-w-0">{group.label}</span>
-        </span>
-        <span className="shrink-0 text-label text-muted-foreground tabular-nums">
-          {group.named} of {group.onBallot} named
-        </span>
-      </p>
-
-      {winner ? (
-        <>
-          <ol className="mt-2.5 space-y-1.5">
-            <Nominee nominee={winner} lead={winner.votes} delay={0.1 + index * 0.1} winner />
-            {/* Keyed by position, not by id: paging then slides each row's bar
-                and springs its count from the last name to the next, rather
-                than replaying three entrances from nothing. */}
-            {shown.map((n, i) => (
-              <Nominee
-                key={i}
-                nominee={n}
-                lead={winner.votes}
-                delay={0.16 + index * 0.1 + i * 0.06}
-              />
-            ))}
-          </ol>
-          <PanelPager
-            page={page}
-            pageSize={PER_PAGE}
-            total={group.nominees.length}
-            offset={1}
-            unit="nominees"
-            onChange={setPage}
-          />
-        </>
-      ) : (
-        <p className="mt-3 rounded-xl border border-dashed border-border bg-surface/60 px-3 py-4 text-center text-label text-muted-foreground">
-          No ballot has named anyone in this category yet.
-        </p>
-      )}
-    </section>
-  );
-}
-
 function Nominee({
   nominee,
   lead,
   delay,
-  winner = false,
 }: {
   nominee: AwardStanding;
   /** The category leader's count, so every bar is read against the same top. */
   lead: number;
   delay: number;
-  winner?: boolean;
 }) {
   const reduce = useReducedMotion();
   const entrance = useEntrance();
+  const winner = nominee.rank === 1;
   return (
     <motion.li
       initial={{ opacity: 0, y: 10 }}
