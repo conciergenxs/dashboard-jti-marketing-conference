@@ -174,8 +174,10 @@ export function Panel({
         <div className="mb-5 flex shrink-0 items-start justify-between gap-3">
           {/* `meta` sits beside the title with a rule between them, and drops
               under it below 640px, where the rule would have nothing to
-              separate. */}
-          <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+              separate. The row stretches rather than centring, so the rule
+              runs the title's full height: beside a title that wraps to two
+              lines, a rule only as tall as one line reads as missing. */}
+          <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-stretch sm:gap-4">
             <div className="min-w-0">
               {eyebrow && (
                 <p className="text-[10px] font-semibold tracking-[0.22em] text-primary uppercase">
@@ -184,7 +186,11 @@ export function Panel({
               )}
               {title && <h2 className="display mt-1 text-title font-bold uppercase">{title}</h2>}
             </div>
-            {meta && <div className="shrink-0 sm:border-l sm:border-border/70 sm:pl-4">{meta}</div>}
+            {meta && (
+              <div className="flex shrink-0 items-center sm:border-l sm:border-border/70 sm:pl-4">
+                {meta}
+              </div>
+            )}
           </div>
           {action && <div className="shrink-0">{action}</div>}
         </div>
@@ -208,6 +214,7 @@ export function PanelPager({
   offset = 0,
   unit,
   onChange,
+  className,
 }: {
   /** Zero-based. */
   page: number;
@@ -219,6 +226,8 @@ export function PanelPager({
   /** What is being paged, for the buttons' accessible names. */
   unit: string;
   onChange: (page: number) => void;
+  /** The caller sets the block's own spacing, and any rule above it. */
+  className?: string;
 }) {
   const paged = Math.max(0, total - offset);
   const pages = Math.max(1, Math.ceil(paged / pageSize));
@@ -226,7 +235,7 @@ export function PanelPager({
   const from = offset + page * pageSize + 1;
   const to = Math.min(total, offset + (page + 1) * pageSize);
   return (
-    <div className="mt-2.5 flex items-center justify-between gap-2">
+    <div className={cn("flex items-center justify-between gap-2", className)}>
       <PagerButton
         label={`Previous ${unit}`}
         disabled={page === 0}

@@ -16,7 +16,7 @@ export function Missions({ missions, preEvent }: { missions: Mission[]; preEvent
         <b className="font-semibold text-foreground tabular-nums">
           <Counter value={preEvent} />
         </b>{" "}
-        people ticked Pre-event · re-sends allowed until 17 Nov
+        ticked Pre-event · re-sends allowed until 17 Nov
       </p>
 
       <div className="space-y-4">

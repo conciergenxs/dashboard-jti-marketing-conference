@@ -80,6 +80,7 @@ export function TalentBoard({ talents }: { talents: Talent[] }) {
         offset={3}
         unit="acts"
         onChange={setPage}
+        className="mt-2.5"
       />
     </Panel>
   );

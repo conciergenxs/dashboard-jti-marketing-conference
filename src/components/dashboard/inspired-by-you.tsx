@@ -132,13 +132,6 @@ export function InspiredByYou({ inspired }: { inspired: Inspired }) {
           )}
         </label>
 
-        {/* The count sits with the controls that narrow it, ruled off the list. */}
-        <p className="mt-2.5 border-b border-border/70 pb-2 text-right text-label text-muted-foreground tabular-nums">
-          {query.trim()
-            ? `${matches.length} ${matches.length === 1 ? "match" : "matches"}`
-            : `${group.named} of ${group.onBallot} named`}
-        </p>
-
         <div id="award-panel" role="tabpanel" aria-labelledby={`award-tab-${group.id}`}>
           {shown.length ? (
             <>
@@ -156,6 +149,7 @@ export function InspiredByYou({ inspired }: { inspired: Inspired }) {
                 total={matches.length}
                 unit="nominees"
                 onChange={setPage}
+                className="mt-3 border-t border-border/70 pt-3"
               />
             </>
           ) : (
@@ -163,11 +157,6 @@ export function InspiredByYou({ inspired }: { inspired: Inspired }) {
               No one in {group.label} matches “{query.trim()}”.
             </p>
           )}
-        </div>
-
-        <div className="mt-auto flex items-center justify-between gap-3 border-t border-border/60 pt-3.5">
-          <p className="min-w-0 truncate text-label text-muted-foreground">Who sent a ballot</p>
-          <SeeAll metric="inspire-ballots" label="Detail" variant="text" />
         </div>
       </div>
     </Panel>

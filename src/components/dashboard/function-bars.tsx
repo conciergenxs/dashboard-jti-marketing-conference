@@ -12,10 +12,13 @@ export function FunctionBars({ functions }: { functions: Slice[] }) {
     <Panel
       eyebrow="Departments"
       title="Who Is In The Room"
-      action={
-        <span className="rounded-full border border-border bg-surface-2 px-3 py-1 text-label text-muted-foreground tabular-nums">
-          {total} checked in
-        </span>
+      meta={
+        <p className="text-label text-muted-foreground">
+          <b className="display mr-1 text-title font-bold text-foreground tabular-nums">
+            <Counter value={total} />
+          </b>
+          checked in
+        </p>
       }
     >
       <ul className="space-y-3.5">
