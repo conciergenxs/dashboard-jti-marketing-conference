@@ -2,10 +2,10 @@ import { motion, useReducedMotion } from "motion/react";
 import { Counter, Panel, SeeAll, useEntrance } from "./primitives";
 import { PRIZE_TOTALS, REDEEMERS, SHORT } from "@/lib/detail-data";
 
-/** The last few hand-overs, newest first. */
+/** The last five hand-overs, newest first. */
 const LATEST = [...REDEEMERS]
   .sort((a, b) => (b.rewardAt ?? "").localeCompare(a.rewardAt ?? ""))
-  .slice(0, 6);
+  .slice(0, 5);
 
 /**
  * The Redemption Corner's hand-overs, counted from the same per-person records

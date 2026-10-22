@@ -36,7 +36,19 @@ const cell = (c: Column, value: string | number) =>
 
 const PAGE_SIZE = 12;
 
+/**
+ * A panel can link straight to its own slice of a table: `?facet=mission&
+ * value=01 · Connect to Win` opens this page with that filter already set.
+ * The pair only seeds the controls — changing a filter afterwards does not
+ * rewrite the address, so a link someone shares keeps opening the view it was
+ * made for.
+ */
 export const Route = createFileRoute("/details/$metric")({
+  validateSearch: (search: Record<string, unknown>): { facet?: string; value?: string } => {
+    const facet = typeof search["facet"] === "string" ? search["facet"] : "";
+    const value = typeof search["value"] === "string" ? search["value"] : "";
+    return facet && value ? { facet, value } : {};
+  },
   loader: ({ params }) => {
     if (!METRIC_KEYS.includes(params.metric as MetricKey)) throw notFound();
     const m = METRICS[params.metric as MetricKey];
@@ -64,8 +76,13 @@ export const Route = createFileRoute("/details/$metric")({
 function MetricDetail() {
   const { metric } = Route.useParams();
   const config = METRICS[metric as MetricKey]!;
+  const seed = Route.useSearch();
   const [query, setQuery] = useState("");
-  const [facets, setFacets] = useState<Record<string, string>>({});
+  const [facets, setFacets] = useState<Record<string, string>>(() =>
+    seed.facet && seed.value && config.filters.some((f) => f.key === seed.facet)
+      ? { [seed.facet]: seed.value }
+      : {},
+  );
   const [page, setPage] = useState(1);
   const [open, setOpen] = useState<string | null>(null);
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null);

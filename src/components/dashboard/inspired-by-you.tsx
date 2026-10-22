@@ -9,7 +9,7 @@ import { INSPIRE_VOTE } from "@/lib/detail-data";
 const EASE = [0.22, 1, 0.36, 1] as const;
 
 /** Names on a page. */
-const PER_PAGE = 10;
+const PER_PAGE = 8;
 
 /**
  * Inspired By You: who the room voted for, one category at a time.

@@ -1,4 +1,6 @@
 import { motion, useReducedMotion } from "motion/react";
+import { Link } from "@tanstack/react-router";
+import { ArrowUpRight } from "lucide-react";
 import { Panel, Counter, SeeAll, useEntrance } from "./primitives";
 import { EVENT, type Mission } from "@/lib/dashboard-data";
 
@@ -28,8 +30,18 @@ export function Missions({ missions, preEvent }: { missions: Mission[]; preEvent
               initial={{ opacity: 0, x: -16 }}
               {...entrance({ opacity: 1, x: 0 })}
               transition={{ duration: reduce ? 0 : 0.5, delay: reduce ? 0 : i * 0.1 }}
-              className="hover-warm rounded-xl border border-border/70 bg-surface/60 p-4"
+              className="hover-warm group relative rounded-xl border border-border/70 bg-surface/60 p-4"
             >
+              {/* The whole card is the link: it covers the card rather than
+                  wrapping it, so the layout above is untouched and the focus
+                  ring still traces the card's own shape. */}
+              <Link
+                to="/details/$metric"
+                params={{ metric: "missions" }}
+                search={{ facet: "mission", value: `${m.index} · ${m.name}` }}
+                aria-label={`See every submission for Mission ${m.index}, ${m.name}`}
+                className="absolute inset-0 z-10 rounded-xl focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
+              />
               <div className="flex items-baseline gap-3">
                 <span className="display text-title font-semibold text-primary/35">{m.index}</span>
                 <div className="min-w-0 flex-1">
@@ -63,6 +75,13 @@ export function Missions({ missions, preEvent }: { missions: Mission[]; preEvent
                   </b>{" "}
                   sent
                 </span>
+                {/* Visible at rest, not only on hover — a phone never hovers.
+                    It rides this row rather than the title's, which has no
+                    width to spare. */}
+                <ArrowUpRight
+                  aria-hidden
+                  className="size-4 shrink-0 text-primary/40 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-primary"
+                />
               </div>
             </motion.div>
           );
