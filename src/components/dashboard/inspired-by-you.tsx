@@ -113,7 +113,7 @@ export function InspiredByYou({ inspired }: { inspired: Inspired }) {
               setQuery(e.target.value);
               setPage(0);
             }}
-            placeholder="Search name or function…"
+            placeholder="Search name or division…"
             aria-label="Search nominees"
             className="h-10 w-full min-w-0 rounded-xl border border-border bg-surface/70 pr-9 pl-9 text-body outline-none transition-colors duration-200 focus:border-primary/50"
           />

@@ -535,7 +535,12 @@ const TOP_3 = new Set(TALENT_STANDINGS.slice(0, 3).map((s) => s.act));
 export type Column = {
   key: string;
   label: string;
-  align?: "right";
+  /**
+   * A column of numbers. Every column reads from the left (client, 22 Oct),
+   * so this no longer moves the column — it only asks for tabular figures, so
+   * the digits still line up down the page.
+   */
+  numeric?: boolean;
   primary?: boolean;
   /** The column the row adds up to: given room and weight of its own. */
   total?: boolean;
@@ -603,14 +608,13 @@ function checkinsConfig(): MetricConfig {
     description:
       "Everyone registered, and where the crew first scanned them in: the Welcome Dinner on 17 Nov, or the Morning Market Conference for those arriving on 18 Nov.",
     filters: [
-      { key: "fn", label: "Function", options: [...FUNCTIONS] },
       { key: "where", label: "First scan", options: FIRST_SCAN },
       { key: "status", label: "Status", options: ["Checked in", "Not yet"] },
     ],
     columns: [
       { key: "name", label: "Participant", primary: true },
       { key: "id", label: "Pass ID", nowrap: true },
-      { key: "fn", label: "Function" },
+      { key: "fn", label: "Division" },
       { key: "where", label: "First scan" },
       { key: "checkinAt", label: "Scan time", nowrap: true },
       { key: "status", label: "Status" },
@@ -658,14 +662,13 @@ function missionsConfig(): MetricConfig {
       },
       { key: "status", label: "Status", options: [SUBMITTED, NOT_SUBMITTED] },
       { key: "resent", label: "Sends", options: ["Not sent", "Sent once", "Re-sent"] },
-      { key: "fn", label: "Function", options: [...FUNCTIONS] },
     ],
     columns: [
       { key: "name", label: "Participant", primary: true },
-      { key: "fn", label: "Function" },
+      { key: "fn", label: "Division" },
       { key: "mission", label: "Mission" },
       { key: "first", label: "First sent", nowrap: true },
-      { key: "sends", label: "Sends", align: "right" },
+      { key: "sends", label: "Sends", numeric: true },
       { key: "status", label: "Status", badge: true },
     ],
     rows,
@@ -688,11 +691,10 @@ function talentConfig(): MetricConfig {
     filters: [
       { key: "act", label: "Act", options: TALENT_STANDINGS.map((s) => s.act) },
       { key: "standing", label: "Standing", options: STANDING },
-      { key: "fn", label: "Function", options: [...FUNCTIONS] },
     ],
     columns: [
       { key: "name", label: "Voter", primary: true },
-      { key: "fn", label: "Function" },
+      { key: "fn", label: "Division" },
       { key: "act", label: "Act" },
       { key: "at", label: "Voted", nowrap: true },
     ],
@@ -751,16 +753,15 @@ function inspiredStandingsConfig(): MetricConfig {
     filters: [
       { key: "category", label: "Category", options: INSPIRE_CATEGORY_META.map((c) => c.name) },
       { key: "standing", label: "Standing", options: STANDING_HERE },
-      { key: "fn", label: "Function", options: [...FUNCTIONS] },
     ],
     columns: [
       { key: "name", label: "Nominee", primary: true },
-      { key: "rank", label: "Rank", align: "right" },
+      { key: "rank", label: "Rank", numeric: true },
       { key: "id", label: "Pass ID", nowrap: true },
-      { key: "fn", label: "Function" },
+      { key: "fn", label: "Division" },
       { key: "category", label: "Category", nowrap: true },
-      { key: "share", label: "Share", align: "right" },
-      { key: "votes", label: "Votes", align: "right", total: true },
+      { key: "share", label: "Share", numeric: true },
+      { key: "votes", label: "Votes", numeric: true, total: true },
     ],
     rows,
   };
@@ -804,18 +805,15 @@ function inspiredBallotsConfig(): MetricConfig {
     key: "inspire-ballots",
     title: "Inspired By You Ballots",
     description: `Who sent a ballot in each category, Submitted or Not Submitted — everyone registered is eligible for both. One vote per category and one is enough; voting ran ${INSPIRE_VOTE.opens} – ${INSPIRE_VOTE.closes}, before the event.`,
-    filters: [
-      { key: "sent", label: "Ballot", options: INSPIRE_SENT },
-      { key: "fn", label: "Function", options: [...FUNCTIONS] },
-    ],
+    filters: [{ key: "sent", label: "Ballot", options: INSPIRE_SENT }],
     columns: [
       { key: "name", label: "Participant", primary: true },
       { key: "id", label: "Pass ID", nowrap: true },
-      { key: "fn", label: "Function" },
+      { key: "fn", label: "Division" },
       { key: "field", label: "Field Employee", badge: true },
       { key: "nonField", label: "Non-Field Employee", badge: true },
       { key: "at", label: "First sent", nowrap: true },
-      { key: "ballots", label: "Ballots", align: "right", total: true },
+      { key: "ballots", label: "Ballots", numeric: true, total: true },
     ],
     rows,
   };
@@ -863,16 +861,15 @@ function rewardsConfig(): MetricConfig {
     filters: [
       { key: "set", label: "Prizes", options: sets },
       { key: "crew", label: "Crew", options: [...REDEEM_CREW] },
-      { key: "fn", label: "Function", options: [...FUNCTIONS] },
     ],
     columns: [
       { key: "name", label: "Participant", primary: true },
       { key: "id", label: "Pass ID", nowrap: true },
-      { key: "fn", label: "Function" },
+      { key: "fn", label: "Division" },
       { key: "prizes", label: "Prizes" },
       { key: "crew", label: "Crew", nowrap: true },
       { key: "at", label: "Time", nowrap: true },
-      { key: "count", label: "Taken", align: "right", total: true },
+      { key: "count", label: "Taken", numeric: true, total: true },
     ],
     rows,
   };
@@ -901,11 +898,10 @@ function activitiesConfig(): MetricConfig {
       { key: "activity", label: "Activity", options: ACTIVITIES.map((a) => a.name) },
       { key: "day", label: "Day", options: ["Day 1", "Day 2"] },
       { key: "scan", label: "Scan", options: ["Crew scan", "Self scan"] },
-      { key: "fn", label: "Function", options: [...FUNCTIONS] },
     ],
     columns: [
       { key: "name", label: "Participant", primary: true },
-      { key: "fn", label: "Function" },
+      { key: "fn", label: "Division" },
       { key: "activity", label: "Activity" },
       { key: "day", label: "Day" },
       { key: "scan", label: "Scan" },
@@ -940,19 +936,16 @@ function checklistConfig(): MetricConfig {
     title: "Participation Checklist",
     description:
       "The passport's four badges, Submitted or Not Submitted: Pre-event (at least one Infinity Mission sent), Welcome Dinner (took part at a booth), JTI Got Talent (voted) and Inspired By You (voted in Field, Non-Field or both).",
-    filters: [
-      { key: "fn", label: "Function", options: [...FUNCTIONS] },
-      { key: "checked", label: "Checked", options: ["0/4", "1/4", "2/4", "3/4", "4/4"] },
-    ],
+    filters: [{ key: "checked", label: "Checked", options: ["0/4", "1/4", "2/4", "3/4", "4/4"] }],
     columns: [
       { key: "name", label: "Participant", primary: true },
       { key: "id", label: "Pass ID", nowrap: true },
-      { key: "fn", label: "Function" },
+      { key: "fn", label: "Division" },
       { key: "preEvent", label: "Pre-event", badge: true },
       { key: "welcomeDinner", label: "Welcome Dinner", badge: true },
       { key: "talent", label: "JTI Got Talent", badge: true },
       { key: "award", label: "Inspired By You", badge: true },
-      { key: "checked", label: "Checked", align: "right", total: true },
+      { key: "checked", label: "Checked", numeric: true, total: true },
     ],
     rows,
   };
@@ -987,13 +980,10 @@ function qaConfig(): MetricConfig {
     title: "Q&A Questions",
     description:
       "Questions sent from the microsite's Q&A page to the stage's Audience tab, one row per question.",
-    filters: [
-      { key: "status", label: "Status", options: ["On stage", "Queued", "Removed"] },
-      { key: "fn", label: "Function", options: [...FUNCTIONS] },
-    ],
+    filters: [{ key: "status", label: "Status", options: ["On stage", "Queued", "Removed"] }],
     columns: [
       { key: "name", label: "Asked by", primary: true },
-      { key: "fn", label: "Function" },
+      { key: "fn", label: "Division" },
       { key: "question", label: "Question" },
       { key: "at", label: "Sent", nowrap: true },
       { key: "status", label: "Status" },
@@ -1031,15 +1021,12 @@ function storiesConfig(): MetricConfig {
     key: "stories",
     title: "Stories Shared",
     description: "Photo stories posted to the Growing Together wall from the app.",
-    filters: [
-      { key: "fn", label: "Function", options: [...FUNCTIONS] },
-      { key: "moment", label: "Moment", options: [...STORY_MOMENTS] },
-    ],
+    filters: [{ key: "moment", label: "Moment", options: [...STORY_MOMENTS] }],
     columns: [
       { key: "name", label: "Contributor", primary: true },
-      { key: "fn", label: "Function" },
+      { key: "fn", label: "Division" },
       { key: "moment", label: "Latest moment" },
-      { key: "stories", label: "Stories", align: "right" },
+      { key: "stories", label: "Stories", numeric: true },
     ],
     rows,
   };

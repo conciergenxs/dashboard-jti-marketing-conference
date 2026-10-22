@@ -108,7 +108,7 @@ function MetricDetail() {
           to="/"
           className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/80 px-3.5 py-2 text-label font-semibold text-foreground/80 transition-colors hover:border-primary/40 hover:text-primary"
         >
-          <ArrowLeft className="size-3.5" /> Back to dashboard
+          <ArrowLeft className="size-3.5" /> Back to Dashboard
         </Link>
 
         <motion.header
@@ -125,12 +125,14 @@ function MetricDetail() {
 
         {/* controls */}
         <div className="glass-card sticky top-3 z-20 mt-5 flex flex-col gap-2.5 p-3 sm:flex-row sm:items-center">
-          <label className="relative flex min-w-0 flex-1 items-center">
+          {/* The search leads at a quarter of the row once there is room for
+              its whole placeholder; below that it takes the space it needs. */}
+          <label className="relative flex min-w-0 flex-1 items-center xl:w-1/4 xl:flex-none">
             <Search className="absolute left-3 size-4 text-muted-foreground" />
             <input
               value={query}
               onChange={(e) => reset(() => setQuery(e.target.value))}
-              placeholder="Search name or function…"
+              placeholder="Search name or division…"
               className="h-11 w-full rounded-xl border border-border bg-surface/70 pr-9 pl-9 text-body outline-none transition-colors focus:border-primary/50"
             />
             {query && (
@@ -145,7 +147,8 @@ function MetricDetail() {
             )}
           </label>
 
-          <div className="grid grid-cols-2 gap-2.5 sm:flex sm:shrink-0">
+          {/* The filters follow, matched in width and set to the right. */}
+          <div className="grid grid-cols-2 gap-2.5 sm:flex sm:shrink-0 xl:ml-auto">
             {config.filters.map((f) => (
               <label key={f.key} className="relative flex min-w-0 items-center">
                 <SlidersHorizontal className="pointer-events-none absolute left-3 size-4 text-muted-foreground" />
@@ -185,7 +188,7 @@ function MetricDetail() {
                 {config.columns.map((c) => (
                   <th
                     key={c.key}
-                    className={`px-4 py-3 text-label font-semibold tracking-[0.14em] text-muted-foreground uppercase ${c.align === "right" ? "text-right" : "text-left"} ${c.total ? "w-36 pr-6 text-primary lg:w-44" : ""}`}
+                    className={`px-4 py-3 text-left text-label font-semibold tracking-[0.14em] text-muted-foreground uppercase ${c.total ? "w-36 pr-6 text-primary lg:w-44" : ""}`}
                   >
                     {c.label}
                   </th>
@@ -207,7 +210,7 @@ function MetricDetail() {
                     {config.columns.map((c) => (
                       <td
                         key={c.key}
-                        className={`px-4 py-3 ${c.nowrap ? "whitespace-nowrap" : ""} ${c.align === "right" ? "text-right tabular-nums" : ""} ${c.primary || c.total ? "font-semibold" : "text-muted-foreground"} ${c.total ? "pr-6 text-foreground" : ""}`}
+                        className={`px-4 py-3 text-left ${c.nowrap ? "whitespace-nowrap" : ""} ${c.numeric ? "tabular-nums" : ""} ${c.primary || c.total ? "font-semibold" : "text-muted-foreground"} ${c.total ? "pr-6 text-foreground" : ""}`}
                       >
                         {cell(c, r.cells[c.key]!)}
                       </td>
