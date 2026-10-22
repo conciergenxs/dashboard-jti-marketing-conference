@@ -9,7 +9,7 @@ import {
 } from "motion/react";
 import { useEffect, useRef, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsDesktop } from "@/hooks/use-desktop";
 import type { MetricKey } from "@/lib/detail-data";
@@ -191,6 +191,86 @@ export function Panel({
       )}
       <div className="min-h-0 flex-1">{children}</div>
     </div>
+  );
+}
+
+/**
+ * Pages a list inside a panel, in place.
+ *
+ * It renders nothing while everything fits on one page, so a board gains its
+ * controls the moment it outgrows the space and not a moment before — the
+ * Got Talent line-up is six acts today and needs none.
+ */
+export function PanelPager({
+  page,
+  pageSize,
+  total,
+  offset = 0,
+  unit,
+  onChange,
+}: {
+  /** Zero-based. */
+  page: number;
+  pageSize: number;
+  /** The whole list, pinned rows included, so the range reads as positions. */
+  total: number;
+  /** How many sit pinned above the paged rows — a winner, or a Top 3. */
+  offset?: number;
+  /** What is being paged, for the buttons' accessible names. */
+  unit: string;
+  onChange: (page: number) => void;
+}) {
+  const paged = Math.max(0, total - offset);
+  const pages = Math.max(1, Math.ceil(paged / pageSize));
+  if (pages < 2) return null;
+  const from = offset + page * pageSize + 1;
+  const to = Math.min(total, offset + (page + 1) * pageSize);
+  return (
+    <div className="mt-2.5 flex items-center justify-between gap-2">
+      <PagerButton
+        label={`Previous ${unit}`}
+        disabled={page === 0}
+        onClick={() => onChange(page - 1)}
+      >
+        <ChevronLeft className="size-3.5" aria-hidden />
+      </PagerButton>
+      <span className="min-w-0 truncate text-label text-muted-foreground tabular-nums">
+        {from}–{to} of {total}
+      </span>
+      <PagerButton
+        label={`Next ${unit}`}
+        disabled={page >= pages - 1}
+        onClick={() => onChange(page + 1)}
+      >
+        <ChevronRight className="size-3.5" aria-hidden />
+      </PagerButton>
+    </div>
+  );
+}
+
+function PagerButton({
+  label,
+  disabled,
+  onClick,
+  children,
+}: {
+  label: string;
+  disabled: boolean;
+  onClick: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      disabled={disabled}
+      onClick={onClick}
+      // 28px reads right beside a 12px range, but it is a poor thumb target,
+      // so an invisible inset carries the hit area out to 44px.
+      className="relative grid size-7 shrink-0 place-items-center rounded-lg border border-border bg-surface/70 text-muted-foreground transition-colors duration-200 after:absolute after:-inset-2 after:content-[''] hover:border-primary/40 hover:text-primary active:scale-95 disabled:pointer-events-none disabled:opacity-35"
+    >
+      {children}
+    </button>
   );
 }
 

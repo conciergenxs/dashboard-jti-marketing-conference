@@ -84,7 +84,8 @@ export type Inspired = {
     onBallot: number;
     /** How many of them took at least one vote. */
     named: number;
-    top: AwardStanding[];
+    /** Everyone who was named, ranked — the panel pages through them. */
+    nominees: AwardStanding[];
   }[];
 };
 
@@ -195,7 +196,7 @@ const INSPIRED: Inspired = (() => {
         label: c.name,
         onBallot: count((p) => p.klass === c.id),
         named: rows.length,
-        top: rows.slice(0, 3),
+        nominees: rows,
       };
     }),
   };

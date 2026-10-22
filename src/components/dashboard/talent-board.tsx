@@ -1,10 +1,17 @@
+import { useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { Lock, Trophy } from "lucide-react";
-import { Counter, Panel, SeeAll, useEntrance } from "./primitives";
+import { Counter, Panel, PanelPager, SeeAll, useEntrance } from "./primitives";
 import type { Talent } from "@/lib/dashboard-data";
 import { TALENT_VOTE } from "@/lib/detail-data";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
+
+/**
+ * Acts shown below the Top 3 at a time. Today's line-up is six, so the pager
+ * stays out of the way; it appears by itself if the line-up ever grows.
+ */
+const PER_PAGE = 3;
 
 /**
  * JTI Got Talent's final standings. The ballot ran before the event and the
@@ -14,8 +21,10 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 export function TalentBoard({ talents }: { talents: Talent[] }) {
   const reduce = useReducedMotion();
   const entrance = useEntrance();
+  const [page, setPage] = useState(0);
   const ranked = [...talents].sort((a, b) => b.votes - a.votes);
   const max = ranked[0]?.votes || 1;
+  const rest = ranked.slice(3);
   const total = ranked.reduce((s, t) => s + t.votes, 0);
 
   return (
@@ -56,11 +65,22 @@ export function TalentBoard({ talents }: { talents: Talent[] }) {
         </ol>
       </motion.section>
 
+      {/* Keyed by position, not by id: paging then slides each row's bar and
+          springs its count to the next act, rather than replaying the entrance
+          from nothing. */}
       <ol className="mt-2.5 space-y-1.5">
-        {ranked.slice(3).map((t, i) => (
-          <Standing key={t.id} talent={t} rank={i + 4} max={max} />
+        {rest.slice(page * PER_PAGE, (page + 1) * PER_PAGE).map((t, i) => (
+          <Standing key={i} talent={t} rank={page * PER_PAGE + i + 4} max={max} />
         ))}
       </ol>
+      <PanelPager
+        page={page}
+        pageSize={PER_PAGE}
+        total={ranked.length}
+        offset={3}
+        unit="acts"
+        onChange={setPage}
+      />
     </Panel>
   );
 }
