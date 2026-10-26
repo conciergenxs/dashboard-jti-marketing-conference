@@ -1,4 +1,12 @@
 import { motion } from "motion/react";
+import { Link } from "@tanstack/react-router";
+import { ChevronDown, LogOut } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { EVENT } from "@/lib/dashboard-data";
 import { LivePill } from "./primitives";
 
@@ -42,23 +50,42 @@ export function DashboardHeader() {
   );
 }
 
-/**
- * Who the dashboard is open for. This build has one audience and no sign-in,
- * so it states the role rather than offering a menu that would lead nowhere.
- */
+/** Who the dashboard is open for, and the one thing they can do about it. */
 function Viewer() {
   return (
-    <div className="glass-card flex w-full items-center gap-3 px-3.5 py-2.5 lg:w-auto">
-      <span className="display grid size-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-primary to-accent text-body font-bold text-primary-foreground shadow-[0_6px_16px_-8px_var(--color-primary)]">
-        H
-      </span>
-      <span className="min-w-0">
-        <span className="block text-[10px] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
-          Viewing as
-        </span>
-        <span className="display block truncate text-body font-semibold">Host</span>
-      </span>
-    </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          className="glass-card hover-warm flex w-full cursor-pointer items-center gap-3 px-3.5 py-2.5 text-left transition-colors duration-200 focus-visible:border-primary/50 focus-visible:outline-none lg:w-auto"
+        >
+          <span className="display grid size-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-primary to-accent text-body font-bold text-primary-foreground shadow-[0_6px_16px_-8px_var(--color-primary)]">
+            H
+          </span>
+          <span className="min-w-0">
+            <span className="block text-[10px] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
+              Viewing as
+            </span>
+            <span className="display block truncate text-body font-semibold">Host</span>
+          </span>
+          <ChevronDown
+            aria-hidden
+            className="ml-1 size-4 shrink-0 text-muted-foreground transition-transform duration-300 group-data-[state=open]:rotate-180"
+          />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" sideOffset={8} className="w-[12.5rem]">
+        <DropdownMenuItem asChild>
+          <Link
+            to="/login"
+            className="flex cursor-pointer items-center gap-2.5 text-body font-medium"
+          >
+            <LogOut className="size-4 text-muted-foreground" aria-hidden />
+            Log Out
+          </Link>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
