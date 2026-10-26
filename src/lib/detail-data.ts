@@ -605,8 +605,7 @@ function checkinsConfig(): MetricConfig {
   return {
     key: "checkins",
     title: "Check-ins",
-    description:
-      "Everyone registered, and where the crew first scanned them in: the Welcome Dinner on 17 Nov, or the Morning Market Conference for those arriving on 18 Nov.",
+    description: "Everyone registered, and where the crew first scanned them in.",
     filters: [
       { key: "where", label: "First scan", options: FIRST_SCAN },
       { key: "status", label: "Status", options: ["Checked in", "Not yet"] },
@@ -652,8 +651,7 @@ function missionsConfig(): MetricConfig {
   return {
     key: "missions",
     title: "Mission Submissions",
-    description:
-      "Every participant's three Infinity Missions, Submitted or Not Submitted. A mission can be sent again until the deadline; only the first send ticks Pre-event, re-sends are counted here.",
+    description: "All three Infinity Missions per person; only the first send ticks Pre-event.",
     filters: [
       {
         key: "mission",
@@ -687,7 +685,7 @@ function talentConfig(): MetricConfig {
   return {
     key: "talent",
     title: "Talent Votes",
-    description: `One vote per account, final once cast. Voting ran ${TALENT_VOTE.opens} – ${TALENT_VOTE.closes}, before the event; the Top 3 were announced ${TALENT_VOTE.announced}.`,
+    description: `One vote per account, final once cast. Top 3 announced ${TALENT_VOTE.announced}.`,
     filters: [
       { key: "act", label: "Act", options: TALENT_STANDINGS.map((s) => s.act) },
       { key: "standing", label: "Standing", options: STANDING },
@@ -749,7 +747,7 @@ function inspiredStandingsConfig(): MetricConfig {
   return {
     key: "inspire",
     title: "Inspired By You",
-    description: `Who the room voted for, ranked inside their own category. Everyone registered is on the ballot and a vote never goes to the voter. Voting ran ${INSPIRE_VOTE.opens} – ${INSPIRE_VOTE.closes}, before the event; the award is given at The Infinity Gala, and the microsite shows none of this.`,
+    description: "Who the room voted for, ranked inside their own category.",
     filters: [
       { key: "category", label: "Category", options: INSPIRE_CATEGORY_META.map((c) => c.name) },
       { key: "standing", label: "Standing", options: STANDING_HERE },
@@ -804,7 +802,7 @@ function inspiredBallotsConfig(): MetricConfig {
   return {
     key: "inspire-ballots",
     title: "Inspired By You Ballots",
-    description: `Who sent a ballot in each category, Submitted or Not Submitted — everyone registered is eligible for both. One vote per category and one is enough; voting ran ${INSPIRE_VOTE.opens} – ${INSPIRE_VOTE.closes}, before the event.`,
+    description: "Who sent a ballot in each category. One vote per category, and one is enough.",
     filters: [{ key: "sent", label: "Ballot", options: INSPIRE_SENT }],
     columns: [
       { key: "name", label: "Participant", primary: true },
@@ -856,8 +854,7 @@ function rewardsConfig(): MetricConfig {
   return {
     key: "rewards",
     title: "Prizes Claimed",
-    description:
-      "Who took what from the Redemption Corner on 17 Nov, one row per person — Sunglasses, the Multifunction Bag and the Handcrafted Leather Journal — and the crew who handed it over.",
+    description: "Who took what from the Redemption Corner, and the crew who handed it over.",
     filters: [
       { key: "set", label: "Prizes", options: sets },
       { key: "crew", label: "Crew", options: [...REDEEM_CREW] },
@@ -893,7 +890,7 @@ function activitiesConfig(): MetricConfig {
   return {
     key: "activities",
     title: "Activity Quota",
-    description: `Every stamp on the passport's Activity Quota: ${ACTIVITIES.length} activities, one stamp each. The crew scans the participant's QR everywhere except The Infinite Race, where participants scan the venue QR themselves — one stamp for the whole race.`,
+    description: `Every stamp on the passport's Activity Quota: ${ACTIVITIES.length} activities, one stamp each.`,
     filters: [
       { key: "activity", label: "Activity", options: ACTIVITIES.map((a) => a.name) },
       { key: "day", label: "Day", options: ["Day 1", "Day 2"] },
@@ -934,8 +931,7 @@ function checklistConfig(): MetricConfig {
   return {
     key: "checklist",
     title: "Participation Checklist",
-    description:
-      "The passport's four badges, Submitted or Not Submitted: Pre-event (at least one Infinity Mission sent), Welcome Dinner (took part at a booth), JTI Got Talent (voted) and Inspired By You (voted in Field, Non-Field or both).",
+    description: "The passport's four badges, Submitted or Not Submitted, one column each.",
     filters: [{ key: "checked", label: "Checked", options: ["0/4", "1/4", "2/4", "3/4", "4/4"] }],
     columns: [
       { key: "name", label: "Participant", primary: true },
@@ -978,8 +974,7 @@ function qaConfig(): MetricConfig {
   return {
     key: "qa",
     title: "Q&A Questions",
-    description:
-      "Questions sent from the microsite's Q&A page to the stage's Audience tab, one row per question.",
+    description: "Questions sent from the microsite's Q&A page to the stage's Audience tab.",
     filters: [{ key: "status", label: "Status", options: ["On stage", "Queued", "Removed"] }],
     columns: [
       { key: "name", label: "Asked by", primary: true },
