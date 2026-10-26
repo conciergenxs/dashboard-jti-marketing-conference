@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
 import { motion } from "motion/react";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { ContourField } from "@/components/dashboard/contour-field";
@@ -13,7 +12,7 @@ import { Rewards } from "@/components/dashboard/rewards";
 import { Checklist } from "@/components/dashboard/checklist";
 import { ActivityQuota } from "@/components/dashboard/activity-quota";
 import { Reveal } from "@/components/dashboard/primitives";
-import { DATA, EVENT, GALLERY_ENABLED, type DayKey } from "@/lib/dashboard-data";
+import { DATA, EVENT, GALLERY_ENABLED } from "@/lib/dashboard-data";
 
 const TITLE = "Grow Beyond Limits — Market Conference 2026 Live Analytics";
 const DESCRIPTION =
@@ -34,8 +33,10 @@ export const Route = createFileRoute("/")({
 });
 
 function Dashboard() {
-  const [day, setDay] = useState<DayKey>("day2");
-  const data = DATA[day];
+  // Both ballots closed before the event and the last day records nothing new,
+  // so there is no day to choose between: the dashboard reads the event's
+  // final state, and Activity Quota still splits Day 1 from Day 2 inside it.
+  const data = DATA.day2;
 
   return (
     <main className="relative min-h-screen overflow-x-clip">
@@ -43,13 +44,9 @@ function Dashboard() {
       {/* 1152px is a reading measure, not a dashboard measure — widen it only
           on screens that actually have the room. */}
       <div className="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6 xl:max-w-7xl xl:px-10 2xl:max-w-[88rem]">
-        <DashboardHeader day={day} onDayChange={setDay} kpis={data.kpis} />
+        <DashboardHeader />
 
         <motion.div
-          key={day}
-          id="day-panel"
-          role="tabpanel"
-          aria-labelledby={`day-tab-${day}`}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
@@ -70,7 +67,7 @@ function Dashboard() {
               order. */}
           <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-5 sm:gap-6 lg:grid-cols-2 xl:col-span-12 xl:row-start-3 xl:grid-cols-3">
             <Reveal>
-              <FunctionBars functions={data.functions} />
+              <FunctionBars room={data.room} />
             </Reveal>
             <Reveal delay={0.08}>
               <Missions missions={data.missions} preEvent={data.checklist.preEvent} />

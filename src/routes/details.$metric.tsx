@@ -12,11 +12,19 @@ import {
   X,
 } from "lucide-react";
 import { ContourField } from "@/components/dashboard/contour-field";
-import { METRICS, METRIC_KEYS, SUBMITTED, type Column, type MetricKey } from "@/lib/detail-data";
+import { FilterSelect } from "@/components/dashboard/primitives";
+import {
+  CHECKED_IN,
+  METRICS,
+  METRIC_KEYS,
+  SUBMITTED,
+  type Column,
+  type MetricKey,
+} from "@/lib/detail-data";
 
-/** The microsite's status badge: Submitted, or Not Submitted. */
+/** The microsite's status badge: Submitted / Not Submitted, Checked in / Not yet. */
 function SubmissionBadge({ value }: { value: string }) {
-  const on = value === SUBMITTED;
+  const on = value === SUBMITTED || value === CHECKED_IN;
   const Icon = on ? Check : CircleDashed;
   return (
     <span
@@ -167,46 +175,16 @@ function MetricDetail() {
           {/* One per row on a phone: two to a row leaves ~135px, and a filter
               that now carries its own name reads "Activity: A…" in that. */}
           <div className="grid grid-cols-1 gap-2.5 sm:flex sm:shrink-0 xl:ml-auto">
-            {config.filters.map((f) => {
-              const value = facets[f.key] ?? "all";
-              return (
-                // The native select is kept, laid invisibly over a face we
-                // draw ourselves. It still owns the keyboard and still gives a
-                // phone its own picker, while "Activity: All" can carry two
-                // weights — which the text of an <option> never can.
-                <label
-                  key={f.key}
-                  // No filter glyph on the left any more: the name says what
-                  // it filters, and those 22px are the difference between
-                  // "The Infinite Race" reading and reading "The Infinit…".
-                  className="relative flex h-11 min-w-0 cursor-pointer items-center rounded-xl border border-border bg-surface/70 pr-9 pl-3.5 transition-colors duration-200 hover:border-primary/40 has-[select:focus-visible]:border-primary/50 sm:w-64"
-                >
-                  <span className="flex min-w-0 items-center gap-1.5 text-body">
-                    <b className="shrink-0 font-semibold text-foreground">{f.label}:</b>
-                    {/* The name always reads; it is the value that gives way. */}
-                    <span className="min-w-0 truncate text-muted-foreground">
-                      {value === "all" ? "All" : value}
-                    </span>
-                  </span>
-                  <ChevronDown className="pointer-events-none absolute right-3 size-4 text-muted-foreground" />
-                  <select
-                    value={value}
-                    onChange={(e) =>
-                      reset(() => setFacets((s) => ({ ...s, [f.key]: e.target.value })))
-                    }
-                    aria-label={f.label}
-                    className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-                  >
-                    <option value="all">All</option>
-                    {f.options.map((o) => (
-                      <option key={o} value={o}>
-                        {o}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              );
-            })}
+            {config.filters.map((f) => (
+              <FilterSelect
+                key={f.key}
+                label={f.label}
+                value={facets[f.key] ?? "all"}
+                options={f.options}
+                onChange={(v) => reset(() => setFacets((st) => ({ ...st, [f.key]: v })))}
+                className="sm:w-64"
+              />
+            ))}
           </div>
         </div>
 

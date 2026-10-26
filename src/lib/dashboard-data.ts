@@ -1,5 +1,6 @@
 import {
   ACTIVITIES,
+  CHECK_IN_EVENTS,
   EVENT_DATES,
   FUNCTIONS,
   INSPIRE_CATEGORY_META,
@@ -20,12 +21,6 @@ export const EVENT = {
   tagline: "Bersama, Pasti Menang!",
   target: 350,
 };
-
-export const DAYS: { key: DayKey; label: string; caption: string }[] = [
-  { key: "day1", label: "Day 1", caption: "Enter the Infinite" },
-  { key: "day2", label: "Day 2", caption: "Break Beyond" },
-  { key: "day3", label: "Day 3", caption: "Continue Infinity" },
-];
 
 export type Kpis = {
   registered: number;
@@ -49,6 +44,19 @@ export type Mission = {
 };
 
 export type Slice = { label: string; value: number };
+
+/**
+ * The room's division split, for everyone scanned in and for each of the
+ * three doors on its own — "who is in the room" depends on which room.
+ */
+export type RoomView = {
+  id: string;
+  /** What the filter calls it. */
+  label: string;
+  /** How many were in that room. */
+  present: number;
+  divisions: Slice[];
+};
 
 export type Talent = {
   id: string;
@@ -106,7 +114,8 @@ export type DayData = {
   kpis: Kpis;
   missions: Mission[];
   checklist: Checklist;
-  functions: Slice[];
+  /** The whole room first, then each door. */
+  room: RoomView[];
   /** JTI Got Talent's final standings — the ballot closed before the event. */
   talents: Talent[];
   /** Inspired By You — the other ballot, also closed before the event. */
@@ -255,7 +264,22 @@ function dayData(day: DayKey): DayData {
     missions: MISSIONS,
     checklist: CHECKLIST,
     inspired: INSPIRED,
-    functions: FUNCTIONS.map((f) => ({ label: f, value: count((p) => p.fn === f && here(p)) })),
+    room: [
+      { id: "all", label: "All", present: count(here), test: here },
+      ...CHECK_IN_EVENTS.map((e) => {
+        const at = (p: Participant) => {
+          const t = p.stamps[e.id];
+          return t !== undefined && t <= end;
+        };
+        return { id: e.id, label: e.name, present: count(at), test: at };
+      }),
+    ].map(({ test, ...view }) => ({
+      ...view,
+      divisions: FUNCTIONS.map((f) => ({
+        label: f,
+        value: count((p) => p.fn === f && test(p)),
+      })),
+    })),
     talents: TALENTS,
     activities: ACTIVITIES.map((a) =>
       count((p) => {

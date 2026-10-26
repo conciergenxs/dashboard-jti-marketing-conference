@@ -82,6 +82,22 @@ export const SUBMITTED = "Submitted";
 export const NOT_SUBMITTED = "Not Submitted";
 const submission = (on: boolean) => (on ? SUBMITTED : NOT_SUBMITTED);
 
+/** The same two states for a door: the crew scanned you, or they have not. */
+export const CHECKED_IN = "Checked in";
+export const NOT_CHECKED_IN = "Not yet";
+const presence = (on: boolean) => (on ? CHECKED_IN : NOT_CHECKED_IN);
+
+/**
+ * The three gatherings a participant is scanned into — the room, at its three
+ * moments. Everything else on the Activity Quota is a stamp inside a day,
+ * not a door.
+ */
+export const CHECK_IN_EVENTS = [
+  { id: "welcome-arrival", name: "Welcome Dinner Arrival" },
+  { id: "conference-arrival", name: "Morning Market Conference" },
+  { id: "gala-check-in", name: "Infinite Gala" },
+] as const;
+
 /** The approved acts, as the microsite's Got Talent line-up names them. */
 export const TALENT_ACTS = [
   "The Infinity Sound · Music & Band",
@@ -578,45 +594,47 @@ export type MetricConfig = {
   rows: DetailRow[];
 };
 
-const FIRST_SCAN = ["Welcome Dinner", "Morning Market Conference"];
+/** "2/3" — how many of the three doors a participant came through. */
+const PRESENT_COUNTS = CHECK_IN_EVENTS.map((_, i) => `${i + 1}/${CHECK_IN_EVENTS.length}`);
 
 function checkinsConfig(): MetricConfig {
   const rows = PARTICIPANTS.map((p) => {
-    const status = p.checkedIn ? "Checked in" : "Not yet";
-    const where = !p.checkedIn
-      ? "—"
-      : p.stamps["welcome-arrival"]
-        ? FIRST_SCAN[0]!
-        : FIRST_SCAN[1]!;
+    const at = CHECK_IN_EVENTS.map((e) => p.stamps[e.id] !== undefined);
+    const through = at.filter(Boolean).length;
+    const present = `${through}/${CHECK_IN_EVENTS.length}`;
+    const cells: Record<string, string | number> = {
+      name: p.name,
+      id: p.id,
+      fn: p.fn,
+      checkinAt: when(p.checkinAt),
+      present,
+    };
+    CHECK_IN_EVENTS.forEach((e, i) => (cells[e.id] = presence(at[i]!)));
     return {
       id: p.id,
       search: `${p.name} ${p.id} ${p.fn}`.toLowerCase(),
-      facets: { fn: p.fn, where, status },
-      cells: {
-        name: p.name,
-        id: p.id,
-        fn: p.fn,
-        where,
-        checkinAt: when(p.checkinAt),
-        status,
-      },
+      facets: { fn: p.fn, present },
+      cells,
     };
   });
   return {
     key: "checkins",
     title: "Check-ins",
-    description: "Everyone registered, and where the crew first scanned them in.",
+    description: "Everyone registered, and which of the three doors the crew scanned them through.",
     filters: [
-      { key: "where", label: "First scan", options: FIRST_SCAN },
-      { key: "status", label: "Status", options: ["Checked in", "Not yet"] },
+      {
+        key: "present",
+        label: "Scanned",
+        options: [`0/${CHECK_IN_EVENTS.length}`, ...PRESENT_COUNTS],
+      },
     ],
     columns: [
       { key: "name", label: "Participant", primary: true },
       { key: "id", label: "Pass ID", nowrap: true },
       { key: "fn", label: "Division" },
-      { key: "where", label: "First scan" },
-      { key: "checkinAt", label: "Scan time", nowrap: true },
-      { key: "status", label: "Status" },
+      ...CHECK_IN_EVENTS.map((e) => ({ key: e.id, label: e.name, badge: true })),
+      { key: "checkinAt", label: "First scan", nowrap: true },
+      { key: "present", label: "Scanned", numeric: true, total: true },
     ],
     rows,
   };

@@ -9,7 +9,7 @@ import {
 } from "motion/react";
 import { useEffect, useRef, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowUpRight, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsDesktop } from "@/hooks/use-desktop";
 import type { MetricKey } from "@/lib/detail-data";
@@ -280,6 +280,63 @@ function PagerButton({
     >
       {children}
     </button>
+  );
+}
+
+/**
+ * "Check-in: All" — the name in one weight, the value in another.
+ *
+ * The text of an <option> can only carry one weight, so the native select is
+ * kept and laid invisibly over a face drawn here: it still owns the keyboard
+ * and still hands a phone its own picker. Shared by the detail tables and by
+ * any panel that filters itself, so the two never drift apart.
+ */
+export function FilterSelect({
+  label,
+  value,
+  options,
+  allLabel = "All",
+  onChange,
+  className,
+}: {
+  label: string;
+  /** "all", or one of `options`. */
+  value: string;
+  options: readonly string[];
+  /** What "all" reads as on the face and in the list. */
+  allLabel?: string;
+  onChange: (value: string) => void;
+  className?: string;
+}) {
+  return (
+    <label
+      className={cn(
+        "relative flex h-11 min-w-0 cursor-pointer items-center rounded-xl border border-border bg-surface/70 pr-9 pl-3.5 transition-colors duration-200 hover:border-primary/40 has-[select:focus-visible]:border-primary/50",
+        className,
+      )}
+    >
+      <span className="flex min-w-0 items-center gap-1.5 text-body">
+        <b className="shrink-0 font-semibold text-foreground">{label}:</b>
+        {/* The name always reads; it is the value that gives way. */}
+        <span className="min-w-0 truncate text-muted-foreground">
+          {value === "all" ? allLabel : value}
+        </span>
+      </span>
+      <ChevronDown className="pointer-events-none absolute right-3 size-4 text-muted-foreground" />
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        aria-label={label}
+        className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+      >
+        <option value="all">{allLabel}</option>
+        {options.map((o) => (
+          <option key={o} value={o}>
+            {o}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }
 
