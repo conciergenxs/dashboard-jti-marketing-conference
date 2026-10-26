@@ -4,35 +4,32 @@ import { Counter, FilterSelect, Panel, SeeAll, useEntrance } from "./primitives"
 import type { RoomView } from "@/lib/dashboard-data";
 
 /**
- * Who is in the room, by division — and which room. The whole event is the
- * default; the filter narrows it to one of the three doors the crew scans
- * people through, and the line under the title follows whichever is chosen.
+ * Who is in the room, by division — and which room. There are three doors and
+ * no average of them, so the filter always names one, and the line under the
+ * title follows it.
  */
 export function FunctionBars({ room }: { room: RoomView[] }) {
   const reduce = useReducedMotion();
   const entrance = useEntrance();
-  const [choice, setChoice] = useState("all");
+  const [choice, setChoice] = useState(room[0]!.label);
 
-  const everyone = room[0]!;
-  const current = choice === "all" ? everyone : (room.find((r) => r.label === choice) ?? everyone);
-  const doors = room.slice(1).map((r) => r.label);
+  const current = room.find((r) => r.label === choice) ?? room[0]!;
   const max = Math.max(1, ...current.divisions.map((d) => d.value));
   const total = Math.max(1, current.present);
 
   return (
     <Panel eyebrow="Departments" title="Who Is In The Room" action={<SeeAll metric="checkins" />}>
-      <p className="-mt-3 mb-4 text-label text-muted-foreground">
+      <p className="-mt-3 mb-4 border-b border-border/70 pb-3 text-label text-muted-foreground">
         <b className="font-semibold text-foreground tabular-nums">
           <Counter value={current.present} />
         </b>{" "}
-        {current.id === "all" ? "checked in across the event" : `checked in at ${current.label}`}
+        checked in at {current.label}
       </p>
 
       <FilterSelect
         label="Check-in"
         value={choice}
-        options={doors}
-        allLabel="All"
+        options={room.map((r) => r.label)}
         onChange={setChoice}
         className="mb-4 h-10 w-full"
       />

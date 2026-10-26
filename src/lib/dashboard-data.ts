@@ -46,8 +46,8 @@ export type Mission = {
 export type Slice = { label: string; value: number };
 
 /**
- * The room's division split, for everyone scanned in and for each of the
- * three doors on its own — "who is in the room" depends on which room.
+ * The room's division split at each of the three doors — "who is in the room"
+ * depends on which room, so there is no view that averages them.
  */
 export type RoomView = {
   id: string;
@@ -114,7 +114,7 @@ export type DayData = {
   kpis: Kpis;
   missions: Mission[];
   checklist: Checklist;
-  /** The whole room first, then each door. */
+  /** One per door, in the order the event runs. */
   room: RoomView[];
   /** JTI Got Talent's final standings — the ballot closed before the event. */
   talents: Talent[];
@@ -264,16 +264,13 @@ function dayData(day: DayKey): DayData {
     missions: MISSIONS,
     checklist: CHECKLIST,
     inspired: INSPIRED,
-    room: [
-      { id: "all", label: "All", present: count(here), test: here },
-      ...CHECK_IN_EVENTS.map((e) => {
-        const at = (p: Participant) => {
-          const t = p.stamps[e.id];
-          return t !== undefined && t <= end;
-        };
-        return { id: e.id, label: e.name, present: count(at), test: at };
-      }),
-    ].map(({ test, ...view }) => ({
+    room: CHECK_IN_EVENTS.map((e) => {
+      const at = (p: Participant) => {
+        const t = p.stamps[e.id];
+        return t !== undefined && t <= end;
+      };
+      return { id: e.id, label: e.name, present: count(at), test: at };
+    }).map(({ test, ...view }) => ({
       ...view,
       divisions: FUNCTIONS.map((f) => ({
         label: f,

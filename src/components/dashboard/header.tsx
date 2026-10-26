@@ -22,10 +22,8 @@ export function DashboardHeader() {
         </div>
 
         <div className="min-w-0 lg:col-start-1 lg:row-start-2">
-          <h1 className="display text-display font-extrabold uppercase">
-            <span className="text-gradient">Grow Beyond</span>
-            <br />
-            Limits
+          <h1 className="display text-display font-extrabold text-balance uppercase">
+            <span className="text-gradient">Grow Beyond</span> Limits
           </h1>
           <p className="mt-2.5 max-w-none text-body text-muted-foreground lg:max-w-[34rem]">
             {EVENT.subtitle}.

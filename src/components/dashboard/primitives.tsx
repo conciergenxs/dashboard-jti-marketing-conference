@@ -295,15 +295,15 @@ export function FilterSelect({
   label,
   value,
   options,
-  allLabel = "All",
+  allLabel,
   onChange,
   className,
 }: {
   label: string;
-  /** "all", or one of `options`. */
+  /** One of `options`, or "all" when there is an all-option to pick. */
   value: string;
   options: readonly string[];
-  /** What "all" reads as on the face and in the list. */
+  /** The all-option's wording. Leave it out and there is no all-option. */
   allLabel?: string;
   onChange: (value: string) => void;
   className?: string;
@@ -319,7 +319,7 @@ export function FilterSelect({
         <b className="shrink-0 font-semibold text-foreground">{label}:</b>
         {/* The name always reads; it is the value that gives way. */}
         <span className="min-w-0 truncate text-muted-foreground">
-          {value === "all" ? allLabel : value}
+          {value === "all" ? (allLabel ?? "All") : value}
         </span>
       </span>
       <ChevronDown className="pointer-events-none absolute right-3 size-4 text-muted-foreground" />
@@ -329,7 +329,7 @@ export function FilterSelect({
         aria-label={label}
         className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
       >
-        <option value="all">{allLabel}</option>
+        {allLabel !== undefined && <option value="all">{allLabel}</option>}
         {options.map((o) => (
           <option key={o} value={o}>
             {o}

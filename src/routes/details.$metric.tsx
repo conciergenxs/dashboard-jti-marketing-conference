@@ -181,6 +181,7 @@ function MetricDetail() {
                 label={f.label}
                 value={facets[f.key] ?? "all"}
                 options={f.options}
+                allLabel="All"
                 onChange={(v) => reset(() => setFacets((st) => ({ ...st, [f.key]: v })))}
                 className="sm:w-64"
               />

@@ -49,7 +49,7 @@ export function InspiredByYou({ inspired }: { inspired: Inspired }) {
   return (
     <Panel eyebrow="Inspired By You" title="Award Standings" action={<SeeAll metric="inspire" />}>
       <div className="flex h-full flex-col">
-        <p className="-mt-3 text-label text-muted-foreground">
+        <p className="-mt-3 border-b border-border/70 pb-3 text-label text-muted-foreground">
           <b className="font-semibold text-foreground tabular-nums">
             <Counter value={inspired.any} /> of {inspired.eligible}
           </b>{" "}

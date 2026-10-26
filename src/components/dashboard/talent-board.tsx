@@ -29,7 +29,7 @@ export function TalentBoard({ talents }: { talents: Talent[] }) {
 
   return (
     <Panel eyebrow="JTI Got Talent" title="Final Standings" action={<SeeAll metric="talent" />}>
-      <p className="-mt-3 mb-4 flex min-w-0 items-center gap-2 text-label text-muted-foreground">
+      <p className="-mt-3 mb-4 flex min-w-0 items-center gap-2 border-b border-border/70 pb-3 text-label text-muted-foreground">
         <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 font-semibold tracking-[0.1em] text-primary uppercase">
           <Lock className="size-3" aria-hidden />
           Final

@@ -14,7 +14,7 @@ export function Missions({ missions, preEvent }: { missions: Mission[]; preEvent
       title="Mission Progress"
       action={<SeeAll metric="missions" />}
     >
-      <p className="-mt-3 mb-4 text-label text-muted-foreground">
+      <p className="-mt-3 mb-4 border-b border-border/70 pb-3 text-label text-muted-foreground">
         <b className="font-semibold text-foreground tabular-nums">
           <Counter value={preEvent} />
         </b>{" "}

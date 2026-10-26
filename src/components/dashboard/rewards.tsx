@@ -17,7 +17,7 @@ export function Rewards() {
   const total = PRIZE_TOTALS.reduce((s, r) => s + r.redeemed, 0);
   return (
     <Panel eyebrow="Redemption Corner" title="Prizes Claimed" action={<SeeAll metric="rewards" />}>
-      <p className="-mt-3 mb-4 text-label text-muted-foreground">
+      <p className="-mt-3 mb-4 border-b border-border/70 pb-3 text-label text-muted-foreground">
         <b className="font-semibold text-foreground tabular-nums">
           <Counter value={total} />
         </b>{" "}
