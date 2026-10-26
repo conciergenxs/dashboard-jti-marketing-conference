@@ -42,7 +42,8 @@ function SubmissionBadge({ value }: { value: string }) {
 const cell = (c: Column, value: string | number) =>
   c.badge ? <SubmissionBadge value={String(value)} /> : value;
 
-const PAGE_SIZE = 12;
+/** Rows to a page, unless a table asks for its own count. */
+const DEFAULT_PAGE_SIZE = 12;
 
 /**
  * A panel can link straight to its own slice of a table: `?facet=mission&
@@ -109,9 +110,10 @@ function MetricDetail() {
     );
   }, [config, query, facets]);
 
-  const pages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const pageSize = config.pageSize ?? DEFAULT_PAGE_SIZE;
+  const pages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const current = Math.min(page, pages);
-  const slice = filtered.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE);
+  const slice = filtered.slice((current - 1) * pageSize, current * pageSize);
   const isFiltered =
     !!query.trim() || config.filters.some((f) => facets[f.key] && facets[f.key] !== "all");
 

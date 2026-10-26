@@ -640,6 +640,8 @@ export type MetricConfig = {
   key: MetricKey;
   title: string;
   description: string;
+  /** Rows to a page, when this table wants its own count. */
+  pageSize?: number;
   filters: Filter[];
   columns: Column[];
   rows: DetailRow[];
@@ -711,6 +713,7 @@ function invitesConfig(): MetricConfig {
     key: "invites",
     title: "Invitations",
     description: "Everyone on the committee's list, and whether they have registered yet.",
+    pageSize: 10,
     filters: [{ key: "status", label: "Status", options: [REGISTERED, NOT_REGISTERED] }],
     columns: [
       { key: "name", label: "Invited", primary: true },
