@@ -14,7 +14,7 @@ export function Missions({ missions, preEvent }: { missions: Mission[]; preEvent
       title="Mission Progress"
       action={<SeeAll metric="missions" />}
     >
-      <p className="-mt-3 mb-4 border-b border-border/70 pb-3 text-label text-muted-foreground">
+      <p className="-mt-3 mb-5 border-b border-border/70 pb-5 text-label text-muted-foreground">
         <b className="font-semibold text-foreground tabular-nums">
           <Counter value={preEvent} />
         </b>{" "}
@@ -23,7 +23,7 @@ export function Missions({ missions, preEvent }: { missions: Mission[]; preEvent
 
       <div className="space-y-4">
         {missions.map((m, i) => {
-          const pct = Math.min(100, (m.sent / EVENT.target) * 100);
+          const pct = Math.min(100, (m.sent / EVENT.registered) * 100);
           return (
             <motion.div
               key={m.id}

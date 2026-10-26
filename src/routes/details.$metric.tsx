@@ -17,14 +17,15 @@ import {
   CHECKED_IN,
   METRICS,
   METRIC_KEYS,
+  REGISTERED,
   SUBMITTED,
   type Column,
   type MetricKey,
 } from "@/lib/detail-data";
 
-/** The microsite's status badge: Submitted / Not Submitted, Checked in / Not yet. */
+/** The one status badge: Submitted, Checked in, Registered — or not yet. */
 function SubmissionBadge({ value }: { value: string }) {
-  const on = value === SUBMITTED || value === CHECKED_IN;
+  const on = value === SUBMITTED || value === CHECKED_IN || value === REGISTERED;
   const Icon = on ? Check : CircleDashed;
   return (
     <span

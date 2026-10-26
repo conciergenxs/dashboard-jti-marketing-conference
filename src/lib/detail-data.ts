@@ -87,6 +87,11 @@ export const CHECKED_IN = "Checked in";
 export const NOT_CHECKED_IN = "Not yet";
 const presence = (on: boolean) => (on ? CHECKED_IN : NOT_CHECKED_IN);
 
+/** And for the committee's list: the invitation was taken up, or it has not. */
+export const REGISTERED = "Registered";
+export const NOT_REGISTERED = "Not yet";
+const registration = (on: boolean) => (on ? REGISTERED : NOT_REGISTERED);
+
 /**
  * The three gatherings a participant is scanned into — the room, at its three
  * moments. Everything else on the Activity Quota is a stamp inside a day,
@@ -224,6 +229,15 @@ const pad = (n: number) => String(n).padStart(2, "0");
 function moment(date: string, hour: number, minutes: number, seconds: number) {
   const total = hour * 60 + Math.floor(minutes);
   return `${date} ${pad(Math.floor(total / 60) % 24)}:${pad(total % 60)}:${pad(Math.floor(seconds))}`;
+}
+
+/** Registration opens with the e-invitation on Mon 19 Oct 2026. */
+const INVITES_OPEN = Date.UTC(2026, 9, 19);
+
+/** A moment inside the registration window: at most `days` after 19 Oct. */
+function inviteMoment(days: number, r: () => number) {
+  const date = new Date(INVITES_OPEN + Math.floor(r() * (days + 1)) * 86_400_000);
+  return moment(date.toISOString().slice(0, 10), 7, r() * 900, r() * 60);
 }
 
 /** A moment inside the ballot window: at most `days` after 26 Oct, 07.00–23.00. */
@@ -539,6 +553,42 @@ export const INSPIRE_WINNERS = INSPIRE_CATEGORIES.map(
   (category) => INSPIRE_STANDINGS.find((s) => s.category === category && s.rank === 1) ?? null,
 );
 
+/**
+ * The committee's invitation list. Everyone in PARTICIPANTS took their
+ * invitation up; these are the rest, who have not registered yet and so have
+ * no pass, no stamps and no ballot. Built from streams of their own, so the
+ * 350 registered records are untouched by their existence.
+ */
+export type Invitee = {
+  name: string;
+  fn: string;
+  /** Their pass once they register; null while they have not. */
+  id: string | null;
+  registeredAt: string | null;
+};
+
+/** How many invitations are still outstanding. */
+const NOT_YET_REGISTERED = 38;
+
+export const INVITEES: Invitee[] = (() => {
+  const r = rng(20261026);
+  const pool = buildFunctionPool();
+  return [
+    ...PARTICIPANTS.map((p) => ({
+      name: p.name,
+      fn: p.fn,
+      id: p.id as string | null,
+      registeredAt: inviteMoment(27, r) as string | null,
+    })),
+    ...Array.from({ length: NOT_YET_REGISTERED }, (_, i) => ({
+      name: `${FIRST[Math.floor(r() * FIRST.length)]!} ${LAST[Math.floor(r() * LAST.length)]!}`,
+      fn: pool[Math.floor(r() * pool.length)]!,
+      id: null,
+      registeredAt: null,
+    })),
+  ];
+})();
+
 /** Final standings: each act's votes, most first. */
 export const TALENT_STANDINGS = TALENT_ACTS.map((act) => ({
   act,
@@ -574,6 +624,7 @@ export type DetailRow = {
 };
 
 export type MetricKey =
+  | "invites"
   | "checkins"
   | "activities"
   | "checklist"
@@ -635,6 +686,38 @@ function checkinsConfig(): MetricConfig {
       ...CHECK_IN_EVENTS.map((e) => ({ key: e.id, label: e.name, badge: true })),
       { key: "checkinAt", label: "First scan", nowrap: true },
       { key: "present", label: "Scanned", numeric: true, total: true },
+    ],
+    rows,
+  };
+}
+
+function invitesConfig(): MetricConfig {
+  const rows = INVITEES.map((v, i) => {
+    const status = registration(v.registeredAt !== null);
+    return {
+      id: v.id ?? `invite-${i}`,
+      search: `${v.name} ${v.id ?? ""} ${v.fn}`.toLowerCase(),
+      facets: { status },
+      cells: {
+        name: v.name,
+        id: v.id ?? "—",
+        fn: v.fn,
+        at: when(v.registeredAt),
+        status,
+      },
+    };
+  });
+  return {
+    key: "invites",
+    title: "Invitations",
+    description: "Everyone on the committee's list, and whether they have registered yet.",
+    filters: [{ key: "status", label: "Status", options: [REGISTERED, NOT_REGISTERED] }],
+    columns: [
+      { key: "name", label: "Invited", primary: true },
+      { key: "id", label: "Pass ID", nowrap: true },
+      { key: "fn", label: "Division" },
+      { key: "at", label: "Registered", nowrap: true },
+      { key: "status", label: "Status", badge: true },
     ],
     rows,
   };
@@ -1052,6 +1135,7 @@ const keepDates = (c: MetricConfig): MetricConfig => ({
 });
 
 export const METRICS: Record<MetricKey, MetricConfig> = {
+  invites: keepDates(invitesConfig()),
   checkins: keepDates(checkinsConfig()),
   activities: keepDates(activitiesConfig()),
   checklist: keepDates(checklistConfig()),

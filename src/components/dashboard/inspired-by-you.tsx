@@ -49,7 +49,7 @@ export function InspiredByYou({ inspired }: { inspired: Inspired }) {
   return (
     <Panel eyebrow="Inspired By You" title="Award Standings" action={<SeeAll metric="inspire" />}>
       <div className="flex h-full flex-col">
-        <p className="-mt-3 border-b border-border/70 pb-3 text-label text-muted-foreground">
+        <p className="-mt-3 border-b border-border/70 pb-5 text-label text-muted-foreground">
           <b className="font-semibold text-foreground tabular-nums">
             <Counter value={inspired.any} /> of {inspired.eligible}
           </b>{" "}
@@ -59,7 +59,7 @@ export function InspiredByYou({ inspired }: { inspired: Inspired }) {
         <div
           role="tablist"
           aria-label="Award category"
-          className="mt-3.5 grid grid-cols-2 gap-1 rounded-xl border border-border bg-surface/70 p-1"
+          className="mt-5 grid grid-cols-2 gap-1 rounded-xl border border-border bg-surface/70 p-1"
         >
           {inspired.standings.map((g, i) => {
             const active = i === tab;

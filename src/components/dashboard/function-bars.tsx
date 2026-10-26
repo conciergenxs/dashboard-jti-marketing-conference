@@ -19,7 +19,7 @@ export function FunctionBars({ room }: { room: RoomView[] }) {
 
   return (
     <Panel eyebrow="Departments" title="Who Is In The Room" action={<SeeAll metric="checkins" />}>
-      <p className="-mt-3 mb-4 border-b border-border/70 pb-3 text-label text-muted-foreground">
+      <p className="-mt-3 mb-5 border-b border-border/70 pb-5 text-label text-muted-foreground">
         <b className="font-semibold text-foreground tabular-nums">
           <Counter value={current.present} />
         </b>{" "}

@@ -26,8 +26,9 @@ export function KpiStrip({ kpis }: { kpis: Kpis }) {
       key: "registered",
       label: "Registered",
       value: kpis.registered,
-      hint: `of ${EVENT.target.toLocaleString("en-US")} invited`,
+      hint: `of ${EVENT.invited.toLocaleString("en-US")} invited`,
       icon: Users,
+      metric: "invites",
     },
     {
       key: "checklist",

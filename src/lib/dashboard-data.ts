@@ -5,6 +5,7 @@ import {
   FUNCTIONS,
   INSPIRE_CATEGORY_META,
   INSPIRE_STANDINGS,
+  INVITEES,
   PARTICIPANTS,
   TALENT_ACTS,
   checklistOf,
@@ -19,7 +20,10 @@ export const EVENT = {
   subtitle: "Market Conference 2026 · Live Analytics",
   location: "Yogyakarta, Indonesia",
   tagline: "Bersama, Pasti Menang!",
-  target: 350,
+  /** Everyone the committee invited, registered or not. */
+  invited: INVITEES.length,
+  /** Everyone who took the invitation up — what every other figure counts against. */
+  registered: PARTICIPANTS.length,
 };
 
 export type Kpis = {

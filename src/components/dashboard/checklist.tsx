@@ -53,7 +53,7 @@ export function Checklist({
       title="Participation Checklist"
       action={<SeeAll metric="checklist" />}
     >
-      <p className="-mt-3 mb-4 border-b border-border/70 pb-3 text-label text-muted-foreground">
+      <p className="-mt-3 mb-5 border-b border-border/70 pb-5 text-label text-muted-foreground">
         <b className="font-semibold text-foreground tabular-nums">
           <Counter value={checklist.complete} />
         </b>{" "}
